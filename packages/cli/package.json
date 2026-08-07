@@ -1,6 +1,6 @@
 ﻿{
   "name": "@nexora.ts/create",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "CLI to scaffold new Nexora Discord bot projects",
   "license": "MIT",
   "type": "module",

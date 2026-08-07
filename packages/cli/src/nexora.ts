@@ -147,17 +147,20 @@ async function runDev(): Promise<void> {
     console.warn('  ⚠️  No .env found. Copy .env.example → .env and set DISCORD_TOKEN.\n');
   }
 
+  const studio = spawnStudio({ quiet: true });
+  // When Vite UI is available, CLI owns :3002. Otherwise the bot's createDevServer
+  // serves an embedded UI automatically (do not set NEXORA_STUDIO).
+  const cliOwnsUi = Boolean(studio);
+
   console.log(`
   🚀 Nexora Dev
 
   Starting:
     • Bot + Studio API   (pnpm run dev / createDevServer on :3920)
-    • Nexora Studio UI   ${STUDIO_URL}
+    • Nexora Studio UI   ${cliOwnsUi ? STUDIO_URL + ' (Vite)' : STUDIO_URL + ' (embedded via createDevServer)'}
 
-  Open Studio once the UI is ready:
+  Open Studio once ready:
     ${STUDIO_URL}
-
-  Tip: API must be up (${STUDIO_API}) — your bot starts it via @nexora.ts/dev-server.
 `);
 
   const children: ChildProcess[] = [];
@@ -167,19 +170,20 @@ async function runDev(): Promise<void> {
       cwd,
       stdio: 'inherit',
       shell: true,
-      env: { ...process.env, NEXORA_STUDIO: '1' },
+      env: {
+        ...process.env,
+        ...(cliOwnsUi ? { NEXORA_STUDIO: '1', NEXORA_STUDIO_URL: STUDIO_URL } : {}),
+      },
     }),
   );
 
-  const studio = spawnStudio();
   if (studio) {
     children.push(studio);
     console.log(`  ✓ Studio UI process started → ${STUDIO_URL}\n`);
   } else {
-    console.warn(
-      `  ⚠️  Studio UI not started automatically.\n` +
-        `     Bot API still runs on ${STUDIO_API}.\n` +
-        `     Start UI with: nexora studio\n`,
+    console.log(
+      `  ✓ Studio UI will be served by @nexora.ts/dev-server on ${STUDIO_URL}\n` +
+        `    (install @nexora.ts/studio or run from the monorepo for the Vite UI)\n`,
     );
   }
 
@@ -200,10 +204,14 @@ async function runStudioOnly(): Promise<void> {
   Starting Nexora Studio UI → ${STUDIO_URL}
   Expects Studio API at ${STUDIO_API} (start your bot with createDevServer).
 `);
-  const child = spawnStudio();
+  const child = spawnStudio({ quiet: false });
   if (!child) {
     console.error(
       '  ❌ Could not locate @nexora.ts/studio.\n' +
+        '     Tip: with recent @nexora.ts/dev-server, `pnpm dev` already serves\n' +
+        '     an embedded Studio UI at ' +
+        STUDIO_URL +
+        ' — no separate UI process needed.\n' +
         '     From the monorepo: pnpm --filter @nexora.ts/studio dev\n',
     );
     process.exit(1);
@@ -211,7 +219,7 @@ async function runStudioOnly(): Promise<void> {
   child.on('exit', (code) => process.exit(code ?? 0));
 }
 
-function spawnStudio(): ChildProcess | null {
+function spawnStudio(options: { quiet?: boolean } = {}): ChildProcess | null {
   // Prefer monorepo studio app when developing Nexora itself
   const monorepoStudio = resolve(cwd, 'apps/studio/package.json');
   const nestedStudio = resolve(cwd, 'node_modules/@nexora.ts/studio/package.json');
@@ -232,10 +240,12 @@ function spawnStudio(): ChildProcess | null {
     });
   }
 
-  console.warn(
-    '  ⚠️  @nexora.ts/studio not found next to this project.\n' +
-      '     Start it manually: pnpm --filter @nexora.ts/studio dev\n',
-  );
+  if (!options.quiet) {
+    console.warn(
+      '  ⚠️  @nexora.ts/studio not found next to this project.\n' +
+        '     With @nexora.ts/dev-server ≥0.1.2, createDevServer serves an embedded UI.\n',
+    );
+  }
   return null;
 }
 

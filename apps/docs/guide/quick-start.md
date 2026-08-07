@@ -37,13 +37,17 @@ pnpm dev
 nexora dev
 ```
 
-`nexora dev` starts your bot **and** [Nexora Studio](studio.md) (Developer Center).
+`pnpm dev` starts your bot, the Studio API (`:3920`), and an **embedded Studio UI** on **http://localhost:3002** — no second terminal needed.
+
+`nexora dev` does the same and, when `@nexora.ts/studio` is available, prefers the Vite UI.
 
 | Service | URL |
 | --- | --- |
-| Dashboard (if enabled) | http://localhost:3000 |
+| Dashboard (if enabled — separate Next app) | http://localhost:3000 |
 | **Nexora Studio** | http://localhost:3002 |
 | Studio API | http://127.0.0.1:3920 |
+
+> `:3000` is the optional OAuth dashboard, not Studio. Open **:3002** for the Developer Center.
 
 Public docs (this site): [https://cjays-organization.gitbook.io/nexora.ts/](https://cjays-organization.gitbook.io/nexora.ts/)
 

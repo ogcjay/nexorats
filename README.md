@@ -87,20 +87,20 @@ Commands and events are **auto-discovered** — no manual registration.
 
 ## Nexora Studio (local Developer Center)
 
-When you develop a bot, start **Nexora Studio** alongside it. It is a local control panel — not the public docs site.
+When you develop a bot, **Nexora Studio** starts with `createDevServer` / `pnpm dev`. It is a local control panel — not the public docs site.
 
 ```text
-Dashboard         http://localhost:3000
-Nexora Studio     http://localhost:3002
+Dashboard         http://localhost:3000   (optional Next app — different from Studio)
+Nexora Studio     http://localhost:3002   (embedded UI via @nexora.ts/dev-server)
 Studio API        http://127.0.0.1:3920
 ```
 
 Studio shows **project-specific** data: registered commands, events, plugins, sanitized config, database status, and live logs.
 
 ```bash
-# monorepo
-pnpm --filter @nexora.ts/playground dev   # bot + Studio API
-pnpm studio:dev                        # Studio UI
+pnpm dev                               # bot + Studio API + embedded Studio UI
+# monorepo optional Vite UI:
+pnpm studio:dev
 ```
 
 See the docs guide: [Nexora Studio](https://cjays-organization.gitbook.io/nexora.ts/platform/nexora-studio).

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Studio DX:** `createDevServer` now serves an embedded Studio UI on `:3002` by default, so `pnpm dev` opens a working `http://localhost:3002` without a second terminal
+- **Banner port mismatch:** startup banner no longer reuses `dashboard.url` (`:3000`) as the Studio URL; it only shows Studio when `NEXORA_STUDIO_URL` is set by a live UI
+
 ### Added
 
 - Open-source readiness: LICENSE, SECURITY, CoC, CI, issue/PR templates

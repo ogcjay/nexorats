@@ -95,8 +95,7 @@ async function main(): Promise<void> {
   console.log('    pnpm install');
   console.log('    # Edit .env with your Discord bot token');
   console.log('    pnpm dev');
-  console.log('    # or: npx nexora dev  → bot + Studio UI\n');
-  console.log('  Nexora Studio: http://localhost:3002  (API :3920)\n');
+  console.log('    # Studio UI opens at http://localhost:3002 (API :3920)\n');
 }
 
 function ensureDir(filePath: string): void {
@@ -138,9 +137,9 @@ OAUTH_REDIRECT_URI=http://localhost:3000/api/auth/callback
         },
         dependencies: {
           '@nexora.ts/config': '^0.1.2',
-          '@nexora.ts/core': '^0.1.3',
+          '@nexora.ts/core': '^0.1.7',
           '@nexora.ts/logger': '^0.1.2',
-          '@nexora.ts/dev-server': '^0.1.1',
+          '@nexora.ts/dev-server': '^0.1.2',
           ...(options.dashboard
             ? {
                 '@nexora.ts/database': '^0.1.1',
@@ -223,9 +222,6 @@ const studioApi = createDevServer(bot, {
 
 await studioApi.start();
 await bot.start();
-
-bot.logger.info('Nexora Studio → http://localhost:3002 (API :3920)');
-bot.logger.info('Start the Studio UI with: npx nexora studio  (or nexora dev)');
 
 process.on('SIGINT', async () => {
   await studioApi.stop();

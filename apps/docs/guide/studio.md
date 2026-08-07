@@ -9,19 +9,19 @@ It is **not** the public documentation website.
 | Where | [GitBook](https://cjays-organization.gitbook.io/nexora.ts/) | `localhost:3002` |
 | Audience | Everyone | You, on your machine |
 | Content | Framework guides | **Your** commands, plugins, logs, config |
-| Start | Open the URL | Scaffold + `nexora dev` / `pnpm studio:dev` |
+| Start | Open the URL | `pnpm dev` (embedded UI via `@nexora.ts/dev-server`) |
 
 ## Scaffold includes Studio
 
-Projects from `create-nexora-ts@latest` wire `@nexora.ts/dev-server` so Studio’s API starts with the bot. After `cp .env.example .env` and `pnpm install`:
+Projects from `create-nexora-ts@latest` wire `@nexora.ts/dev-server` so **both** the Studio API and an embedded Studio UI start with the bot. After `cp .env.example .env` and `pnpm install`:
 
 ```bash
 pnpm dev
-# or:
-nexora dev
 ```
 
-That starts the bot process and the Studio UI. Open **http://localhost:3002**.
+Open **http://localhost:3002** — no second terminal required.
+
+Optional: `nexora dev` starts the bot and, when `@nexora.ts/studio` is available (monorepo), the Vite UI instead of the embedded page.
 
 ## Why Studio exists
 
@@ -38,9 +38,11 @@ Studio shows exactly that.
 
 | Service | URL |
 | --- | --- |
-| Dashboard | http://localhost:3000 |
+| Dashboard (optional Next app) | http://localhost:3000 |
 | **Nexora Studio** | http://localhost:3002 |
 | Studio API | http://127.0.0.1:3920 |
+
+> Dashboard (`:3000`) and Studio (`:3002`) are different apps. The startup banner only shows Studio when the UI is actually listening.
 
 ## Wire it in your bot
 
@@ -57,8 +59,8 @@ studioApi.setPlugins(/* … */);
 CLI helpers:
 
 ```bash
-nexora dev      # bot + Studio UI
-nexora studio    # Studio UI only (expects API on :3920)
+nexora dev      # bot + Studio (Vite UI if available, else embedded)
+nexora studio    # Vite Studio UI only (expects API on :3920)
 ```
 
 In the monorepo:
@@ -76,3 +78,4 @@ pnpm --filter @nexora.ts/studio dev
 - Sanitized configuration (secrets redacted)
 - Log buffer
 - Link to public docs
+- Embedded UI served by `@nexora.ts/dev-server` (no separate Vite process required)

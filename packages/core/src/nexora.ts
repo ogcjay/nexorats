@@ -147,11 +147,9 @@ export class Nexora {
         userTag: readyClient.user.tag,
         commands: this.commandRegistry.size,
         events: this.eventRegistry.size,
-        studioUrl:
-          process.env.NEXORA_STUDIO_URL ??
-          (this.config.dashboard?.enabled
-            ? (this.config.dashboard.url ?? 'http://localhost:3002')
-            : 'http://localhost:3002'),
+        // Only show Studio when createDevServer (or CLI) advertised a live URL.
+        // Never reuse dashboard.url — that is a different app on :3000.
+        studioUrl: process.env.NEXORA_STUDIO_URL || undefined,
       });
       void this.eventBus.emit(FrameworkEvents.BOT_READY, { client: readyClient });
       void this.maybeCheckForUpdates();

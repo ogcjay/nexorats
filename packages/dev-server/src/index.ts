@@ -3,6 +3,7 @@ import { TOKENS, type Nexora, type LifecyclePhase } from '@nexora.ts/core';
 import type { LogEntry } from '@nexora.ts/logger';
 import { subscribeLiveLogs } from '@nexora.ts/logger';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import { getStudioHtml } from './ui-html.js';
 
 /** Plugin snapshot for Studio */
 export interface StudioPluginInfo {
@@ -18,14 +19,20 @@ export interface StudioPluginInfo {
 export interface DevServerOptions {
   /** Default 3920 — Studio UI proxies here */
   port?: number;
+  /** Studio UI port (default 3002). Embedded UI binds here when enabled. */
+  studioPort?: number;
+  /**
+   * Serve an embedded Studio UI on `studioPort` (default `true`).
+   * Skipped automatically when `NEXORA_STUDIO=1` (CLI already starts Vite UI)
+   * or when `ui: false`.
+   */
+  ui?: boolean;
   /** Optional plugin snapshots from PluginLoader */
   plugins?: StudioPluginInfo[];
   /** Optional DB connectivity probe */
   databaseStatus?: () => Promise<{ connected: boolean; provider?: string; message?: string }>;
   /** Max log lines kept in memory */
   logBufferSize?: number;
-  /** Advertised Studio UI port (for meta only) */
-  studioPort?: number;
 }
 
 export interface StudioSnapshot {
@@ -46,6 +53,7 @@ export interface StudioSnapshot {
     studio: true;
     apiVersion: '0.1';
     ports: { studio: number; api: number };
+    ui: 'embedded' | 'external' | 'none';
   };
 }
 
@@ -95,20 +103,37 @@ function sendJson(res: ServerResponse, status: number, body: unknown): void {
   res.end(payload);
 }
 
+function sendHtml(res: ServerResponse, html: string): void {
+  res.writeHead(200, {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Cache-Control': 'no-store',
+  });
+  res.end(html);
+}
+
 /**
  * Local introspection API powering **Nexora Studio**.
  * Exposes project-specific runtime data that a public docs site can never know.
+ *
+ * By default also serves an embedded Studio UI on `studioPort` (3002) so
+ * `pnpm dev` works without a second terminal.
  */
 export class DevServer {
   private server: Server | null = null;
+  private uiServer: Server | null = null;
   private readonly logBuffer: LogEntry[] = [];
   private readonly logBufferSize: number;
   private readonly plugins: StudioPluginInfo[];
   private readonly databaseStatus?: DevServerOptions['databaseStatus'];
   private readonly studioPort: number;
+  private readonly uiEnabled: boolean;
+  private uiMode: 'embedded' | 'external' | 'none' = 'none';
   private unsubscribeLogs: (() => void) | null = null;
   private startedAt: Date | null = null;
   readonly port: number;
+
+  /** Public Studio UI URL once listening (or null if UI did not start). */
+  studioUrl: string | null = null;
 
   constructor(
     private readonly bot: Nexora,
@@ -119,6 +144,15 @@ export class DevServer {
     this.logBufferSize = options.logBufferSize ?? 200;
     this.plugins = [...(options.plugins ?? [])];
     this.databaseStatus = options.databaseStatus;
+    // CLI `nexora dev` sets NEXORA_STUDIO=1 and starts the Vite UI separately.
+    const cliOwnsUi =
+      process.env.NEXORA_STUDIO === '1' || process.env.NEXORA_STUDIO === 'true';
+    this.uiEnabled = options.ui ?? !cliOwnsUi;
+    if (cliOwnsUi) {
+      this.uiMode = 'external';
+      this.studioUrl = `http://localhost:${this.studioPort}`;
+      process.env.NEXORA_STUDIO_URL ??= this.studioUrl;
+    }
   }
 
   /** Update plugin list after PluginLoader finishes */
@@ -141,7 +175,7 @@ export class DevServer {
     });
 
     this.server = createServer((req, res) => {
-      void this.handle(req, res);
+      void this.handleApi(req, res);
     });
 
     await new Promise<void>((resolve, reject) => {
@@ -151,17 +185,81 @@ export class DevServer {
         resolve();
       });
     });
+
+    if (this.uiEnabled) {
+      await this.startEmbeddedUi();
+    } else if (this.uiMode === 'external') {
+      this.bot.logger.info(
+        `Nexora Studio UI → ${this.studioUrl} (started by CLI / external Vite)`,
+      );
+    } else {
+      this.bot.logger.info(
+        `Nexora Studio UI disabled. API only: http://127.0.0.1:${this.port}/api/studio/health`,
+      );
+      this.bot.logger.info(
+        `Start UI with: npx nexora studio  (or createDevServer(bot, { ui: true }))`,
+      );
+    }
+  }
+
+  private async startEmbeddedUi(): Promise<void> {
+    this.uiServer = createServer((req, res) => {
+      void this.handleUi(req, res);
+    });
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        this.uiServer!.once('error', reject);
+        // Bind all interfaces so http://localhost:PORT works on Windows
+        // (IPv6 ::1) as well as 127.0.0.1.
+        this.uiServer!.listen(this.studioPort, () => resolve());
+      });
+    } catch (error) {
+      this.uiServer = null;
+      this.uiMode = 'none';
+      this.studioUrl = null;
+      const code =
+        error && typeof error === 'object' && 'code' in error
+          ? String((error as { code?: unknown }).code)
+          : '';
+      this.bot.logger.warn(
+        `Nexora Studio UI could not bind :${this.studioPort}${code ? ` (${code})` : ''}.`,
+      );
+      this.bot.logger.warn(
+        `API is still available at http://127.0.0.1:${this.port}/api/studio/health`,
+      );
+      this.bot.logger.warn(
+        `Free the port or start UI separately: npx nexora studio`,
+      );
+      return;
+    }
+
+    this.uiMode = 'embedded';
+    this.studioUrl = `http://localhost:${this.studioPort}`;
+    process.env.NEXORA_STUDIO_URL = this.studioUrl;
+    this.bot.logger.info(`Nexora Studio → ${this.studioUrl} (API :${this.port})`);
   }
 
   async stop(): Promise<void> {
     this.unsubscribeLogs?.();
     this.unsubscribeLogs = null;
 
-    if (!this.server) return;
-    await new Promise<void>((resolve) => {
-      this.server!.close(() => resolve());
-    });
-    this.server = null;
+    if (this.uiServer) {
+      await new Promise<void>((resolve) => {
+        this.uiServer!.close(() => resolve());
+      });
+      this.uiServer = null;
+    }
+
+    if (this.server) {
+      await new Promise<void>((resolve) => {
+        this.server!.close(() => resolve());
+      });
+      this.server = null;
+    }
+
+    this.studioUrl = null;
+    this.uiMode = 'none';
   }
 
   async getSnapshot(): Promise<StudioSnapshot> {
@@ -204,11 +302,28 @@ export class DevServer {
         studio: true,
         apiVersion: '0.1',
         ports: { studio: this.studioPort, api: this.port },
+        ui: this.uiMode,
       },
     };
   }
 
-  private async handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  private async handleUi(req: IncomingMessage, res: ServerResponse): Promise<void> {
+    const pathname = new URL(req.url ?? '/', 'http://127.0.0.1').pathname;
+
+    if (pathname.startsWith('/api/')) {
+      await this.handleApi(req, res);
+      return;
+    }
+
+    if (req.method === 'GET' || req.method === 'HEAD') {
+      sendHtml(res, getStudioHtml());
+      return;
+    }
+
+    sendJson(res, 405, { error: 'Method not allowed' });
+  }
+
+  private async handleApi(req: IncomingMessage, res: ServerResponse): Promise<void> {
     if (req.method === 'OPTIONS') {
       sendJson(res, 204, {});
       return;
@@ -224,7 +339,12 @@ export class DevServer {
     try {
       switch (pathname) {
         case '/api/studio/health':
-          sendJson(res, 200, { ok: true, service: 'nexora-studio-api' });
+          sendJson(res, 200, {
+            ok: true,
+            service: 'nexora-studio-api',
+            ui: this.uiMode,
+            studioUrl: this.studioUrl,
+          });
           return;
         case '/api/studio/snapshot':
           sendJson(res, 200, await this.getSnapshot());
