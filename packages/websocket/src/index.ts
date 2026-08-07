@@ -18,6 +18,8 @@ export const WsEvents = {
   STUDIO_LOGS: 'studio:logs',
   /** Combined Studio state: `{ snapshot, logs }` */
   STUDIO_STATE: 'studio:state',
+  /** Studio telemetry ring-buffer summary (events / pipelines / metrics) */
+  STUDIO_TELEMETRY: 'studio:telemetry',
 } as const;
 
 export type WsEventType = (typeof WsEvents)[keyof typeof WsEvents];

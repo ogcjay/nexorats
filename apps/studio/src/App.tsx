@@ -1,43 +1,84 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  commandKey,
   connectStudioLive,
   fetchLogs,
   fetchSnapshot,
-  formatCooldown,
   formatUptime,
-  typeLabel,
   type LiveConnectionState,
   type LogEntry,
-  type StudioCommandInfo,
+  type StudioEventTrace,
   type StudioSnapshot,
+  type StudioTelemetryPayload,
 } from './api';
+import { ApiExplorer } from './components/ApiExplorer';
+import { CommandsView } from './components/CommandsView';
+import { ConfigView } from './components/ConfigView';
+import { DatabaseView } from './components/DatabaseView';
+import { EventsView } from './components/EventInspector';
+import { GraphView } from './components/GraphView';
+import { PerformanceView } from './components/PerformanceView';
+import { PipelineViewer } from './components/PipelineViewer';
+import { PluginsView } from './components/PluginsView';
 
 type Tab =
   | 'overview'
   | 'commands'
   | 'events'
+  | 'pipelines'
   | 'plugins'
+  | 'performance'
+  | 'graph'
+  | 'api'
+  | 'database'
   | 'config'
   | 'logs'
   | 'docs';
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'commands', label: 'Commands' },
-  { id: 'events', label: 'Events' },
-  { id: 'plugins', label: 'Plugins' },
-  { id: 'config', label: 'Configuration' },
-  { id: 'logs', label: 'Logs' },
-  { id: 'docs', label: 'Documentation' },
+type NavGroup = { label: string; tabs: { id: Tab; label: string }[] };
+
+const NAV: NavGroup[] = [
+  {
+    label: 'Inspect',
+    tabs: [
+      { id: 'overview', label: 'Overview' },
+      { id: 'commands', label: 'Commands' },
+      { id: 'events', label: 'Events' },
+      { id: 'pipelines', label: 'Pipelines' },
+      { id: 'plugins', label: 'Plugins' },
+    ],
+  },
+  {
+    label: 'Runtime',
+    tabs: [
+      { id: 'performance', label: 'Performance' },
+      { id: 'graph', label: 'Graph' },
+      { id: 'api', label: 'API Explorer' },
+      { id: 'database', label: 'Database' },
+    ],
+  },
+  {
+    label: 'System',
+    tabs: [
+      { id: 'config', label: 'Configuration' },
+      { id: 'logs', label: 'Logs' },
+      { id: 'docs', label: 'Documentation' },
+    ],
+  },
 ];
+
+const ALL_TABS = NAV.flatMap((g) => g.tabs);
 
 const SUBTITLES: Record<Tab, string> = {
   overview: 'Live bot metrics from the Studio API.',
-  commands: 'Registered slash, group, context, and message commands.',
-  events: 'Discord event listeners attached to this process.',
-  plugins: 'Loaded plugins and their contribution counts.',
-  config: 'Active configuration — tokens and secrets redacted.',
+  commands: 'Registry plus live executions, latency, and denies.',
+  events: 'Event Inspector — live traces and registered listeners.',
+  pipelines: 'Middleware pipeline traces for recent interactions.',
+  plugins: 'Plugins, dependency health, and package install.',
+  performance: 'Memory, slow commands/plugins, and top errors.',
+  graph: 'Plugin and service dependency graph.',
+  api: 'Discover and try Studio / bot API routes (localhost).',
+  database: 'Read-only table list and row preview.',
+  config: 'Allowlisted live config — secrets never editable.',
   logs: 'Buffered runtime logs from this bot process.',
   docs: 'Framework documentation and local ports.',
 };
@@ -56,6 +97,7 @@ export function App() {
   const [refreshing, setRefreshing] = useState(false);
   const [live, setLive] = useState<LiveConnectionState>('offline');
   const [pageKey, setPageKey] = useState(0);
+  const [eventSeeds, setEventSeeds] = useState<StudioEventTrace[] | undefined>();
 
   const selectTab = (id: Tab) => {
     setTab(id);
@@ -107,6 +149,11 @@ export function App() {
 
     startPoll();
 
+    const onTelemetry = (payload: StudioTelemetryPayload) => {
+      if (cancelled) return;
+      if (payload.events) setEventSeeds(payload.events);
+    };
+
     const disposeWs = connectStudioLive({
       onState: (state) => {
         if (cancelled) return;
@@ -123,6 +170,7 @@ export function App() {
         if (cancelled) return;
         setLogs(logLines);
       },
+      onTelemetry,
       onError: (message) => {
         if (cancelled) return;
         setError(message);
@@ -136,7 +184,8 @@ export function App() {
     };
   }, []);
 
-  const title = useMemo(() => TABS.find((t) => t.id === tab)?.label ?? 'Studio', [tab]);
+  const showMetrics = tab !== 'docs' && tab !== 'api' && tab !== 'graph';
+  const title = useMemo(() => ALL_TABS.find((t) => t.id === tab)?.label ?? 'Studio', [tab]);
   const counts = snapshot?.meta.counts;
 
   return (
@@ -150,30 +199,34 @@ export function App() {
         </div>
 
         <nav className="nav">
-          <div className="nav-label">Inspect</div>
-          {TABS.map((item) => {
-            const count =
-              item.id === 'commands'
-                ? (counts?.commands ?? snapshot?.commands.length)
-                : item.id === 'events'
-                  ? (counts?.events ?? snapshot?.events.length)
-                  : item.id === 'plugins'
-                    ? (counts?.plugins ?? snapshot?.plugins.length)
-                    : item.id === 'logs'
-                      ? logs.length
-                      : undefined;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                className={tab === item.id ? 'active' : undefined}
-                onClick={() => selectTab(item.id)}
-              >
-                <span>{item.label}</span>
-                {count != null && <span className="count">{count}</span>}
-              </button>
-            );
-          })}
+          {NAV.map((group) => (
+            <div key={group.label} className="nav-group">
+              <div className="nav-label">{group.label}</div>
+              {group.tabs.map((item) => {
+                const count =
+                  item.id === 'commands'
+                    ? (counts?.commands ?? snapshot?.commands.length)
+                    : item.id === 'events'
+                      ? (counts?.events ?? snapshot?.events.length)
+                      : item.id === 'plugins'
+                        ? (counts?.plugins ?? snapshot?.plugins.length)
+                        : item.id === 'logs'
+                          ? logs.length
+                          : undefined;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={tab === item.id ? 'active' : undefined}
+                    onClick={() => selectTab(item.id)}
+                  >
+                    <span>{item.label}</span>
+                    {count != null && <span className="count">{count}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         <div className="sidebar-foot">
@@ -244,7 +297,7 @@ export function App() {
             </div>
           )}
 
-          {snapshot && tab !== 'docs' && (
+          {snapshot && showMetrics && (
             <div className="metrics">
               <Metric
                 label="Commands"
@@ -260,10 +313,23 @@ export function App() {
 
           <div className="page-enter" key={pageKey}>
             {tab === 'overview' && snapshot && <Overview snapshot={snapshot} />}
-            {tab === 'commands' && snapshot && <Commands snapshot={snapshot} />}
-            {tab === 'events' && snapshot && <Events snapshot={snapshot} />}
-            {tab === 'plugins' && snapshot && <Plugins snapshot={snapshot} />}
-            {tab === 'config' && snapshot && <ConfigView snapshot={snapshot} />}
+            {tab === 'commands' && snapshot && (
+              <CommandsView snapshot={snapshot} active={tab === 'commands'} />
+            )}
+            {tab === 'events' && snapshot && (
+              <EventsView snapshot={snapshot} active={tab === 'events'} seedTraces={eventSeeds} />
+            )}
+            {tab === 'pipelines' && <PipelineViewer active={tab === 'pipelines'} />}
+            {tab === 'plugins' && snapshot && (
+              <PluginsView snapshot={snapshot} active={tab === 'plugins'} />
+            )}
+            {tab === 'performance' && <PerformanceView active={tab === 'performance'} />}
+            {tab === 'graph' && <GraphView active={tab === 'graph'} />}
+            {tab === 'api' && <ApiExplorer active={tab === 'api'} />}
+            {tab === 'database' && <DatabaseView active={tab === 'database'} />}
+            {tab === 'config' && snapshot && (
+              <ConfigView snapshot={snapshot} active={tab === 'config'} />
+            )}
             {tab === 'logs' && <LogsView logs={logs} />}
             {tab === 'docs' && <DocsView />}
           </div>
@@ -409,255 +475,9 @@ function Overview({ snapshot }: { snapshot: StudioSnapshot }) {
   );
 }
 
-function TypePill({ type }: { type: StudioCommandInfo['type'] }) {
-  const cls = type === 'slash' ? 'strong' : type === 'group' ? 'accent' : '';
-  return <span className={`pill ${cls}`}>{typeLabel(type)}</span>;
-}
-
-function Commands({ snapshot }: { snapshot: StudioSnapshot }) {
-  const [selected, setSelected] = useState<string | null>(null);
-  const [filter, setFilter] = useState('');
-  const q = filter.trim().toLowerCase();
-  const filtered = snapshot.commands.filter((c) => {
-    if (!q) return true;
-    return (
-      c.name.toLowerCase().includes(q) ||
-      (c.description || '').toLowerCase().includes(q) ||
-      c.type.toLowerCase().includes(q)
-    );
-  });
-  const sel = snapshot.commands.find((c) => commandKey(c) === selected) ?? null;
-
-  return (
-    <div className="split">
-      <div className="panel">
-        <div className="panel-head">
-          <h2>Command registry</h2>
-          <span className="muted">
-            {filtered.length}
-            {q ? ` / ${snapshot.commands.length}` : ''}
-          </span>
-        </div>
-        <div className="panel-body filter-pad">
-          <div className="filter-bar">
-            <input
-              type="search"
-              placeholder="Filter by name, type…"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="panel-body tight">
-          {filtered.length === 0 ? (
-            <div className="detail-empty">No commands match.</div>
-          ) : (
-            filtered.map((cmd) => {
-              const key = commandKey(cmd);
-              return (
-                <button
-                  type="button"
-                  key={key}
-                  className={`cmd-row ${selected === key ? 'active' : ''}`}
-                  onClick={() => setSelected(key)}
-                >
-                  <div className="cmd-name">
-                    <TypePill type={cmd.type} />
-                    <span>/{cmd.name}</span>
-                  </div>
-                  <div className="cmd-meta">
-                    {cmd.guildOnly && <span className="pill warn">guild</span>}
-                    {cmd.adminOnly && <span className="pill warn">admin</span>}
-                    {cmd.guardsCount > 0 && (
-                      <span className="pill">{cmd.guardsCount} guards</span>
-                    )}
-                    {cmd.optionsCount > 0 && (
-                      <span className="pill">{cmd.optionsCount} opts</span>
-                    )}
-                    {cmd.subcommands != null && (
-                      <span className="pill">{cmd.subcommands} subs</span>
-                    )}
-                    {cmd.cooldownMs ? (
-                      <span className="pill">{formatCooldown(cmd.cooldownMs)}</span>
-                    ) : null}
-                  </div>
-                  <div className="cmd-desc">{cmd.description || 'No description'}</div>
-                </button>
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      <div className="panel">
-        <div className="panel-head">
-          <h2>Details</h2>
-        </div>
-        <div className="panel-body">
-          {!sel ? (
-            <div className="detail-empty">Select a command to inspect options, cooldown, and flags.</div>
-          ) : (
-            <CommandDetail cmd={sel} />
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CommandDetail({ cmd }: { cmd: StudioCommandInfo }) {
-  return (
-    <>
-      <div className="detail-title">/{cmd.name}</div>
-      <div className="detail-sub">{cmd.description}</div>
-      <div className="tag-row">
-        <TypePill type={cmd.type} />
-        {cmd.guildOnly && <span className="pill warn">guildOnly</span>}
-        {cmd.adminOnly && <span className="pill warn">adminOnly</span>}
-        {cmd.guardsCount > 0 && <span className="pill">{cmd.guardsCount} guards</span>}
-      </div>
-      <div className="kv">
-        <div className="kv-row">
-          <span>Source</span>
-          <span>{cmd.source ? <code>{cmd.source}</code> : '—'}</span>
-        </div>
-        <div className="kv-row">
-          <span>Cooldown</span>
-          <span>{formatCooldown(cmd.cooldownMs)}</span>
-        </div>
-        <div className="kv-row">
-          <span>Options</span>
-          <span>{cmd.optionsCount}</span>
-        </div>
-        {cmd.subcommands != null && (
-          <div className="kv-row">
-            <span>Subcommands</span>
-            <span>{cmd.subcommands}</span>
-          </div>
-        )}
-        {cmd.aliases?.length ? (
-          <div className="kv-row">
-            <span>Aliases</span>
-            <span>{cmd.aliases.join(', ')}</span>
-          </div>
-        ) : null}
-      </div>
-      <div className="section-label">Options</div>
-      {cmd.options.length === 0 ? (
-        <p className="empty-note inline">No options.</p>
-      ) : (
-        <table className="opt-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Req</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cmd.options.map((opt) => (
-              <tr key={opt.name}>
-                <td>
-                  <code>{opt.name}</code>
-                </td>
-                <td>{opt.type}</td>
-                <td>{opt.required ? 'yes' : '—'}</td>
-                <td className="muted">{opt.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </>
-  );
-}
-
-function Events({ snapshot }: { snapshot: StudioSnapshot }) {
-  return (
-    <div className="panel">
-      <div className="panel-head">
-        <h2>Registered events</h2>
-        <span className="muted">{snapshot.events.length}</span>
-      </div>
-      <div className="panel-body tight">
-        {snapshot.events.length === 0 ? (
-          <p className="empty-note">No events registered.</p>
-        ) : (
-          snapshot.events.map((evt, index) => (
-            <div className="evt-row" key={`${evt.name}-${index}`}>
-              <div>
-                <div className="evt-name">{evt.name}</div>
-                {evt.source && <div className="row-sub">{evt.source}</div>}
-              </div>
-              <div className="cmd-meta">
-                <span className={`pill ${evt.once ? 'warn' : 'strong'}`}>
-                  {evt.once ? 'once' : 'on'}
-                </span>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Plugins({ snapshot }: { snapshot: StudioSnapshot }) {
-  return (
-    <div className="panel">
-      <div className="panel-head">
-        <h2>Installed plugins</h2>
-        <span className="muted">{snapshot.plugins.length}</span>
-      </div>
-      <div className="panel-body tight">
-        {snapshot.plugins.length === 0 ? (
-          <p className="empty-note">
-            No plugins loaded. Drop packages into ./plugins or use nexora add.
-          </p>
-        ) : (
-          snapshot.plugins.map((plugin) => (
-            <div className="plug-row" key={plugin.name}>
-              <div>
-                <div className="plug-name">
-                  <span className={`dot ${plugin.enabled ? 'ok' : ''}`} />
-                  <span>{plugin.name}</span>
-                  <span className="muted">v{plugin.version}</span>
-                </div>
-                {plugin.description && <div className="row-sub">{plugin.description}</div>}
-              </div>
-              <div className="cmd-meta">
-                <span className="pill">{plugin.commands} cmds</span>
-                <span className="pill">{plugin.events} events</span>
-                <span className={`pill ${plugin.enabled ? 'ok' : 'warn'}`}>
-                  {plugin.enabled ? 'enabled' : 'disabled'}
-                </span>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ConfigView({ snapshot }: { snapshot: StudioSnapshot }) {
-  return (
-    <div className="panel">
-      <div className="panel-head">
-        <h2>Active configuration</h2>
-        <span className="muted">secrets redacted</span>
-      </div>
-      <div className="panel-body">
-        <pre className="pre">{JSON.stringify(snapshot.config, null, 2)}</pre>
-      </div>
-    </div>
-  );
-}
-
 function logTime(timestamp: string): string {
   const match = /(\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?)/.exec(timestamp);
-  return match ? match[1] : timestamp;
+  return match ? match[1]! : timestamp;
 }
 
 function LogsView({ logs }: { logs: LogEntry[] }) {

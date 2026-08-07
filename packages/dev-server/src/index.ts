@@ -5,7 +5,48 @@ import { subscribeLiveLogs } from '@nexora.ts/logger';
 import { WebSocketHub, WsEvents } from '@nexora.ts/websocket';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import type { Duplex } from 'node:stream';
+import { applyLiveConfigPatch, buildLiveConfigGet } from './config-live.js';
+import {
+  listStudioTables,
+  runSafeTableQuery,
+  type StudioDbQueryFn,
+} from './db-inspect.js';
+import { collectDepsHealth } from './deps-health.js';
+import { buildStudioGraph } from './graph.js';
+import { readJsonBody } from './http-util.js';
+import {
+  getPluginInstallJob,
+  publicInstallJob,
+  queuePluginInstall,
+} from './plugin-install.js';
+import {
+  emptyPerformanceFallback,
+  resolveStudioTelemetry,
+  telemetryFingerprint,
+  telemetrySummary,
+} from './telemetry.js';
 import { getStudioHtml } from './ui-html.js';
+
+export type {
+  StudioEventTrace,
+  StudioEventHandlerSpan,
+  StudioPipelineTrace,
+  StudioPipelineStep,
+  StudioCommandMetrics,
+  StudioPerformanceSnapshot,
+  PipelineStepKind,
+} from './telemetry.js';
+export type { DepsHealthReport, DepHealthEntry } from './deps-health.js';
+export type { StudioDependencyGraph, StudioGraphNode, StudioGraphEdge } from './graph.js';
+export type {
+  StudioDbTablesResponse,
+  StudioDbQueryResponse,
+  KnownDbTable,
+} from './db-inspect.js';
+export { KNOWN_DB_TABLES } from './db-inspect.js';
+export type { LiveConfigGetResponse, LiveConfigPutResponse } from './config-live.js';
+export { LIVE_CONFIG_ALLOWLIST } from './config-live.js';
+export type { PluginInstallJob, InstallJobStatus } from './plugin-install.js';
 
 /** Plugin snapshot for Studio */
 export interface StudioPluginInfo {
@@ -61,8 +102,26 @@ export interface DevServerOptions {
   plugins?: StudioPluginInfo[];
   /** Optional DB connectivity probe */
   databaseStatus?: () => Promise<{ connected: boolean; provider?: string; message?: string }>;
+  /**
+   * Optional read-only table query for Studio DB preview.
+   * Must only SELECT from allowlisted tables — never run client SQL.
+   */
+  databaseQuery?: StudioDbQueryFn;
+  /**
+   * Optional listing of the bot's internal API routes
+   * (e.g. from `@nexora.ts/api` ApiRouter).
+   */
+  apiRoutes?: () => StudioApiRouteInfo[] | Promise<StudioApiRouteInfo[]>;
   /** Max log lines kept in memory */
   logBufferSize?: number;
+}
+
+/** Internal API route descriptor for Studio */
+export interface StudioApiRouteInfo {
+  method: string;
+  path: string;
+  auth?: boolean;
+  source?: string;
 }
 
 export interface StudioSnapshot {
@@ -82,7 +141,7 @@ export interface StudioSnapshot {
   database: { connected: boolean; provider?: string; message?: string };
   meta: {
     studio: true;
-    apiVersion: '0.2';
+    apiVersion: '0.3';
     ports: { studio: number; api: number };
     ui: 'embedded' | 'external' | 'none';
     counts: {
@@ -93,6 +152,12 @@ export interface StudioSnapshot {
       messageCommands: number;
       events: number;
       plugins: number;
+      eventTraces?: number;
+      pipelineTraces?: number;
+      commandMetrics?: number;
+    };
+    telemetry?: {
+      available: boolean;
     };
   };
 }
@@ -267,7 +332,7 @@ function sendJson(res: ServerResponse, status: number, body: unknown): void {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, PUT, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   });
   res.end(payload);
@@ -297,6 +362,8 @@ export class DevServer {
   private readonly logBufferSize: number;
   private readonly plugins: StudioPluginInfo[];
   private readonly databaseStatus?: DevServerOptions['databaseStatus'];
+  private readonly databaseQuery?: StudioDbQueryFn;
+  private readonly apiRoutesFn?: DevServerOptions['apiRoutes'];
   private readonly studioPort: number;
   private readonly uiEnabled: boolean;
   private uiMode: 'embedded' | 'external' | 'none' = 'none';
@@ -308,6 +375,7 @@ export class DevServer {
   private watchTimer: ReturnType<typeof setInterval> | null = null;
   private uptimeTimer: ReturnType<typeof setInterval> | null = null;
   private lastFingerprint = '';
+  private lastTelemetryFingerprint = '';
   readonly port: number;
 
   /** Public Studio UI URL once listening (or null if UI did not start). */
@@ -322,6 +390,8 @@ export class DevServer {
     this.logBufferSize = options.logBufferSize ?? 200;
     this.plugins = [...(options.plugins ?? [])];
     this.databaseStatus = options.databaseStatus;
+    this.databaseQuery = options.databaseQuery;
+    this.apiRoutesFn = options.apiRoutes;
     // Align DI Config token with this package's @nexora.ts/core copy
     // (avoids Symbol identity mismatch across nested installs).
     ensureConfigRegistered(this.bot);
@@ -533,6 +603,9 @@ export class DevServer {
     ).length;
     const messageCommands = commands.filter((c) => c.type === 'message').length;
 
+    const tel = resolveStudioTelemetry();
+    const telSummary = telemetrySummary(tel);
+
     return {
       bot: {
         phase: this.bot.lifecycle,
@@ -550,7 +623,7 @@ export class DevServer {
       database,
       meta: {
         studio: true,
-        apiVersion: '0.2',
+        apiVersion: '0.3',
         ports: { studio: this.studioPort, api: this.port },
         ui: this.uiMode,
         counts: {
@@ -561,6 +634,12 @@ export class DevServer {
           messageCommands,
           events: events.length,
           plugins: plugins.length,
+          eventTraces: telSummary.eventTraces,
+          pipelineTraces: telSummary.pipelineTraces,
+          commandMetrics: telSummary.commandMetrics,
+        },
+        telemetry: {
+          available: telSummary.available,
         },
       },
     };
@@ -600,6 +679,7 @@ export class DevServer {
     this.watchTimer = setInterval(() => {
       if (this.wsHub.connectionCount === 0) return;
       void this.checkFingerprint();
+      this.pushTelemetryIfChanged();
     }, 2000);
     this.watchTimer.unref?.();
 
@@ -609,6 +689,24 @@ export class DevServer {
       void this.pushSnapshotOnly();
     }, 10_000);
     this.uptimeTimer.unref?.();
+  }
+
+  private pushTelemetryIfChanged(): void {
+    const tel = resolveStudioTelemetry();
+    const fp = telemetryFingerprint(tel);
+    if (fp === this.lastTelemetryFingerprint) return;
+    this.lastTelemetryFingerprint = fp;
+    if (!tel) return;
+    try {
+      this.wsHub.broadcast('studio:telemetry', {
+        eventTraces: tel.getEventTraces(20),
+        pipelines: tel.getPipelineTraces(20),
+        commandMetrics: tel.getCommandMetrics(),
+        performance: tel.getPerformance(),
+      });
+    } catch {
+      /* ignore */
+    }
   }
 
   private fingerprintOf(snapshot: StudioSnapshot): string {
@@ -693,25 +791,51 @@ export class DevServer {
       return;
     }
 
-    if (req.method !== 'GET') {
-      sendJson(res, 405, { error: 'Method not allowed' });
-      return;
-    }
-
-    const pathname = new URL(req.url ?? '/', 'http://127.0.0.1').pathname;
+    const method = req.method ?? 'GET';
+    const url = new URL(req.url ?? '/', 'http://127.0.0.1');
+    const pathname = url.pathname;
 
     try {
+      // --- mutations ---
+      if (method === 'PUT' && pathname === '/api/studio/config/live') {
+        await this.handleConfigLivePut(req, res);
+        return;
+      }
+      if (method === 'POST' && pathname === '/api/studio/plugins/install') {
+        await this.handlePluginInstall(req, res);
+        return;
+      }
+
+      if (method !== 'GET') {
+        sendJson(res, 405, { error: 'Method not allowed' });
+        return;
+      }
+
+      // Install job status: /api/studio/plugins/install/:id
+      const installMatch = pathname.match(/^\/api\/studio\/plugins\/install\/([^/]+)$/);
+      if (installMatch) {
+        const job = getPluginInstallJob(decodeURIComponent(installMatch[1]!));
+        if (!job) {
+          sendJson(res, 404, { error: 'Install job not found' });
+          return;
+        }
+        sendJson(res, 200, publicInstallJob(job));
+        return;
+      }
+
       switch (pathname) {
         case '/api/studio/health':
           sendJson(res, 200, {
             ok: true,
             service: 'nexora-studio-api',
+            apiVersion: '0.3',
             ui: this.uiMode,
             studioUrl: this.studioUrl,
             websocket: {
               path: '/ws',
               clients: this.wsHub.connectionCount,
             },
+            telemetry: telemetrySummary(resolveStudioTelemetry()),
           });
           return;
         case '/api/studio/snapshot':
@@ -726,6 +850,130 @@ export class DevServer {
         case '/api/studio/events':
           sendJson(res, 200, (await this.getSnapshot()).events);
           return;
+        case '/api/studio/events/live': {
+          const tel = resolveStudioTelemetry();
+          if (!tel) {
+            sendJson(res, 200, {
+              available: false,
+              traces: [],
+              note: 'Studio telemetry not available from @nexora.ts/core yet',
+            });
+            return;
+          }
+          sendJson(res, 200, {
+            available: true,
+            traces: tel.getEventTraces(50),
+          });
+          return;
+        }
+        case '/api/studio/pipelines': {
+          const tel = resolveStudioTelemetry();
+          if (!tel) {
+            sendJson(res, 200, {
+              available: false,
+              pipelines: [],
+              note: 'Studio telemetry not available from @nexora.ts/core yet',
+            });
+            return;
+          }
+          sendJson(res, 200, {
+            available: true,
+            pipelines: tel.getPipelineTraces(50),
+          });
+          return;
+        }
+        case '/api/studio/commands/metrics': {
+          const tel = resolveStudioTelemetry();
+          if (!tel) {
+            sendJson(res, 200, {
+              available: false,
+              metrics: [],
+              note: 'Studio telemetry not available from @nexora.ts/core yet',
+            });
+            return;
+          }
+          sendJson(res, 200, {
+            available: true,
+            metrics: tel.getCommandMetrics(),
+          });
+          return;
+        }
+        case '/api/studio/performance': {
+          const tel = resolveStudioTelemetry();
+          if (!tel) {
+            sendJson(res, 200, {
+              available: false,
+              ...emptyPerformanceFallback(),
+              note: 'Telemetry unavailable — returning process memory only',
+            });
+            return;
+          }
+          sendJson(res, 200, {
+            available: true,
+            ...tel.getPerformance(),
+          });
+          return;
+        }
+        case '/api/studio/graph':
+          sendJson(res, 200, buildStudioGraph(this.plugins));
+          return;
+        case '/api/studio/health/deps':
+          sendJson(res, 200, await collectDepsHealth(process.cwd()));
+          return;
+        case '/api/studio/api-routes': {
+          if (!this.apiRoutesFn) {
+            sendJson(res, 200, {
+              routes: [],
+              note: 'Bot did not expose apiRoutes to createDevServer — empty list',
+            });
+            return;
+          }
+          const routes = await this.apiRoutesFn();
+          sendJson(res, 200, {
+            routes: Array.isArray(routes) ? routes : [],
+          });
+          return;
+        }
+        case '/api/studio/db/tables': {
+          const snap = await this.getSnapshot();
+          sendJson(
+            res,
+            200,
+            listStudioTables({
+              connected: snap.database.connected,
+              provider: snap.database.provider,
+              message: snap.database.message,
+            }),
+          );
+          return;
+        }
+        case '/api/studio/db/query': {
+          const snap = await this.getSnapshot();
+          sendJson(
+            res,
+            200,
+            await runSafeTableQuery(
+              url.searchParams.get('table'),
+              url.searchParams.get('limit'),
+              this.databaseQuery,
+              snap.database.connected,
+            ),
+          );
+          return;
+        }
+        case '/api/studio/config/live': {
+          const { config, error: configError } = resolveStudioConfig(this.bot);
+          if (!config) {
+            sendJson(res, 503, {
+              error: configError ?? 'Config unavailable',
+              allowlist: [],
+              limitations: [],
+            });
+            return;
+          }
+          sendJson(res, 200, buildLiveConfigGet(sanitizeConfig(config)));
+          return;
+        }
         case '/api/studio/plugins':
           sendJson(res, 200, (await this.getSnapshot()).plugins);
           return;
@@ -749,6 +997,69 @@ export class DevServer {
         error: error instanceof Error ? error.message : String(error),
       });
     }
+  }
+
+  private async handleConfigLivePut(req: IncomingMessage, res: ServerResponse): Promise<void> {
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch (error) {
+      sendJson(res, 400, {
+        error: error instanceof Error ? error.message : 'Invalid JSON body',
+      });
+      return;
+    }
+
+    const { config, error: configError } = resolveStudioConfig(this.bot);
+    if (!config) {
+      sendJson(res, 503, { error: configError ?? 'Config unavailable' });
+      return;
+    }
+
+    const result = applyLiveConfigPatch(config, body, sanitizeConfig);
+    if (result.applied.length > 0) {
+      this.schedulePush('config-live');
+    }
+    sendJson(res, result.ok ? 200 : 400, result);
+  }
+
+  private async handlePluginInstall(req: IncomingMessage, res: ServerResponse): Promise<void> {
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch (error) {
+      sendJson(res, 400, {
+        error: error instanceof Error ? error.message : 'Invalid JSON body',
+      });
+      return;
+    }
+
+    const name =
+      body && typeof body === 'object' && body !== null && 'name' in body
+        ? (body as { name?: unknown }).name
+        : undefined;
+
+    if (typeof name !== 'string') {
+      sendJson(res, 400, { error: 'Body must be `{ name: string }`' });
+      return;
+    }
+
+    const result = await queuePluginInstall(name, process.cwd());
+    if ('error' in result) {
+      sendJson(res, 400, result);
+      return;
+    }
+
+    sendJson(res, 202, {
+      id: result.id,
+      status: result.status,
+      name: result.name,
+      packageManager: result.packageManager,
+      statusUrl: `/api/studio/plugins/install/${encodeURIComponent(result.id)}`,
+      preferNexoraPrefix: name.startsWith('@nexora.ts/')
+        ? true
+        : 'Non-@nexora.ts packages are allowed but prefer scoped framework plugins',
+    });
   }
 
   private streamLogs(res: ServerResponse): void {

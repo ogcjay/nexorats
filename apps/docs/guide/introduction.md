@@ -2,7 +2,7 @@
 
 **Nexora** is a modern open-source TypeScript **application framework** for Discord bots — built on [Discord.js](https://discord.js.org).
 
-Nexora isn’t just a framework — **it ships with its own local Developer Center**. After `pnpm dev`, open **Nexora Studio** at `http://localhost:3002` and inspect *your* commands, plugins, logs, and config.
+Nexora isn’t just a framework — **it ships with its own local Developer Operating System**. After `pnpm dev`, open **Nexora Studio** at `http://localhost:3002` and inspect *your* commands, plugins, logs, and config. Handlers work through a shared `ctx` (reply helpers today; logger/services rolling out) so you spend less time wiring services by hand.
 
 Think of the relationship like **Next.js → React**: Discord.js is the library; Nexora is the opinionated platform on top so you never wire the same stack from scratch again.
 
@@ -22,7 +22,7 @@ Discord.js is the foundation. Nexora does **not** replace it — it packages the
 | --- | :---: | :---: |
 | Discord API client | ✅ | ✅ (via Discord.js) |
 | Project CLI / scaffold | ❌ | ✅ |
-| Local Developer Center (Studio) | ❌ | ✅ |
+| Local Developer OS (Studio) | ❌ | ✅ |
 | Plugin system | ❌ | ✅ |
 | Auto-discovery (commands / events) | ❌ | ✅ |
 | Typed `defineConfig()` | ❌ | ✅ |
@@ -38,7 +38,7 @@ The memorable outcome after install:
 | Building block | What you get |
 | --- | --- |
 | **CLI** | `create-nexora-ts@latest` scaffolds a project with Studio + `.env` |
-| **Studio** | Local Developer Center (`localhost:3002`) — commands, plugins, logs, status |
+| **Studio** | Local Developer OS (`localhost:3002`) — commands, events, plugins, logs, status |
 | **Commands & events** | Typed helpers or classes + auto-discovery + guards |
 | **Plugins** | Manifest or `NexoraPlugin` class — extend without forking core |
 | **Auth** | Discord OAuth, sessions, permissions |

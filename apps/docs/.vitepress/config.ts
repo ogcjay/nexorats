@@ -23,7 +23,10 @@ const sidebar = [
   {
     text: 'Nexora Studio',
     collapsed: false,
-    items: [{ text: 'Developer Center', link: '/guide/studio' }],
+    items: [
+      { text: 'Developer Center', link: '/guide/studio' },
+      { text: 'Studio roadmap', link: '/guide/studio-roadmap' },
+    ],
   },
   {
     text: 'Commands & Interactions',

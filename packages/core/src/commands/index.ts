@@ -8,6 +8,7 @@ export {
   withDefaultEphemeral,
   type CommandDefinition,
   type CommandContext,
+  type CommandContextServices,
   type CommandOption,
   type CommandModuleType,
   type MessageCommandDefinition,
@@ -32,11 +33,13 @@ export {
   runGuards,
   type Guard,
   type GuardResult,
+  type RunGuardsOptions,
 } from './guards.js';
 
 export {
   composeCommandMiddleware,
   type CommandMiddleware,
+  type ComposeCommandMiddlewareOptions,
 } from './middleware.js';
 
 export {

@@ -393,15 +393,22 @@ export function getStudioHtml(): string {
       ['overview', 'Overview'],
       ['commands', 'Commands'],
       ['events', 'Events'],
+      ['events-live', 'Events Live'],
+      ['pipelines', 'Pipelines'],
+      ['performance', 'Performance'],
       ['plugins', 'Plugins'],
       ['config', 'Configuration'],
       ['logs', 'Logs'],
       ['docs', 'Documentation'],
     ];
+    /* Full Studio UI lives in apps/studio (Vite). Embedded mode keeps light stubs for Developer OS tabs. */
     const SUBTITLES = {
       overview: 'Live bot metrics from the Studio API.',
       commands: 'Registered slash, group, context, and message commands.',
       events: 'Discord event listeners attached to this process.',
+      'events-live': 'Recent event handler traces (telemetry).',
+      pipelines: 'Middleware pipeline traces per command execution.',
+      performance: 'Memory and slow command / plugin aggregates.',
       plugins: 'Loaded plugins and their contribution counts.',
       config: 'Active configuration — tokens and secrets redacted.',
       logs: 'Buffered runtime logs from this bot process.',
@@ -418,6 +425,7 @@ export function getStudioHtml(): string {
     let reconnectAttempt = 0;
     let reconnectTimer = null;
     let pollTimer = null;
+    let osCache = { eventsLive: null, pipelines: null, performance: null };
 
     const nav = document.getElementById('nav');
     for (const [id, label] of TABS) {
@@ -504,6 +512,13 @@ export function getStudioHtml(): string {
             applyState(msg.payload, null);
           } else if (msg.type === 'studio:logs') {
             applyState(null, msg.payload);
+          } else if (msg.type === 'studio:telemetry' && msg.payload) {
+            osCache.eventsLive = { available: true, traces: msg.payload.eventTraces || [] };
+            osCache.pipelines = { available: true, pipelines: msg.payload.pipelines || [] };
+            if (msg.payload.performance) {
+              osCache.performance = { available: true, ...msg.payload.performance };
+            }
+            if (tab === 'events-live' || tab === 'pipelines' || tab === 'performance') render();
           }
         } catch (_) {}
       };
@@ -675,7 +690,7 @@ export function getStudioHtml(): string {
       renderMetrics();
 
       const el = document.getElementById('content');
-      if (!snapshot && tab !== 'docs' && tab !== 'logs') {
+      if (!snapshot && tab !== 'docs' && tab !== 'logs' && tab !== 'events-live' && tab !== 'pipelines' && tab !== 'performance') {
         el.innerHTML = '<p class="empty-note">Waiting for Studio API…</p>';
         return;
       }
@@ -683,10 +698,41 @@ export function getStudioHtml(): string {
       if (tab === 'overview') renderOverview(el);
       else if (tab === 'commands') renderCommands(el);
       else if (tab === 'events') renderEvents(el);
+      else if (tab === 'events-live') void renderOsJson(el, 'events-live', '/api/studio/events/live');
+      else if (tab === 'pipelines') void renderOsJson(el, 'pipelines', '/api/studio/pipelines');
+      else if (tab === 'performance') void renderOsJson(el, 'performance', '/api/studio/performance');
       else if (tab === 'plugins') renderPlugins(el);
       else if (tab === 'config') renderConfig(el);
       else if (tab === 'logs') renderLogs(el);
       else if (tab === 'docs') renderDocs(el);
+    }
+
+    async function renderOsJson(el, cacheKey, path) {
+      const titles = {
+        'events-live': 'Event traces',
+        pipelines: 'Pipeline traces',
+        performance: 'Performance',
+      };
+      const cacheField = cacheKey === 'events-live' ? 'eventsLive' : cacheKey;
+      el.innerHTML = panel(titles[cacheKey] || 'Data', '<p class="empty-note">Loading…</p>');
+      try {
+        const res = await fetch(path);
+        const data = res.ok ? await res.json() : { error: 'HTTP ' + res.status };
+        osCache[cacheField] = data;
+        el.innerHTML = panel(
+          titles[cacheKey] || 'Data',
+          '<pre class="pre">' + esc(JSON.stringify(data, null, 2)) + '</pre>',
+          false,
+          data && data.available === false
+            ? '<span class="pill warn">unavailable</span>'
+            : '<span class="pill ok">live</span>',
+        );
+      } catch (e) {
+        el.innerHTML = panel(
+          titles[cacheKey] || 'Data',
+          '<p class="empty-note err">' + esc(e instanceof Error ? e.message : String(e)) + '</p>',
+        );
+      }
     }
 
     function renderOverview(el) {
@@ -911,7 +957,7 @@ export function getStudioHtml(): string {
       el.innerHTML =
         '<div class="panel"><div class="docs-hero">' +
         '<h3>Nexora.js documentation</h3>' +
-        '<p class="muted" style="margin:0 0 16px;max-width:46ch;font-size:13px">Studio is your local control panel. Framework guides, recipes, and API references live on GitBook.</p>' +
+        '<p class="muted" style="margin:0 0 16px;max-width:46ch;font-size:13px">Studio is your local control panel. Framework guides, recipes, and API references live on GitBook. Full Developer OS UI: apps/studio (Vite).</p>' +
         '<p style="margin:0"><a class="docs-link" href="https://cjays-organization.gitbook.io/nexora.ts" target="_blank" rel="noreferrer">' +
         'cjays-organization.gitbook.io/nexora.ts →</a></p>' +
         '</div></div>' +
@@ -920,6 +966,16 @@ export function getStudioHtml(): string {
           '<ul class="list">' +
           row('Nexora Studio', '<code>http://localhost:3002</code>') +
           row('Studio API', '<code>http://127.0.0.1:3920</code>') +
+          '</ul>') +
+        panel('Developer OS endpoints (api v0.3)',
+          '<ul class="list">' +
+          row('Events live', '<code>GET /api/studio/events/live</code>') +
+          row('Pipelines', '<code>GET /api/studio/pipelines</code>') +
+          row('Cmd metrics', '<code>GET /api/studio/commands/metrics</code>') +
+          row('Performance', '<code>GET /api/studio/performance</code>') +
+          row('Graph', '<code>GET /api/studio/graph</code>') +
+          row('Deps health', '<code>GET /api/studio/health/deps</code>') +
+          row('Config live', '<code>GET|PUT /api/studio/config/live</code>') +
           '</ul>') +
         '</div>';
     }

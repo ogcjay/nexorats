@@ -1,4 +1,9 @@
 import type { Client, ClientEvents } from 'discord.js';
+import {
+  nextTelemetryId,
+  studioTelemetry,
+  type StudioEventHandlerSpan,
+} from '../studio-telemetry/index.js';
 import { resolveEventExport } from './event-class.js';
 
 export {
@@ -71,6 +76,8 @@ export interface RegisteredEvent<
   K extends keyof ClientEvents = keyof ClientEvents,
 > extends EventDefinition<K> {
   source?: string;
+  /** Optional plugin name when registered via a plugin loader */
+  plugin?: string;
 }
 
 /** Event registry */
@@ -89,6 +96,11 @@ export class EventRegistry {
       all.push(...events);
     }
     return all;
+  }
+
+  /** Handlers grouped by Discord event name */
+  getByName(name: string): RegisteredEvent[] {
+    return this.events.get(name) ?? [];
   }
 
   get size(): number {
@@ -128,13 +140,86 @@ export async function discoverEvents(
   logger.info(`Discovered ${registry.size} event handler(s)`);
 }
 
-/** Attach all registered events to the Discord client */
+/**
+ * Attach all registered events to the Discord client.
+ * Handlers for the same event (+ once flag) share one listener so Studio
+ * receives a single {@link import('../studio-telemetry/index.js').StudioEventTrace}.
+ */
 export function attachEventHandlers(client: Client, registry: EventRegistry): void {
+  /** key: `once|on:eventName` → handlers */
+  const groups = new Map<string, RegisteredEvent[]>();
+
   for (const eventDef of registry.getAll()) {
-    if (eventDef.once) {
-      client.once(eventDef.name, (...args: unknown[]) => eventDef.execute(...(args as never)));
+    const key = `${eventDef.once ? 'once' : 'on'}:${String(eventDef.name)}`;
+    const list = groups.get(key);
+    if (list) {
+      list[list.length] = eventDef;
     } else {
-      client.on(eventDef.name, (...args: unknown[]) => eventDef.execute(...(args as never)));
+      groups.set(key, [eventDef]);
     }
   }
+
+  for (const [key, handlers] of groups) {
+    const once = key.startsWith('once:');
+    const eventName = handlers[0]!.name;
+
+    const listener = (...args: unknown[]) => {
+      void runEventHandlers(String(eventName), handlers, args);
+    };
+
+    if (once) {
+      client.once(eventName, listener);
+    } else {
+      client.on(eventName, listener);
+    }
+  }
+}
+
+async function runEventHandlers(
+  eventName: string,
+  handlers: readonly RegisteredEvent[],
+  args: unknown[],
+): Promise<void> {
+  const started = Date.now();
+  const spans: StudioEventHandlerSpan[] = [];
+  let traceError: string | undefined;
+
+  for (let i = 0; i < handlers.length; i++) {
+    const eventDef = handlers[i]!;
+    const spanId = nextTelemetryId('eh');
+    const source =
+      eventDef.source ??
+      (typeof eventDef.execute === 'function' ? eventDef.execute.name || undefined : undefined);
+    const t0 = performance.now();
+
+    try {
+      await eventDef.execute(...(args as never));
+      spans[spans.length] = {
+        id: spanId,
+        plugin: eventDef.plugin,
+        source,
+        durationMs: performance.now() - t0,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      spans[spans.length] = {
+        id: spanId,
+        plugin: eventDef.plugin,
+        source,
+        durationMs: performance.now() - t0,
+        error: message,
+      };
+      // Keep first handler error on the trace; continue so one bad handler
+      // does not skip siblings (matches prior per-listener isolation).
+      if (!traceError) traceError = message;
+    }
+  }
+
+  studioTelemetry.recordEventTrace({
+    event: eventName,
+    timestamp: new Date(started).toISOString(),
+    totalMs: Date.now() - started,
+    handlers: spans,
+    error: traceError,
+  });
 }

@@ -93,6 +93,9 @@ export type {
   Guard,
   GuardResult,
   CommandMiddleware,
+  CommandContextServices,
+  RunGuardsOptions,
+  ComposeCommandMiddlewareOptions,
 } from './commands/index.js';
 
 export {
@@ -286,3 +289,21 @@ export {
   isNewerVersion,
 } from './update-check.js';
 export type { UpdateCheckResult } from './update-check.js';
+
+export {
+  studioTelemetry,
+  getStudioTelemetry,
+  StudioTelemetry,
+  PipelineTraceBuilder,
+  nextTelemetryId,
+} from './studio-telemetry/index.js';
+export type {
+  StudioEventHandlerSpan,
+  StudioEventTrace,
+  PipelineStepKind,
+  StudioPipelineStep,
+  StudioPipelineTrace,
+  StudioCommandMetrics,
+  StudioPerformanceSnapshot,
+  RecordCommandResultInput,
+} from './studio-telemetry/index.js';

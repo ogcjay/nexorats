@@ -9,8 +9,14 @@ import {
   type UserContextMenuCommandInteraction,
 } from 'discord.js';
 import type { Logger } from '@nexora.ts/logger';
+import type { Cache } from '../cache/index.js';
+import type { Container } from '../container/index.js';
 import type { EventBus } from '../event-bus/index.js';
 import { FrameworkEvents } from '../event-bus/index.js';
+import {
+  PipelineTraceBuilder,
+  studioTelemetry,
+} from '../studio-telemetry/index.js';
 import type { CommandContext, CommandDefinition, MessageCommandDefinition } from './define.js';
 import {
   createCommandContext,
@@ -157,6 +163,12 @@ export interface AttachCommandHandlersOptions {
    * Prefer passing the live array from {@link import('../nexora.js').Nexora.useCommand}.
    */
   middlewares?: readonly CommandMiddleware[];
+  /** Optional DI container — wired into {@link CommandContext} */
+  container?: Container;
+  /** Optional logger — also exposed as `ctx.logger` */
+  logger?: Logger;
+  /** Optional cache — exposed as `ctx.cache` */
+  cache?: Cache;
 }
 
 /** Auto-discover and register commands from glob patterns */
@@ -414,8 +426,16 @@ export function attachCommandHandlers(
 ): void {
   const eventBus = options?.eventBus;
   const middlewares = options?.middlewares ?? [];
+  const container = options?.container;
+  const cache = options?.cache;
   /** key: `${commandName}:${userId}` → cooldown expiry timestamp (ms) */
   const cooldowns = new Map<string, number>();
+
+  const ctxExtras = {
+    logger: options?.logger ?? logger,
+    cache,
+    container,
+  };
 
   client.on('interactionCreate', async (interaction) => {
     if (interaction.isAutocomplete()) {
@@ -465,96 +485,36 @@ export function attachCommandHandlers(
       if (!resolved) return;
 
       const { sub, label: commandLabel, cooldownKey } = resolved;
-      const ctx = createCommandContext(interaction, client, {
-        ephemeral: sub.ephemeral,
+      await runSlashCommand({
+        interaction,
+        client,
+        cmd: sub,
+        commandLabel,
+        cooldownKey,
+        cooldowns,
+        middlewares,
+        logger,
+        eventBus,
+        ctxExtras,
       });
-      const blocked = await enforceGuards(interaction, sub, cooldowns, ctx, cooldownKey);
-      if (blocked) return;
-
-      const started = Date.now();
-      const run = composeCommandMiddleware(middlewares, (c) => sub.execute(c));
-
-      try {
-        await run(ctx);
-        const duration = Date.now() - started;
-
-        logger.command(`/${commandLabel}`, {
-          name: commandLabel,
-          user: interaction.user.tag,
-          duration,
-        });
-
-        await eventBus?.emit(FrameworkEvents.COMMAND_EXECUTED, {
-          command: commandLabel,
-          userId: interaction.user.id,
-          guildId: interaction.guildId,
-          interaction,
-          duration,
-        });
-      } catch (error) {
-        logger.error(
-          `Command error: /${commandLabel}`,
-          error instanceof Error ? error : { error: String(error) },
-        );
-
-        await eventBus?.emit(FrameworkEvents.COMMAND_ERROR, {
-          command: commandLabel,
-          userId: interaction.user.id,
-          guildId: interaction.guildId,
-          error,
-          interaction,
-        });
-
-        await replyCommandError(interaction);
-      }
       return;
     }
 
     const cmd = registry.get(interaction.commandName);
     if (!cmd) return;
 
-    const ctx = createCommandContext(interaction, client, {
-      ephemeral: cmd.ephemeral,
+    await runSlashCommand({
+      interaction,
+      client,
+      cmd,
+      commandLabel: cmd.name,
+      cooldownKey: undefined,
+      cooldowns,
+      middlewares,
+      logger,
+      eventBus,
+      ctxExtras,
     });
-    const blocked = await enforceGuards(interaction, cmd, cooldowns, ctx);
-    if (blocked) return;
-
-    const started = Date.now();
-    const run = composeCommandMiddleware(middlewares, (c) => cmd.execute(c));
-
-    try {
-      await run(ctx);
-      const duration = Date.now() - started;
-
-      logger.command(`/${cmd.name}`, {
-        name: cmd.name,
-        user: interaction.user.tag,
-        duration,
-      });
-
-      await eventBus?.emit(FrameworkEvents.COMMAND_EXECUTED, {
-        command: cmd.name,
-        userId: interaction.user.id,
-        guildId: interaction.guildId,
-        interaction,
-        duration,
-      });
-    } catch (error) {
-      logger.error(
-        `Command error: /${cmd.name}`,
-        error instanceof Error ? error : { error: String(error) },
-      );
-
-      await eventBus?.emit(FrameworkEvents.COMMAND_ERROR, {
-        command: cmd.name,
-        userId: interaction.user.id,
-        guildId: interaction.guildId,
-        error,
-        interaction,
-      });
-
-      await replyCommandError(interaction);
-    }
   });
 
   // Content-match message commands (first token = name/alias, no prefix)
@@ -570,16 +530,36 @@ export function attachCommandHandlers(
     const cmd = registry.getMessage(rawName);
     if (!cmd) return;
 
+    const pipe = new PipelineTraceBuilder(
+      cmd.name,
+      message.author.id,
+      message.guildId,
+    );
     const started = Date.now();
+
     try {
       const ctx = createMessageCommandContext(message, client, args);
-      await cmd.execute(ctx);
-      const duration = Date.now() - started;
+      await pipe.timed('execute', 'command', () => cmd.execute(ctx));
 
+      const duration = Date.now() - started;
+      const logStart = performance.now();
       logger.command(cmd.name, {
         name: cmd.name,
         user: message.author.tag,
         duration,
+      });
+      pipe.push({
+        name: 'logger',
+        kind: 'logger',
+        status: 'ok',
+        durationMs: performance.now() - logStart,
+      });
+
+      studioTelemetry.recordPipelineTrace(pipe.finish('ok'));
+      studioTelemetry.recordCommandResult({
+        name: cmd.name,
+        durationMs: duration,
+        outcome: 'ok',
       });
 
       await eventBus?.emit(FrameworkEvents.COMMAND_EXECUTED, {
@@ -591,10 +571,20 @@ export function attachCommandHandlers(
         duration,
       });
     } catch (error) {
-      logger.error(
-        `Message command error: ${cmd.name}`,
-        error instanceof Error ? error : { error: String(error) },
-      );
+      const duration = Date.now() - started;
+      const errMsg = error instanceof Error ? error.message : String(error);
+
+      logger.error(`Message command error: ${cmd.name}`, {
+        error: errMsg,
+      });
+
+      studioTelemetry.recordPipelineTrace(pipe.finish('error', errMsg));
+      studioTelemetry.recordCommandResult({
+        name: cmd.name,
+        durationMs: duration,
+        outcome: 'error',
+        error: errMsg,
+      });
 
       await eventBus?.emit(FrameworkEvents.COMMAND_ERROR, {
         command: cmd.name,
@@ -608,6 +598,133 @@ export function attachCommandHandlers(
   });
 }
 
+interface RunSlashCommandArgs {
+  interaction: ChatInputCommandInteraction;
+  client: Client;
+  cmd: CommandDefinition;
+  commandLabel: string;
+  cooldownKey: string | undefined;
+  cooldowns: Map<string, number>;
+  middlewares: readonly CommandMiddleware[];
+  logger: Logger;
+  eventBus?: EventBus;
+  ctxExtras: {
+    logger: Logger;
+    cache?: Cache;
+    container?: Container;
+  };
+}
+
+async function runSlashCommand(args: RunSlashCommandArgs): Promise<void> {
+  const {
+    interaction,
+    client,
+    cmd,
+    commandLabel,
+    cooldownKey,
+    cooldowns,
+    middlewares,
+    logger,
+    eventBus,
+    ctxExtras,
+  } = args;
+
+  const pipe = new PipelineTraceBuilder(
+    commandLabel,
+    interaction.user.id,
+    interaction.guildId,
+  );
+
+  const ctx = createCommandContext(interaction, client, {
+    ephemeral: cmd.ephemeral,
+    ...ctxExtras,
+  });
+
+  const blocked = await enforceGuards(
+    interaction,
+    cmd,
+    cooldowns,
+    ctx,
+    pipe,
+    cooldownKey,
+  );
+  if (blocked) {
+    const trace = pipe.finish('denied');
+    studioTelemetry.recordPipelineTrace(trace);
+    studioTelemetry.recordCommandResult({
+      name: commandLabel,
+      durationMs: trace.totalMs,
+      outcome: 'denied',
+    });
+    return;
+  }
+
+  const started = Date.now();
+  const run = composeCommandMiddleware(
+    middlewares,
+    (c) => cmd.execute(c),
+    { onStep: (step) => pipe.push(step) },
+  );
+
+  try {
+    await run(ctx);
+    const duration = Date.now() - started;
+
+    const logStart = performance.now();
+    logger.command(`/${commandLabel}`, {
+      name: commandLabel,
+      user: interaction.user.tag,
+      duration,
+    });
+    pipe.push({
+      name: 'logger',
+      kind: 'logger',
+      status: 'ok',
+      durationMs: performance.now() - logStart,
+    });
+
+    studioTelemetry.recordPipelineTrace(pipe.finish('ok'));
+    studioTelemetry.recordCommandResult({
+      name: commandLabel,
+      durationMs: duration,
+      outcome: 'ok',
+    });
+
+    await eventBus?.emit(FrameworkEvents.COMMAND_EXECUTED, {
+      command: commandLabel,
+      userId: interaction.user.id,
+      guildId: interaction.guildId,
+      interaction,
+      duration,
+    });
+  } catch (error) {
+    const duration = Date.now() - started;
+    const errMsg = error instanceof Error ? error.message : String(error);
+
+    logger.error(`Command error: /${commandLabel}`, {
+      error: errMsg,
+    });
+
+    studioTelemetry.recordPipelineTrace(pipe.finish('error', errMsg));
+    studioTelemetry.recordCommandResult({
+      name: commandLabel,
+      durationMs: duration,
+      outcome: 'error',
+      error: errMsg,
+    });
+
+    await eventBus?.emit(FrameworkEvents.COMMAND_ERROR, {
+      command: commandLabel,
+      userId: interaction.user.id,
+      guildId: interaction.guildId,
+      error,
+      interaction,
+    });
+
+    await replyCommandError(interaction);
+  }
+}
+
 async function runContextMenu(
   interaction: UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction,
   cmd: RegisteredContextMenu | undefined,
@@ -617,30 +734,71 @@ async function runContextMenu(
 ): Promise<void> {
   if (!cmd) return;
 
+  const label = `ctx:${cmd.type}:${cmd.name}`;
+  const pipe = new PipelineTraceBuilder(
+    label,
+    interaction.user.id,
+    interaction.guildId,
+  );
   const ctx = createContextMenuContext(interaction, client);
 
   if (cmd.guards?.length) {
-    // Built-in Guards only need user / guildId / interaction.memberPermissions
-    const result = await runGuards(ctx as unknown as CommandContext, cmd.guards);
+    const result = await runGuards(ctx as unknown as CommandContext, cmd.guards, {
+      onGuard: ({ index, durationMs, result: guardResult }) => {
+        const denied = guardResult !== true;
+        pipe.push({
+          name: `guard[${index}]`,
+          kind: 'guard',
+          status: denied ? 'deny' : 'ok',
+          durationMs,
+          detail:
+            typeof guardResult === 'string'
+              ? guardResult
+              : denied
+                ? 'denied'
+                : undefined,
+        });
+      },
+    });
     if (result !== true) {
       const message =
         typeof result === 'string' ? result : 'You cannot use this command.';
       await replyEphemeral(interaction, message);
+      const trace = pipe.finish('denied');
+      studioTelemetry.recordPipelineTrace(trace);
+      studioTelemetry.recordCommandResult({
+        name: label,
+        durationMs: trace.totalMs,
+        outcome: 'denied',
+      });
       return;
     }
   }
 
   const started = Date.now();
-  const label = `ctx:${cmd.type}:${cmd.name}`;
 
   try {
-    await cmd.execute(ctx);
+    await pipe.timed('execute', 'command', () => cmd.execute(ctx));
     const duration = Date.now() - started;
 
+    const logStart = performance.now();
     logger.command(label, {
       name: cmd.name,
       user: interaction.user.tag,
       duration,
+    });
+    pipe.push({
+      name: 'logger',
+      kind: 'logger',
+      status: 'ok',
+      durationMs: performance.now() - logStart,
+    });
+
+    studioTelemetry.recordPipelineTrace(pipe.finish('ok'));
+    studioTelemetry.recordCommandResult({
+      name: label,
+      durationMs: duration,
+      outcome: 'ok',
     });
 
     await eventBus?.emit(FrameworkEvents.COMMAND_EXECUTED, {
@@ -652,10 +810,20 @@ async function runContextMenu(
       duration,
     });
   } catch (error) {
-    logger.error(
-      `Context menu error: ${cmd.name}`,
-      error instanceof Error ? error : { error: String(error) },
-    );
+    const duration = Date.now() - started;
+    const errMsg = error instanceof Error ? error.message : String(error);
+
+    logger.error(`Context menu error: ${cmd.name}`, {
+      error: errMsg,
+    });
+
+    studioTelemetry.recordPipelineTrace(pipe.finish('error', errMsg));
+    studioTelemetry.recordCommandResult({
+      name: label,
+      durationMs: duration,
+      outcome: 'error',
+      error: errMsg,
+    });
 
     await eventBus?.emit(FrameworkEvents.COMMAND_ERROR, {
       command: cmd.name,
@@ -693,36 +861,72 @@ async function enforceGuards(
   cmd: CommandDefinition,
   cooldowns: Map<string, number>,
   ctx: CommandContext,
+  pipe: PipelineTraceBuilder,
   cooldownKeyPrefix?: string,
 ): Promise<boolean> {
-  if (cmd.guildOnly && !interaction.guildId) {
-    await replyEphemeral(interaction, 'This command can only be used in a server.');
-    return true;
+  if (cmd.guildOnly) {
+    const t0 = performance.now();
+    const denied = !interaction.guildId;
+    pipe.push({
+      name: 'guildOnly',
+      kind: 'validation',
+      status: denied ? 'deny' : 'ok',
+      durationMs: performance.now() - t0,
+      detail: denied ? 'DM rejected' : undefined,
+    });
+    if (denied) {
+      await replyEphemeral(interaction, 'This command can only be used in a server.');
+      return true;
+    }
   }
 
   if (cmd.adminOnly) {
+    const t0 = performance.now();
     const perms = interaction.memberPermissions;
-    if (!perms?.has(PermissionFlagsBits.Administrator)) {
+    const denied = !perms?.has(PermissionFlagsBits.Administrator);
+    pipe.push({
+      name: 'adminOnly',
+      kind: 'permission',
+      status: denied ? 'deny' : 'ok',
+      durationMs: performance.now() - t0,
+    });
+    if (denied) {
       await replyEphemeral(interaction, 'You need Administrator permission to use this command.');
       return true;
     }
   }
 
   if (cmd.permissions?.length) {
+    const t0 = performance.now();
     const perms = interaction.memberPermissions;
-    if (!perms?.has(cmd.permissions)) {
+    const denied = !perms?.has(cmd.permissions);
+    pipe.push({
+      name: 'permissions',
+      kind: 'permission',
+      status: denied ? 'deny' : 'ok',
+      durationMs: performance.now() - t0,
+    });
+    if (denied) {
       await replyEphemeral(interaction, 'You lack the required permissions for this command.');
       return true;
     }
   }
 
   if (cmd.cooldown != null && cmd.cooldown > 0) {
+    const t0 = performance.now();
     const key = `${cooldownKeyPrefix ?? cmd.name}:${interaction.user.id}`;
     const now = Date.now();
     const expiresAt = cooldowns.get(key);
 
     if (expiresAt != null && now < expiresAt) {
       const remainingSec = Math.ceil((expiresAt - now) / 1000);
+      pipe.push({
+        name: 'cooldown',
+        kind: 'rateLimit',
+        status: 'deny',
+        durationMs: performance.now() - t0,
+        detail: `${remainingSec}s remaining`,
+      });
       await replyEphemeral(
         interaction,
         `Please wait ${remainingSec}s before using this command again.`,
@@ -731,10 +935,32 @@ async function enforceGuards(
     }
 
     cooldowns.set(key, now + cmd.cooldown);
+    pipe.push({
+      name: 'cooldown',
+      kind: 'rateLimit',
+      status: 'ok',
+      durationMs: performance.now() - t0,
+    });
   }
 
   if (cmd.guards?.length) {
-    const result = await runGuards(ctx, cmd.guards);
+    const result = await runGuards(ctx, cmd.guards, {
+      onGuard: ({ index, durationMs, result: guardResult }) => {
+        const denied = guardResult !== true;
+        pipe.push({
+          name: `guard[${index}]`,
+          kind: 'guard',
+          status: denied ? 'deny' : 'ok',
+          durationMs,
+          detail:
+            typeof guardResult === 'string'
+              ? guardResult
+              : denied
+                ? 'denied'
+                : undefined,
+        });
+      },
+    });
     if (result !== true) {
       const message =
         typeof result === 'string' ? result : 'You cannot use this command.';

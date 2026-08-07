@@ -1,6 +1,6 @@
 # Nexora Studio
 
-**Nexora isn’t just a framework — it ships with its own local Developer Center.**
+**Nexora isn’t just a framework — it ships with a local Developer Operating System.**
 
 **Nexora Studio** runs on `localhost:3002` next to your bot. It is the strongest day-one differentiator: live insight into *your* process — not a generic docs page.
 
@@ -14,6 +14,23 @@ It is **not** the public documentation website.
 | Audience | Everyone | You, on your machine |
 | Content | Framework guides | **Your** commands, plugins, logs, config |
 | Start | Open the URL | `pnpm dev` (embedded UI via `@nexora.ts/dev-server`) |
+
+## Developer OS
+
+Studio is evolving into a full **Developer OS** for the bot you are running — one surface for:
+
+| Capability | Role |
+| --- | --- |
+| **Live Events** | Inspect Discord listeners attached to this process |
+| **Commands** | Browse the live command tree (slash, groups, context, message) |
+| **API** | Explore internal API routes as they roll out |
+| **Database** | Inspect connections and data (viewer rolling out) |
+| **Config** | Sanitized runtime config — secrets redacted |
+| **Performance** | Analyzer for hot paths and latency (rolling out) |
+| **Plugin Graph** | Loaded plugins, contributions, dependency health |
+| **Errors & Metrics** | Logs, uptime, and process health |
+
+What you can open today in Studio (Overview, Commands, Events, Plugins, Configuration, Logs) is already useful for day-to-day debugging. The broader OS map — and what ships in which phase — is documented in [Studio roadmap](studio-roadmap.md).
 
 ## Scaffold includes Studio
 
@@ -68,6 +85,8 @@ CLI helpers (after installing `@nexora.ts/create` globally, as a devDependency, 
 ```bash
 nexora dev      # bot + Studio (Vite UI if available, else embedded)
 nexora studio    # Vite Studio UI only (expects API on :3920)
+nexora add <pkg>  # install a plugin from npm
+nexora list       # local ./plugins + matching deps
 ```
 
 Most users can stay on `pnpm dev` — Studio is already embedded.
@@ -78,13 +97,31 @@ In the monorepo:
 pnpm --filter @nexora.ts/studio dev
 ```
 
-## Features (v0.1)
+## Available in Studio
+
+Surfaces you can use when the bot is running with `createDevServer`:
 
 - Bot status & uptime
-- Command tree
-- Registered events
-- Plugin list
-- Sanitized configuration (secrets redacted)
+- Command Explorer (registry + live metrics)
+- Event Inspector (live handler tree + timing) and registered listeners
+- Middleware Pipeline Viewer
+- Performance Analyzer
+- Dependency graph & dependency health
+- Plugin list, local npm install, and deps health
+- API Explorer and read-only Database viewer (when wired)
+- Live Config (allowlisted hot patch) + sanitized raw config
 - Log buffer
 - Link to public docs
 - Embedded UI served by `@nexora.ts/dev-server` (no separate Vite process required)
+
+Full phase map: [Studio roadmap](studio-roadmap.md).
+
+Plugin packages can also be installed from the CLI:
+
+```bash
+nexora add @scope/nexora-plugin-example
+nexora remove @scope/nexora-plugin-example
+nexora list
+```
+
+Then register them with `@nexora.ts/plugin-system` — see [Plugins](plugins.md).

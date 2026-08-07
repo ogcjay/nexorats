@@ -136,6 +136,9 @@ export class Nexora {
     attachCommandHandlers(this.client, this.commandRegistry, this.logger, {
       eventBus: this.eventBus,
       middlewares: this.commandMiddlewares,
+      container: this.container,
+      logger: this.logger,
+      cache: this.cache,
     });
     attachEventHandlers(this.client, this.eventRegistry);
     attachInteractionHandlers(this.client, this.interactionRegistry, this.logger);

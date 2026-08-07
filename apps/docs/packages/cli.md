@@ -43,6 +43,8 @@ Always run from the **bot project root** (directory with `package.json`).
 | --- | --- |
 | `nexora dev` | Runs `pnpm run dev` / `npm run dev` (bot + Studio API). Starts Vite Studio UI when `@nexora.ts/studio` is available; otherwise relies on the embedded UI from `@nexora.ts/dev-server` on `:3002`. |
 | `nexora studio` | Studio UI only (API expected on `:3920`) |
-| `nexora add` / `remove` / `list` | Plugin management (WIP) |
+| `nexora add <package>` | Validates the npm name, then `pnpm add` (if `pnpm-lock.yaml`) or `npm install`. Prints how to register via `@nexora.ts/plugin-system`. |
+| `nexora remove <package>` | Uninstalls the same way (`pnpm remove` / `npm uninstall`). |
+| `nexora list` | Lists `./plugins` folders and dependencies matching `nexora-plugin-*` / `@nexora.ts/plugin-*`. |
 
 See [Quick start](../guide/quick-start.md) and [Nexora Studio](../guide/studio.md).

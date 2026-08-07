@@ -18,7 +18,10 @@ import type {
   APIEmbed,
 } from 'discord.js';
 import { MessageFlags, MessageFlagsBitField, MessagePayload } from 'discord.js';
+import type { Logger } from '@nexora.ts/logger';
 import type { ComponentLike, EmbedLike } from '../builders/index.js';
+import type { Cache } from '../cache/index.js';
+import type { Container, ServiceToken } from '../container/index.js';
 import type { Guard } from './guards.js';
 import {
   buildStatusReply,
@@ -26,6 +29,12 @@ import {
 } from './reply-presets.js';
 
 export type { StatusReplyOptions } from './reply-presets.js';
+
+/** Optional DI accessors on {@link CommandContext} */
+export interface CommandContextServices {
+  get<T>(token: ServiceToken<T>): T;
+  tryGet<T>(token: ServiceToken<T>): T | undefined;
+}
 
 /** Builder-first reply options (resolved before discord.js) */
 export interface BuilderReplyOptions {
@@ -182,6 +191,18 @@ export interface CommandContext {
   member: GuildMember | APIInteractionGuildMember | null;
   channel: TextBasedChannel | null;
   guildId: string | null;
+
+  /** Framework logger when wired via {@link createCommandContext} / attach options */
+  logger?: Logger;
+  /** Shared cache when wired via attach options */
+  cache?: Cache;
+  /** DI container when wired via attach options */
+  container?: Container;
+  /**
+   * Resolve services from {@link container} when available.
+   * Prefer `ctx.logger` / `ctx.cache` for well-known deps.
+   */
+  services?: CommandContextServices;
 
   /**
    * Shortcut for `interaction.reply()`.
@@ -406,6 +427,12 @@ async function deferThenHelper(
 export interface CreateCommandContextOptions {
   /** Default ephemeral for reply / embed / componentsV2 when not set per-call */
   ephemeral?: boolean;
+  /** Optional logger exposed as `ctx.logger` */
+  logger?: Logger;
+  /** Optional cache exposed as `ctx.cache` */
+  cache?: Cache;
+  /** Optional DI container — enables `ctx.container` and `ctx.services` */
+  container?: Container;
 }
 
 /** Apply command-level default ephemeral unless the payload already sets it */
@@ -442,6 +469,21 @@ export function withDefaultEphemeral(
   return { ...obj, ephemeral: true };
 }
 
+function createServicesBag(
+  container: Container | undefined,
+): CommandContextServices | undefined {
+  if (!container) return undefined;
+  return {
+    get<T>(token: ServiceToken<T>): T {
+      return container.resolve(token);
+    },
+    tryGet<T>(token: ServiceToken<T>): T | undefined {
+      if (!container.has(token)) return undefined;
+      return container.resolve(token);
+    },
+  };
+}
+
 /** Build a CommandContext from a chat-input interaction */
 export function createCommandContext(
   interaction: ChatInputCommandInteraction,
@@ -449,6 +491,9 @@ export function createCommandContext(
   contextOptions?: CreateCommandContextOptions,
 ): CommandContext {
   const defaultEphemeral = contextOptions?.ephemeral;
+  const container = contextOptions?.container;
+  const logger = contextOptions?.logger;
+  const cache = contextOptions?.cache;
 
   const reply = (options: CommandReplyOptions) =>
     interaction.reply(resolveReplyOptions(withDefaultEphemeral(options, defaultEphemeral)));
@@ -461,6 +506,10 @@ export function createCommandContext(
     member: interaction.member,
     channel: interaction.channel,
     guildId: interaction.guildId,
+    logger,
+    cache,
+    container,
+    services: createServicesBag(container),
     reply,
     embed: (embed) =>
       interaction.reply(

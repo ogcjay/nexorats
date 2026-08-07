@@ -12,6 +12,7 @@
 ## Nexora Studio
 
 * [Developer Center](guide/studio.md)
+* [Studio roadmap](guide/studio-roadmap.md)
 
 ## Commands & Interactions
 

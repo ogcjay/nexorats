@@ -25,7 +25,7 @@ export default command({
 
 ## Context helpers
 
-`execute` receives a `CommandContext` with Discord.js access **and** short helpers:
+`execute` receives a `CommandContext` with Discord.js access **and** short helpers. Prefer working through `ctx.*` instead of wiring Discord replies (and, as the context system rolls out, logger/services) by hand:
 
 | Field / method | Description |
 | --- | --- |

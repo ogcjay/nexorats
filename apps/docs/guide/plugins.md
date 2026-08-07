@@ -88,13 +88,21 @@ await loader.loadAll({
 
 `onLoad` runs after the plugin is loaded; `onUnload` runs when the plugin is unloaded (if implemented).
 
-## Install (CLI — planned)
+## Install (CLI)
+
+From your bot project root, install a published plugin from the npm registry:
 
 ```bash
-nexora add tickets
-nexora add moderation
+nexora add @scope/nexora-plugin-tickets
+nexora add nexora-plugin-moderation
+nexora list
+nexora remove @scope/nexora-plugin-tickets
 ```
+
+`nexora add` / `remove` run `pnpm add` / `pnpm remove` when `pnpm-lock.yaml` is present, otherwise `npm install` / `npm uninstall`. Output streams to your terminal.
+
+After install, enable the plugin in config (if you use `enabledPlugins`) and load it with `PluginLoader` as shown above. Local development plugins can still live under `./plugins/` without publishing.
 
 ## Community plugins
 
-Building and publishing plugins is how the ecosystem grows. See [Plugin ecosystem](ecosystem.md) and [Contributing](contributing.md). More on classes: [Classes](../classes/index.md).
+Building and publishing plugins is how the ecosystem grows. See [Plugin ecosystem](ecosystem.md) and [Contributing](contributing.md). More on classes: [Classes](../classes/index.md). Studio tracks loaded plugins under [Nexora Studio](studio.md).

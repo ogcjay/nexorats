@@ -94,15 +94,28 @@ export const Guards = {
   or,
 } as const;
 
+/** Optional per-guard timing hook for Studio pipeline traces */
+export interface RunGuardsOptions {
+  onGuard?: (info: {
+    index: number;
+    durationMs: number;
+    result: GuardResult;
+  }) => void;
+}
+
 /**
  * Run guards in order. Returns the first deny result, or `true` if all pass.
  */
 export async function runGuards(
   ctx: CommandContext,
   guards: readonly Guard[],
+  options?: RunGuardsOptions,
 ): Promise<GuardResult> {
-  for (const guard of guards) {
-    const result = await guard(ctx);
+  const onGuard = options?.onGuard;
+  for (let i = 0; i < guards.length; i++) {
+    const t0 = performance.now();
+    const result = await guards[i]!(ctx);
+    onGuard?.({ index: i, durationMs: performance.now() - t0, result });
     if (result !== true) return result;
   }
   return true;
