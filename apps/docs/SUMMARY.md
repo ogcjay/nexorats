@@ -28,7 +28,6 @@
 * [Builders](guide/builders.md)
 * [Components V2](guide/components-v2.md)
 * [Events](guide/events.md)
-* [Classes (overview)](guide/classes.md)
 * [Dependency injection](guide/dependency-injection.md)
 * [Logging](guide/logging.md)
 * [Cache & scheduler](guide/cache-scheduler.md)
