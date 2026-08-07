@@ -1,0 +1,30 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [],
+  "linked": [
+    [
+      "@nexorajs/config",
+      "@nexorajs/logger",
+      "@nexorajs/core",
+      "@nexorajs/database",
+      "@nexorajs/auth",
+      "@nexorajs/api",
+      "@nexorajs/plugin-system",
+      "@nexorajs/websocket",
+      "@nexorajs/ui",
+      "@nexorajs/dev-server",
+      "create-nexorajs"
+    ]
+  ],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "@nexorajs/dashboard",
+    "@nexorajs/docs",
+    "@nexorajs/playground",
+    "@nexorajs/studio"
+  ]
+}

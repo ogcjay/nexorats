@@ -1,0 +1,56 @@
+{
+  "name": "@nexorajs/dev-server",
+  "version": "0.1.0",
+  "description": "Local introspection API for Nexora Studio (Developer Center)",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@nexorajs/config": "workspace:*",
+    "@nexorajs/core": "workspace:*",
+    "@nexorajs/logger": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nexorajs/nexora.git",
+    "directory": "packages/dev-server"
+  },
+  "homepage": "https://github.com/nexorajs/nexora#readme",
+  "bugs": {
+    "url": "https://github.com/nexorajs/nexora/issues"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "nexora",
+    "discord",
+    "bot",
+    "typescript"
+  ],
+  "sideEffects": false
+}

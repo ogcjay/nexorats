@@ -1,0 +1,50 @@
+{
+  "name": "create-nexorajs",
+  "version": "0.1.0",
+  "description": "CLI to scaffold new Nexora Discord bot projects",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "create-nexorajs": "./dist/index.js",
+    "nexora": "./dist/nexora.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@types/prompts": "^2.4.9",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2"
+  },
+  "homepage": "https://github.com/nexorajs/nexora#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nexorajs/nexora.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/nexorajs/nexora/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "nexora",
+    "discord",
+    "bot",
+    "typescript"
+  ]
+}

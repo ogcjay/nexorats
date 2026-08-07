@@ -1,0 +1,33 @@
+{
+  "name": "@nexorajs/playground",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nexorajs/config": "workspace:*",
+    "@nexorajs/core": "workspace:*",
+    "@nexorajs/dev-server": "workspace:*",
+    "@nexorajs/logger": "workspace:*",
+    "@nexorajs/plugin-system": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "homepage": "https://github.com/nexorajs/nexora#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nexorajs/nexora.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nexorajs/nexora/issues"
+  },
+  "license": "MIT"
+}

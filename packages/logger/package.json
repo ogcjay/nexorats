@@ -1,0 +1,53 @@
+{
+  "name": "@nexorajs/logger",
+  "version": "0.1.0",
+  "description": "Structured logging with colors, file output, and live streaming",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@nexorajs/config": "workspace:*"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2"
+  },
+  "homepage": "https://github.com/nexorajs/nexora#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nexorajs/nexora.git",
+    "directory": "packages/logger"
+  },
+  "bugs": {
+    "url": "https://github.com/nexorajs/nexora/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "nexora",
+    "discord",
+    "bot",
+    "typescript"
+  ],
+  "sideEffects": false
+}

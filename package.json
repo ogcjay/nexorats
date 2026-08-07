@@ -1,0 +1,56 @@
+{
+  "name": "nexora",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Open-source TypeScript framework for Discord bots — CLI, commands, plugins, dashboard, and auth",
+  "license": "MIT",
+  "homepage": "https://github.com/nexorajs/nexora#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nexorajs/nexora.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nexorajs/nexora/issues"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "framework",
+    "typescript",
+    "nexora",
+    "dashboard",
+    "plugins"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "preinstall": "node ./scripts/ensure-pnpm.mjs",
+    "build": "pnpm -r --filter \"./packages/**\" --filter \"./apps/**\" run build",
+    "build:packages": "pnpm -r --filter \"./packages/**\" run build",
+    "dev": "pnpm --parallel --filter @nexorajs/dashboard --filter @nexorajs/docs --filter @nexorajs/studio --filter @nexorajs/playground run dev",
+    "studio:dev": "pnpm --filter @nexorajs/studio dev",
+    "docs:dev": "pnpm --filter @nexorajs/docs dev",
+    "docs:build": "pnpm --filter @nexorajs/docs build",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test",
+    "typecheck": "pnpm -r run typecheck",
+    "clean": "pnpm -r run clean && rimraf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json,mjs}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json,mjs}\"",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release:dry": "pnpm build:packages && pnpm -r --filter \"./packages/**\" publish --dry-run --no-git-checks --access public",
+    "release": "pnpm build:packages && pnpm -r --filter \"./packages/**\" publish --no-git-checks --access public"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.11",
+    "@types/node": "^22.10.0",
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  }
+}

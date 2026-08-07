@@ -1,0 +1,55 @@
+{
+  "name": "@nexorajs/plugin-system",
+  "version": "0.1.0",
+  "description": "Plugin API, dependency management, hooks, and lifecycle",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@nexorajs/core": "workspace:*",
+    "@nexorajs/logger": "workspace:*",
+    "glob": "^11.0.0"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2"
+  },
+  "homepage": "https://github.com/nexorajs/nexora#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nexorajs/nexora.git",
+    "directory": "packages/plugin-system"
+  },
+  "bugs": {
+    "url": "https://github.com/nexorajs/nexora/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "nexora",
+    "discord",
+    "bot",
+    "typescript"
+  ],
+  "sideEffects": false
+}
