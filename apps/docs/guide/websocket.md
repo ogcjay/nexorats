@@ -1,6 +1,6 @@
 # WebSocket
 
-`@nexora.ts/websocket` streams live events to the dashboard:
+`@nexora.ts/websocket` streams live events (Studio today; upcoming Dashboard later):
 
 - Log lines
 - Bot status

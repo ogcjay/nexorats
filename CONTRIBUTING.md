@@ -40,8 +40,11 @@ pnpm dev
 
 | App       | URL                   |
 | --------- | --------------------- |
-| Dashboard | http://localhost:3000 |
+| Dashboard | http://localhost:3000 (monorepo only — unreleased / not published) |
 | Docs      | http://localhost:3001 |
+| Studio    | http://localhost:3002 |
+
+> Public docs should treat Dashboard as **coming soon**. Local dashboard work: `pnpm --filter @nexora.ts/dashboard dev` (contributors only).
 
 ## Project Structure
 

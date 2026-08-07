@@ -2,7 +2,7 @@
 
 **Nexora** is a modern open-source TypeScript framework for Discord bots.
 
-It gives you a **complete foundation** — CLI, command system, plugin system, dashboard, authentication, database, API, and logging — so you can focus on your bot’s actual features instead of wiring libraries together.
+It gives you a **complete foundation** — CLI, command system, plugin system, authentication, database, API, logging, and Studio — so you can focus on your bot’s actual features instead of wiring libraries together. A public **Dashboard** is planned (unreleased).
 
 ## Why Nexora exists
 
@@ -16,7 +16,7 @@ Nexora aims to be the shared platform:
 | **Commands & events** | Typed helpers or classes + auto-discovery + guards |
 | **Plugins** | Manifest or `NexoraPlugin` class — extend without forking core |
 | **Studio** | Local Developer Center (`localhost:3002`) |
-| **Dashboard** | Guild settings, modules, logs |
+| **Dashboard** | *Coming soon* — guild settings, modules, logs (unreleased) |
 | **Auth** | Discord OAuth, sessions, permissions |
 | **Database** | Drizzle + repositories |
 | **API + WebSocket** | Internal API and live updates |

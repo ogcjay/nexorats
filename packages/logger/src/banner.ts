@@ -21,8 +21,8 @@ export function printStartupBanner(options: StartupBannerOptions): void {
   if (commands !== undefined) rows.push(['commands', String(commands)]);
   if (events !== undefined) rows.push(['events', String(events)]);
   if (studioUrl) rows.push(['studio', studioUrl]);
-  // Dashboard is a separate Next.js app — never imply the bot started it.
-  if (dashboardUrl) rows.push(['dashboard', `${dashboardUrl} (start separately)`]);
+  // Dashboard is experimental / unreleased — never promise a live URL.
+  if (dashboardUrl) rows.push(['dashboard', dashboardUrl]);
 
   const labelWidth = Math.max(...rows.map(([k]) => k.length));
   const contentWidths = rows.map(([k, v]) => 2 + labelWidth + 2 + v.length);

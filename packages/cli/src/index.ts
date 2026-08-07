@@ -40,8 +40,8 @@ async function main(): Promise<void> {
     {
       type: 'confirm',
       name: 'dashboard',
-      message: 'Include dashboard?',
-      initial: true,
+      message: 'Include experimental dashboard config? (unreleased — coming soon)',
+      initial: false,
     },
     {
       type: 'confirm',
@@ -98,10 +98,7 @@ async function main(): Promise<void> {
   console.log('    # Studio (Developer Center): http://localhost:3002 (API :3920)');
   if (options.dashboard) {
     console.log(
-      '    # Dashboard (public admin UI) is NOT auto-started — separate Next.js app.',
-    );
-    console.log(
-      '    # Config: dashboard.url — monorepo: pnpm --filter @nexora.ts/dashboard dev\n',
+      '    # Dashboard: experimental / unreleased — coming soon (config scaffolded only).\n',
     );
   } else {
     console.log('');
@@ -149,13 +146,13 @@ OAUTH_REDIRECT_URI=http://localhost:3000/api/auth/callback
           '@nexora.ts/config': '^0.1.2',
           '@nexora.ts/core': '^0.1.7',
           '@nexora.ts/logger': '^0.1.2',
-          '@nexora.ts/dev-server': '^0.1.2',
+          '@nexora.ts/dev-server': '^0.1.3',
           ...(options.dashboard
             ? {
                 '@nexora.ts/database': '^0.1.1',
                 '@nexora.ts/auth': '^0.1.1',
                 '@nexora.ts/api': '^0.1.1',
-                '@nexora.ts/websocket': '^0.1.1',
+                '@nexora.ts/websocket': '^0.1.2',
               }
             : {}),
         },
@@ -191,7 +188,8 @@ export default defineConfig({
   },
   ${
     options.dashboard
-      ? `dashboard: {
+      ? `// Experimental / unreleased — config reserved for the upcoming dashboard
+  dashboard: {
     enabled: true,
     port: 3000,
     url: process.env.DASHBOARD_URL ?? 'http://localhost:3000',

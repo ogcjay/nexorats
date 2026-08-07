@@ -1,8 +1,10 @@
 import type { NexoraConfig } from '@nexora.ts/config';
-import { TOKENS, type Nexora, type LifecyclePhase } from '@nexora.ts/core';
+import { FrameworkEvents, TOKENS, type Nexora, type LifecyclePhase } from '@nexora.ts/core';
 import type { LogEntry } from '@nexora.ts/logger';
 import { subscribeLiveLogs } from '@nexora.ts/logger';
+import { WebSocketHub, WsEvents } from '@nexora.ts/websocket';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import type { Duplex } from 'node:stream';
 import { getStudioHtml } from './ui-html.js';
 
 /** Plugin snapshot for Studio */
@@ -13,6 +15,34 @@ export interface StudioPluginInfo {
   description?: string;
   commands: number;
   events: number;
+}
+
+/** Serialized command option for Studio (no handlers) */
+export interface StudioCommandOption {
+  name: string;
+  description: string;
+  type: string;
+  required?: boolean;
+  autocomplete?: boolean;
+  choices?: number;
+}
+
+/** Command / group / context-menu entry for Studio */
+export interface StudioCommandInfo {
+  name: string;
+  description: string;
+  /** slash | group | context-user | context-message | message */
+  type: 'slash' | 'group' | 'context-user' | 'context-message' | 'message';
+  source?: string;
+  guildOnly?: boolean;
+  adminOnly?: boolean;
+  cooldownMs?: number | null;
+  optionsCount: number;
+  options: StudioCommandOption[];
+  guardsCount: number;
+  /** Subcommand count (groups only) */
+  subcommands?: number;
+  aliases?: string[];
 }
 
 /** Options for the local Studio introspection server */
@@ -40,20 +70,30 @@ export interface StudioSnapshot {
     phase: LifecyclePhase;
     online: boolean;
     tag: string | null;
+    id: string | null;
     guilds: number;
     uptimeMs: number | null;
     startedAt: string | null;
   };
-  commands: { name: string; description: string; source?: string; guildOnly?: boolean }[];
+  commands: StudioCommandInfo[];
   events: { name: string; once?: boolean; source?: string }[];
   plugins: StudioPluginInfo[];
   config: Record<string, unknown>;
   database: { connected: boolean; provider?: string; message?: string };
   meta: {
     studio: true;
-    apiVersion: '0.1';
+    apiVersion: '0.2';
     ports: { studio: number; api: number };
     ui: 'embedded' | 'external' | 'none';
+    counts: {
+      commands: number;
+      slash: number;
+      groups: number;
+      contextMenus: number;
+      messageCommands: number;
+      events: number;
+      plugins: number;
+    };
   };
 }
 
@@ -69,13 +109,26 @@ const SENSITIVE_KEYS = new Set([
 
 /** Deep-clone config and redact secrets for Studio display */
 export function sanitizeConfig(config: NexoraConfig): Record<string, unknown> {
-  return redact(structuredClone(config) as unknown as Record<string, unknown>) as Record<
-    string,
-    unknown
-  >;
+  try {
+    return redact(structuredClone(config) as unknown as Record<string, unknown>) as Record<
+      string,
+      unknown
+    >;
+  } catch {
+    // Fall back to JSON round-trip (drops functions / BigInt)
+    try {
+      return redact(JSON.parse(JSON.stringify(config)) as Record<string, unknown>) as Record<
+        string,
+        unknown
+      >;
+    } catch {
+      return { error: 'Config could not be serialized' };
+    }
+  }
 }
 
 function redact(value: unknown): unknown {
+  if (typeof value === 'bigint') return value.toString();
   if (Array.isArray(value)) return value.map(redact);
   if (value && typeof value === 'object') {
     const out: Record<string, unknown> = {};
@@ -90,6 +143,83 @@ function redact(value: unknown): unknown {
     return out;
   }
   return value;
+}
+
+function mapStudioOptions(
+  options: { name: string; description: string; type: string; required?: boolean; autocomplete?: boolean; choices?: unknown[] }[] | undefined,
+): StudioCommandOption[] {
+  if (!options?.length) return [];
+  return options.map((opt) => ({
+    name: opt.name,
+    description: opt.description,
+    type: opt.type,
+    required: opt.required,
+    autocomplete: opt.autocomplete,
+    choices: opt.choices?.length,
+  }));
+}
+
+function collectStudioCommands(bot: Nexora): StudioCommandInfo[] {
+  const registry = bot.commandRegistry;
+  const out: StudioCommandInfo[] = [];
+
+  for (const cmd of registry.getAll()) {
+    const options = mapStudioOptions(cmd.options);
+    out.push({
+      name: cmd.name,
+      description: cmd.description,
+      type: 'slash',
+      source: cmd.source,
+      guildOnly: cmd.guildOnly,
+      adminOnly: cmd.adminOnly,
+      cooldownMs: cmd.cooldown ?? null,
+      optionsCount: options.length,
+      options,
+      guardsCount: cmd.guards?.length ?? 0,
+    });
+  }
+
+  for (const group of registry.getAllGroups()) {
+    const subCount =
+      group.commands.length +
+      (group.groups?.reduce((n, g) => n + g.commands.length, 0) ?? 0);
+    out.push({
+      name: group.name,
+      description: group.description,
+      type: 'group',
+      source: group.source,
+      optionsCount: 0,
+      options: [],
+      guardsCount: 0,
+      subcommands: subCount,
+    });
+  }
+
+  for (const menu of registry.getAllContextMenus()) {
+    out.push({
+      name: menu.name,
+      description: menu.type === 'user' ? 'User context menu' : 'Message context menu',
+      type: menu.type === 'user' ? 'context-user' : 'context-message',
+      source: menu.source,
+      optionsCount: 0,
+      options: [],
+      guardsCount: menu.guards?.length ?? 0,
+    });
+  }
+
+  for (const msg of registry.getAllMessage()) {
+    out.push({
+      name: msg.name,
+      description: msg.description ?? '',
+      type: 'message',
+      optionsCount: 0,
+      options: [],
+      guardsCount: 0,
+      aliases: msg.aliases,
+    });
+  }
+
+  return out;
 }
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
@@ -117,6 +247,8 @@ function sendHtml(res: ServerResponse, html: string): void {
  *
  * By default also serves an embedded Studio UI on `studioPort` (3002) so
  * `pnpm dev` works without a second terminal.
+ *
+ * Live updates: WebSocket at `/ws` on the API (and UI) host — full snapshot pushes.
  */
 export class DevServer {
   private server: Server | null = null;
@@ -130,6 +262,12 @@ export class DevServer {
   private uiMode: 'embedded' | 'external' | 'none' = 'none';
   private unsubscribeLogs: (() => void) | null = null;
   private startedAt: Date | null = null;
+  private readonly wsHub = new WebSocketHub();
+  private readonly unsubscribers: Array<() => void> = [];
+  private pushTimer: ReturnType<typeof setTimeout> | null = null;
+  private watchTimer: ReturnType<typeof setInterval> | null = null;
+  private uptimeTimer: ReturnType<typeof setInterval> | null = null;
+  private lastFingerprint = '';
   readonly port: number;
 
   /** Public Studio UI URL once listening (or null if UI did not start). */
@@ -161,6 +299,7 @@ export class DevServer {
     for (const plugin of plugins) {
       this.plugins.push(plugin);
     }
+    this.schedulePush('plugins');
   }
 
   async start(): Promise<void> {
@@ -172,19 +311,43 @@ export class DevServer {
       if (this.logBuffer.length > this.logBufferSize) {
         this.logBuffer.shift();
       }
+      this.schedulePush('logs');
     });
 
     this.server = createServer((req, res) => {
       void this.handleApi(req, res);
     });
 
+    this.wsHub.start({ noServer: true, path: '/ws', forwardLogs: false });
+    this.wsHub.onConnect(async (client) => {
+      try {
+        const snapshot = await this.getSnapshot();
+        this.wsHub.sendTo(client, WsEvents.STUDIO_STATE, {
+          snapshot,
+          logs: [...this.logBuffer],
+        });
+      } catch (error) {
+        this.wsHub.sendTo(client, 'error', {
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    });
+
+    this.server.on('upgrade', (req, socket, head) => {
+      this.handleWsUpgrade(req, socket, head);
+    });
+
     await new Promise<void>((resolve, reject) => {
       this.server!.once('error', reject);
       this.server!.listen(this.port, '127.0.0.1', () => {
         this.bot.logger.info(`Nexora Studio API → http://127.0.0.1:${this.port}`);
+        this.bot.logger.info(`Nexora Studio WS  → ws://127.0.0.1:${this.port}/ws`);
         resolve();
       });
     });
+
+    this.bindLiveHooks();
+    this.startWatchLoop();
 
     if (this.uiEnabled) {
       await this.startEmbeddedUi();
@@ -205,6 +368,10 @@ export class DevServer {
   private async startEmbeddedUi(): Promise<void> {
     this.uiServer = createServer((req, res) => {
       void this.handleUi(req, res);
+    });
+
+    this.uiServer.on('upgrade', (req, socket, head) => {
+      this.handleWsUpgrade(req, socket, head);
     });
 
     try {
@@ -241,8 +408,28 @@ export class DevServer {
   }
 
   async stop(): Promise<void> {
+    if (this.pushTimer) {
+      clearTimeout(this.pushTimer);
+      this.pushTimer = null;
+    }
+    if (this.watchTimer) {
+      clearInterval(this.watchTimer);
+      this.watchTimer = null;
+    }
+    if (this.uptimeTimer) {
+      clearInterval(this.uptimeTimer);
+      this.uptimeTimer = null;
+    }
+
+    for (const unsub of this.unsubscribers) {
+      unsub();
+    }
+    this.unsubscribers.length = 0;
+
     this.unsubscribeLogs?.();
     this.unsubscribeLogs = null;
+
+    this.wsHub.stop();
 
     if (this.uiServer) {
       await new Promise<void>((resolve) => {
@@ -265,46 +452,184 @@ export class DevServer {
   async getSnapshot(): Promise<StudioSnapshot> {
     const client = this.bot.client;
     const ready = this.bot.lifecycle === 'ready' && Boolean(client.user);
-    const config = this.bot.container.resolve(TOKENS.Config) as NexoraConfig;
 
-    const database = this.databaseStatus
-      ? await this.databaseStatus()
-      : {
-          connected: false,
-          provider: config.database.provider,
-          message: 'No database probe configured',
-        };
+    let config: NexoraConfig;
+    try {
+      config = this.bot.container.resolve(TOKENS.Config) as NexoraConfig;
+    } catch (error) {
+      throw new Error(
+        `Studio could not resolve config: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+
+    let database: StudioSnapshot['database'];
+    try {
+      database = this.databaseStatus
+        ? await this.databaseStatus()
+        : {
+            connected: false,
+            provider: config.database?.provider,
+            message: 'No database probe configured',
+          };
+    } catch (error) {
+      database = {
+        connected: false,
+        provider: config.database?.provider,
+        message: error instanceof Error ? error.message : String(error),
+      };
+    }
+
+    const commands = collectStudioCommands(this.bot);
+    const events = this.bot.eventRegistry.getAll().map((evt) => ({
+      name: String(evt.name),
+      once: evt.once,
+      source: evt.source,
+    }));
+    const plugins = [...this.plugins];
+
+    const slash = commands.filter((c) => c.type === 'slash').length;
+    const groups = commands.filter((c) => c.type === 'group').length;
+    const contextMenus = commands.filter(
+      (c) => c.type === 'context-user' || c.type === 'context-message',
+    ).length;
+    const messageCommands = commands.filter((c) => c.type === 'message').length;
 
     return {
       bot: {
         phase: this.bot.lifecycle,
         online: ready,
         tag: client.user?.tag ?? null,
-        guilds: client.guilds.cache.size,
-        uptimeMs: client.uptime,
+        id: client.user?.id ?? null,
+        guilds: client.guilds?.cache?.size ?? 0,
+        uptimeMs: client.uptime ?? null,
         startedAt: this.startedAt?.toISOString() ?? null,
       },
-      commands: this.bot.commandRegistry.getAll().map((cmd) => ({
-        name: cmd.name,
-        description: cmd.description,
-        source: cmd.source,
-        guildOnly: cmd.guildOnly,
-      })),
-      events: this.bot.eventRegistry.getAll().map((evt) => ({
-        name: String(evt.name),
-        once: evt.once,
-        source: evt.source,
-      })),
-      plugins: [...this.plugins],
+      commands,
+      events,
+      plugins,
       config: sanitizeConfig(config),
       database,
       meta: {
         studio: true,
-        apiVersion: '0.1',
+        apiVersion: '0.2',
         ports: { studio: this.studioPort, api: this.port },
         ui: this.uiMode,
+        counts: {
+          commands: commands.length,
+          slash,
+          groups,
+          contextMenus,
+          messageCommands,
+          events: events.length,
+          plugins: plugins.length,
+        },
       },
     };
+  }
+
+  private handleWsUpgrade(req: IncomingMessage, socket: Duplex, head: Buffer): void {
+    if (!this.wsHub.handleUpgrade(req, socket, head)) {
+      socket.destroy();
+    }
+  }
+
+  private bindLiveHooks(): void {
+    const bus = this.bot.eventBus;
+    const push = () => this.schedulePush('event');
+
+    this.unsubscribers.push(bus.on(FrameworkEvents.BOT_READY, push));
+    this.unsubscribers.push(bus.on(FrameworkEvents.BOT_SHUTDOWN, push));
+    this.unsubscribers.push(bus.on(FrameworkEvents.PLUGIN_LOADED, push));
+    this.unsubscribers.push(bus.on(FrameworkEvents.PLUGIN_UNLOADED, push));
+    this.unsubscribers.push(bus.on(FrameworkEvents.GUILD_JOINED, push));
+    this.unsubscribers.push(bus.on(FrameworkEvents.GUILD_LEFT, push));
+
+    const client = this.bot.client;
+    const onClient = () => this.schedulePush('client');
+    client.on('ready', onClient);
+    client.on('guildCreate', onClient);
+    client.on('guildDelete', onClient);
+    this.unsubscribers.push(() => {
+      client.off('ready', onClient);
+      client.off('guildCreate', onClient);
+      client.off('guildDelete', onClient);
+    });
+  }
+
+  /** While clients are connected, detect registry / config fingerprint changes. */
+  private startWatchLoop(): void {
+    this.watchTimer = setInterval(() => {
+      if (this.wsHub.connectionCount === 0) return;
+      void this.checkFingerprint();
+    }, 2000);
+    this.watchTimer.unref?.();
+
+    // Uptime / guild cache refresh without waiting for events
+    this.uptimeTimer = setInterval(() => {
+      if (this.wsHub.connectionCount === 0) return;
+      void this.pushSnapshotOnly();
+    }, 10_000);
+    this.uptimeTimer.unref?.();
+  }
+
+  private fingerprintOf(snapshot: StudioSnapshot): string {
+    return [
+      snapshot.bot.phase,
+      snapshot.bot.online ? '1' : '0',
+      snapshot.bot.tag ?? '',
+      snapshot.bot.id ?? '',
+      String(snapshot.bot.guilds),
+      String(snapshot.meta.counts.commands),
+      String(snapshot.meta.counts.events),
+      String(snapshot.meta.counts.plugins),
+      snapshot.database.connected ? '1' : '0',
+      JSON.stringify(snapshot.config),
+    ].join('|');
+  }
+
+  private async checkFingerprint(): Promise<void> {
+    try {
+      const snapshot = await this.getSnapshot();
+      const fingerprint = this.fingerprintOf(snapshot);
+      if (fingerprint === this.lastFingerprint) return;
+      this.lastFingerprint = fingerprint;
+      this.wsHub.sendStudioState({ snapshot, logs: [...this.logBuffer] });
+    } catch {
+      /* ignore transient probe errors */
+    }
+  }
+
+  private schedulePush(_reason: string): void {
+    if (this.wsHub.connectionCount === 0) return;
+    if (this.pushTimer) return;
+    this.pushTimer = setTimeout(() => {
+      this.pushTimer = null;
+      void this.pushLiveState();
+    }, 120);
+  }
+
+  private async pushSnapshotOnly(): Promise<void> {
+    if (this.wsHub.connectionCount === 0) return;
+    try {
+      const snapshot = await this.getSnapshot();
+      this.lastFingerprint = this.fingerprintOf(snapshot);
+      this.wsHub.sendStudioSnapshot(snapshot);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private async pushLiveState(): Promise<void> {
+    if (this.wsHub.connectionCount === 0) return;
+    try {
+      const snapshot = await this.getSnapshot();
+      this.lastFingerprint = this.fingerprintOf(snapshot);
+      this.wsHub.sendStudioState({ snapshot, logs: [...this.logBuffer] });
+    } catch (error) {
+      this.bot.logger.warn(
+        `Studio WS push failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   private async handleUi(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -344,6 +669,10 @@ export class DevServer {
             service: 'nexora-studio-api',
             ui: this.uiMode,
             studioUrl: this.studioUrl,
+            websocket: {
+              path: '/ws',
+              clients: this.wsHub.connectionCount,
+            },
           });
           return;
         case '/api/studio/snapshot':

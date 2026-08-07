@@ -49,8 +49,8 @@ export interface StartupBannerOptions {
   /** Local Studio (Developer Center) — shown when actually listening */
   studioUrl?: string;
   /**
-   * Public Dashboard URL from config when `dashboard.enabled`.
-   * The Next.js app is separate and is not started by the bot.
+   * Soft status line when `dashboard.enabled` (experimental / unreleased).
+   * Prefer a teaser string — do not promise a live localhost URL.
    */
   dashboardUrl?: string;
 }

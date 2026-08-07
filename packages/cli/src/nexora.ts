@@ -127,10 +127,10 @@ function printHelp(): void {
   Local ports (typical):
     Nexora Studio    ${STUDIO_URL}   (auto with nexora dev / createDevServer)
     Studio API       ${STUDIO_API}
-    Dashboard        http://localhost:3000  (optional Next.js app — start separately)
+    Dashboard        experimental / unreleased — coming soon
 
   Studio = local Developer Center for THIS project (commands, plugins, logs…).
-  Dashboard = public admin UI — not started by the bot; monorepo: pnpm --filter @nexora.ts/dashboard dev
+  Dashboard = upcoming public admin UI (not published yet).
   Public docs: https://cjays-organization.gitbook.io/nexorajs
 `);
 }
@@ -244,7 +244,7 @@ function spawnStudio(options: { quiet?: boolean } = {}): ChildProcess | null {
   if (!options.quiet) {
     console.warn(
       '  ⚠️  @nexora.ts/studio not found next to this project.\n' +
-        '     With @nexora.ts/dev-server ≥0.1.2, createDevServer serves an embedded UI.\n',
+        '     With @nexora.ts/dev-server ≥0.1.3, createDevServer serves an embedded UI.\n',
     );
   }
   return null;

@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Nexora
   text: Discord bots, production-ready
-  tagline: Open-source TypeScript framework with CLI, commands, plugins, dashboard, and auth — so you can focus on features.
+  tagline: Open-source TypeScript framework with CLI, commands, plugins, auth, and Studio — so you can focus on features.
   actions:
     - theme: brand
       text: Get started
@@ -18,9 +18,9 @@ hero:
 
 features:
   - title: Complete foundation
-    details: CLI, command system, plugins, dashboard, authentication, database, API, and logging — not just a Discord.js wrapper.
+    details: CLI, command system, plugins, authentication, database, API, logging, and Studio — not just a Discord.js wrapper.
   - title: Plugin ecosystem
-    details: Extend Nexora with commands, events, dashboard pages, and API routes without changing core. Build and share community plugins.
+    details: Extend Nexora with commands, events, and API routes without changing core. Build and share community plugins. Dashboard pages are coming soon.
   - title: Type-safe DX
     details: defineConfig(), typed command() / event() helpers or SlashCommand classes, auto-discovery, pretty console, and Studio for local development.
   - title: Free & open source

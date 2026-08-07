@@ -1,6 +1,6 @@
 {
   "name": "@nexora.ts/websocket",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "WebSocket server for live dashboard events",
   "license": "MIT",
   "type": "module",

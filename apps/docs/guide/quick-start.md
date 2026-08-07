@@ -43,11 +43,10 @@ nexora dev
 
 | Service | URL |
 | --- | --- |
-| Dashboard (if enabled — separate Next app) | http://localhost:3000 |
 | **Nexora Studio** | http://localhost:3002 |
 | Studio API | http://127.0.0.1:3920 |
 
-> `:3000` is the optional OAuth dashboard, not Studio. Open **:3002** for the Developer Center.
+> Open **:3002** for the Developer Center. A public OAuth **Dashboard** is planned but unreleased — see [Dashboard](dashboard.md).
 
 Public docs (this site): [https://cjays-organization.gitbook.io/nexorajs](https://cjays-organization.gitbook.io/nexorajs)
 

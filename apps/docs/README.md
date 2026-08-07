@@ -2,7 +2,7 @@
 
 **Modern open-source TypeScript framework for Discord bots.**
 
-Nexora is a complete foundation — CLI, command system, plugin system, dashboard, authentication, and more — so you can focus on your bot’s features instead of wiring libraries together.
+Nexora is a complete foundation — CLI, command system, plugin system, authentication, Studio, and more — so you can focus on your bot’s features instead of wiring libraries together. A public **Dashboard** is planned (unreleased).
 
 | | |
 | --- | --- |
@@ -29,11 +29,12 @@ Continue with **[Quick start](guide/quick-start.md)**, **[Classes](classes/index
 | **CLI** | `@nexora.ts/create` scaffolds a full project |
 | **Classes** | `Nexora`, `SlashCommand`, `EmbedBuilder`, Components V2 — see [Classes](classes/index.md) |
 | **Commands & events** | `command()` / `event()` or class-based commands |
-| **Plugin system** | Commands, events, dashboard, API, migrations |
-| **Dashboard** | Next.js UI for guild settings, modules, logs |
+| **Plugin system** | Commands, events, API, migrations |
+| **Studio** | Local Developer Center (`localhost:3002`) |
+| **Dashboard** | *Coming soon* (unreleased) |
 | **Auth** | Discord OAuth, sessions, permissions |
 | **Database** | Drizzle + repository layer (PostgreSQL / SQLite) |
-| **API + WebSocket** | Internal REST API and live dashboard events |
+| **API + WebSocket** | Internal REST API and live events |
 | **Config & logging** | Type-safe `defineConfig()`, structured logs |
 
 ## Open source

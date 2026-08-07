@@ -1,6 +1,6 @@
 # Auth
 
-`@nexora.ts/auth` provides Discord OAuth, session management, and permission checks for the dashboard.
+`@nexora.ts/auth` provides Discord OAuth, session management, and permission checks — used by the API today and by the upcoming (unreleased) Dashboard.
 
 ## Flow
 

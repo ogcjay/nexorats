@@ -55,7 +55,7 @@ new Nexora({
 });
 ```
 
-On ready, Nexora prints a **startup banner** (commands/events count, Studio URL when live, and Dashboard URL when `dashboard.enabled` — marked as start separately).
+On ready, Nexora prints a **startup banner** (commands/events count, Studio URL when live). If `dashboard.enabled` is set, the banner soft-teases Dashboard as experimental / unreleased — it does not promise a live UI URL.
 
 ## Related
 

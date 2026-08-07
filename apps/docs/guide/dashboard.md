@@ -1,42 +1,21 @@
 # Dashboard
 
-The dashboard (`apps/dashboard`, package `@nexora.ts/dashboard`) is a **separate** Next.js App Router app. It is **not** started by `pnpm dev` on your bot or by `nexora dev`.
+> **Coming soon / Unreleased** — the public admin Dashboard is not part of the published `0.1.x` surface yet.
 
-| | Nexora Studio | Dashboard |
+Nexora’s planned Dashboard is a Next.js admin UI for guild settings, modules, and logs. It is separate from **Nexora Studio** (the local Developer Center on `:3002`).
+
+| | Nexora Studio (shipped) | Dashboard (unreleased) |
 | --- | --- | --- |
-| Role | Local Developer Center | Public admin UI (guilds, modules, logs) |
-| Typical URL | `http://localhost:3002` | `http://localhost:3000` |
-| With bot start? | Yes (`createDevServer` / scaffold) | No — start separately |
+| Role | Local Developer Center | Public admin UI |
+| Typical URL | `http://localhost:3002` | TBD |
+| With bot start? | Yes (`createDevServer` / scaffold) | Not yet |
 
-Scaffolding with “Include dashboard?” only adds `dashboard` / `auth` config and related backend packages (`@nexora.ts/api`, auth, database, websocket). The Next.js UI lives in the Nexora monorepo.
+Scaffolding with “Include experimental dashboard config?” only reserves `dashboard` / `auth` config and related backend packages. It does **not** ship a ready-to-open UI.
 
-Features:
+When `dashboard.enabled` is set, the startup banner shows a soft teaser (`experimental / unreleased — coming soon`) — not a promise that something is listening on `:3000`.
 
-- Discord login (via auth package)
-- Guild selection
-- Dark mode & responsive layout
-- Module management, stats, logs, settings UI
+## Architecture (preview)
 
-It uses `@nexora.ts/ui` components (SettingsCard, StatCard, ServerSelector, GuildSidebar, pickers, tables, …).
+**All data will flow through the internal API.** The browser never opens a database connection. That rule already guides `@nexora.ts/api`, auth, and plugins.
 
-When `dashboard.enabled` is set in config, the bot startup banner shows the configured URL with **(start separately)** — that does not mean the UI is running.
-
-## Architecture rule
-
-**All data flows through the internal API.** The browser never opens a database connection.
-
-```ts
-import { api } from '@/lib/api';
-
-const settings = await api.guildSettings(guildId);
-```
-
-## Local development
-
-From the **Nexora monorepo** root (not from a scaffolded bot folder):
-
-```bash
-pnpm --filter @nexora.ts/dashboard dev
-```
-
-Opens at `http://localhost:3000` (or `dashboard.url` / `dashboard.port` from config).
+Monorepo contributors: local UI work lives under `apps/dashboard` — see [CONTRIBUTING](https://github.com/ogcjay/nexorajs/blob/main/CONTRIBUTING.md). Public quick-starts should not treat Dashboard as production-ready.

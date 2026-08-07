@@ -1,7 +1,8 @@
 {
   "name": "@nexora.ts/ui",
   "version": "0.1.1",
-  "description": "Reusable dashboard UI components",
+  "private": true,
+  "description": "Reusable dashboard UI components (unreleased — not published to npm)",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -48,9 +49,6 @@
   },
   "bugs": {
     "url": "https://github.com/ogcjay/nexorajs/issues"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "engines": {
     "node": ">=20.0.0"

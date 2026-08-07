@@ -38,11 +38,10 @@ Studio shows exactly that.
 
 | Service | URL |
 | --- | --- |
-| Dashboard (optional Next app) | http://localhost:3000 |
 | **Nexora Studio** | http://localhost:3002 |
 | Studio API | http://127.0.0.1:3920 |
 
-> Dashboard (`:3000`) and Studio (`:3002`) are different apps. The startup banner shows Studio only when the UI is actually listening. If `dashboard.enabled` is set, it also shows the Dashboard URL with **(start separately)** — run `pnpm --filter @nexora.ts/dashboard dev` from the monorepo; the bot never auto-starts Dashboard.
+> Studio (`:3002`) is the shipped Developer Center. The public **Dashboard** is unreleased (coming soon) — do not confuse it with Studio.
 
 ## Wire it in your bot
 

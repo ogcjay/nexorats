@@ -14,11 +14,15 @@ Du hast noch nie ein Framework veröffentlicht — hier ist der komplette Weg vo
 | `packages/api` | `@nexora.ts/api` | REST API |
 | `packages/plugin-system` | `@nexora.ts/plugin-system` | Plugins |
 | `packages/websocket` | `@nexora.ts/websocket` | Live events |
-| `packages/ui` | `@nexora.ts/ui` | Dashboard-Komponenten |
 | `packages/dev-server` | `@nexora.ts/dev-server` | Studio-API |
 | `packages/cli` | `@nexora.ts/create` | `npx @nexora.ts/create` / `nexora` |
 
-**Nicht** auf npm: `apps/*` (Dashboard, Docs, Studio, Playground).
+**Nicht** auf npm:
+
+- `apps/*` (Dashboard, Docs, Studio, Playground) — inkl. `@nexora.ts/dashboard` (`private: true`)
+- `packages/ui` (`@nexora.ts/ui`) — Dashboard-UI-Kit, **private / unreleased** bis Dashboard shipped
+
+`pnpm release` publisht nur `./packages/**` und überspringt private Packages automatisch.
 
 ---
 

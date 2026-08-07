@@ -1,6 +1,6 @@
 # Publishing Nexora to GitHub
 
-This repository is prepared as a **public open-source TypeScript framework** for Discord bots (CLI, commands, plugins, dashboard, auth, and more). Follow these steps to put it on GitHub.
+This repository is prepared as a **public open-source TypeScript framework** for Discord bots (CLI, commands, plugins, auth, Studio, and more). Follow these steps to put it on GitHub.
 
 ## 1. Install Git (Windows)
 
@@ -88,4 +88,4 @@ gh repo create nexora --public --source=. --remote=origin --push
 
 Suggested short description:
 
-> Open-source TypeScript framework for Discord bots — CLI, commands, plugins, dashboard, and auth so developers can focus on features.
+> Open-source TypeScript framework for Discord bots — CLI, commands, plugins, Studio, and auth so developers can focus on features.

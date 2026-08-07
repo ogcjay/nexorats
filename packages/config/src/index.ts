@@ -26,8 +26,12 @@ export interface DatabaseConfig {
   url: string;
 }
 
-/** Dashboard configuration */
+/**
+ * Dashboard configuration (experimental / unreleased).
+ * `enabled` opts into upcoming dashboard wiring — the public Next.js UI is not shipped yet.
+ */
 export interface DashboardConfig {
+  /** Experimental flag — does not start a production-ready dashboard */
   enabled: boolean;
   port?: number;
   url?: string;
@@ -104,6 +108,7 @@ export const nexoraConfigSchema = z.object({
     provider: z.enum(['postgresql', 'sqlite']),
     url: z.string().min(1),
   }),
+  // Experimental / unreleased — kept for forward-compatible configs
   dashboard: z
     .object({
       enabled: z.boolean(),

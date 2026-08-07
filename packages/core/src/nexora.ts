@@ -141,12 +141,7 @@ export class Nexora {
 
     this.client.once('ready', (readyClient) => {
       this.phase = 'ready';
-      const dashboard = this.config.dashboard;
-      const dashboardUrl =
-        dashboard?.enabled === true
-          ? dashboard.url?.trim() ||
-            `http://localhost:${dashboard.port ?? 3000}`
-          : undefined;
+      const dashboardEnabled = this.config.dashboard?.enabled === true;
 
       printStartupBanner({
         name: 'Nexora',
@@ -157,14 +152,11 @@ export class Nexora {
         // Only show Studio when createDevServer (or CLI) advertised a live URL.
         // Never reuse dashboard.url for Studio — different app on :3000.
         studioUrl: process.env.NEXORA_STUDIO_URL || undefined,
-        dashboardUrl,
+        // Dashboard UI is unreleased — soft teaser only, no localhost URL promise.
+        dashboardUrl: dashboardEnabled
+          ? 'experimental / unreleased — coming soon'
+          : undefined,
       });
-
-      if (dashboardUrl) {
-        this.logger.info(
-          `Dashboard at ${dashboardUrl} is a separate Next.js app (not auto-started). Monorepo: pnpm --filter @nexora.ts/dashboard dev`,
-        );
-      }
 
       void this.eventBus.emit(FrameworkEvents.BOT_READY, { client: readyClient });
       void this.maybeCheckForUpdates();

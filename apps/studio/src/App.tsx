@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  commandKey,
+  connectStudioLive,
   fetchLogs,
   fetchSnapshot,
+  formatCooldown,
   formatUptime,
+  typeLabel,
+  type LiveConnectionState,
   type LogEntry,
+  type StudioCommandInfo,
   type StudioSnapshot,
 } from './api';
 
@@ -26,16 +32,42 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'docs', label: 'Documentation' },
 ];
 
+const SUBTITLES: Record<Tab, string> = {
+  overview: 'Live bot metrics from the Studio API.',
+  commands: 'Registered slash, group, context, and message commands.',
+  events: 'Discord event listeners attached to this process.',
+  plugins: 'Loaded plugins and their contribution counts.',
+  config: 'Active configuration — tokens and secrets redacted.',
+  logs: 'Buffered runtime logs from this bot process.',
+  docs: 'Framework documentation and local ports.',
+};
+
 export function App() {
   const [tab, setTab] = useState<Tab>('overview');
   const [snapshot, setSnapshot] = useState<StudioSnapshot | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [live, setLive] = useState<LiveConnectionState>('offline');
+
+  const refresh = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      const [snap, logLines] = await Promise.all([fetchSnapshot(), fetchLogs()]);
+      setSnapshot(snap);
+      setLogs(logLines);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
-
-    const refresh = async () => {
+    const tick = async () => {
       try {
         const [snap, logLines] = await Promise.all([fetchSnapshot(), fetchLogs()]);
         if (cancelled) return;
@@ -47,53 +79,130 @@ export function App() {
         setError(err instanceof Error ? err.message : String(err));
       }
     };
+    void tick();
 
-    void refresh();
-    const id = window.setInterval(() => void refresh(), 2500);
+    let pollId: number | undefined;
+    const startPoll = () => {
+      if (pollId != null) return;
+      pollId = window.setInterval(() => void tick(), 2500);
+    };
+    const stopPoll = () => {
+      if (pollId != null) {
+        window.clearInterval(pollId);
+        pollId = undefined;
+      }
+    };
+
+    startPoll();
+
+    const disposeWs = connectStudioLive({
+      onState: (state) => {
+        if (cancelled) return;
+        setLive(state);
+        if (state === 'live') stopPoll();
+        else startPoll();
+      },
+      onSnapshot: (snap) => {
+        if (cancelled) return;
+        setSnapshot(snap);
+        setError(null);
+      },
+      onLogs: (logLines) => {
+        if (cancelled) return;
+        setLogs(logLines);
+      },
+      onError: (message) => {
+        if (cancelled) return;
+        setError(message);
+      },
+    });
+
     return () => {
       cancelled = true;
-      window.clearInterval(id);
+      stopPoll();
+      disposeWs();
     };
   }, []);
 
   const title = useMemo(() => TABS.find((t) => t.id === tab)?.label ?? 'Studio', [tab]);
+  const counts = snapshot?.meta.counts;
 
   return (
     <div className="app">
       <aside className="sidebar">
         <div className="brand">
-          <strong>Nexora Studio</strong>
-          <span>Local Developer Center</span>
+          <div className="brand-mark">
+            <div className="logo">NX</div>
+            <div>
+              <strong>Nexora Studio</strong>
+              <span>Local Developer Center</span>
+            </div>
+          </div>
         </div>
         <nav className="nav">
-          {TABS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={tab === item.id ? 'active' : undefined}
-              onClick={() => setTab(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
+          {TABS.map((item) => {
+            const count =
+              item.id === 'commands'
+                ? (counts?.commands ?? snapshot?.commands.length)
+                : item.id === 'events'
+                  ? (counts?.events ?? snapshot?.events.length)
+                  : item.id === 'plugins'
+                    ? (counts?.plugins ?? snapshot?.plugins.length)
+                    : item.id === 'logs'
+                      ? logs.length
+                      : undefined;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className={tab === item.id ? 'active' : undefined}
+                onClick={() => setTab(item.id)}
+              >
+                <span>{item.label}</span>
+                {count != null && <span className="count">{count}</span>}
+              </button>
+            );
+          })}
         </nav>
+        <div className="sidebar-foot">
+          {snapshot?.meta.ports
+            ? `API :${snapshot.meta.ports.api} · UI :${snapshot.meta.ports.studio} · v${snapshot.meta.apiVersion}`
+            : 'API · —'}
+        </div>
       </aside>
 
       <main className="main">
         <div className="header">
           <div>
             <h1>{title}</h1>
-            <p>
-              Project-specific runtime insights — not a public docs site. Secrets are redacted.
-            </p>
+            <p>{SUBTITLES[tab]}</p>
           </div>
-          <div className="badge">
-            <span className={`dot ${snapshot?.bot.online ? 'ok' : ''}`} />
-            {snapshot?.bot.online
-              ? `Online · ${snapshot.bot.tag ?? 'bot'}`
-              : snapshot
-                ? `Phase: ${snapshot.bot.phase}`
-                : 'Connecting…'}
+          <div className="header-actions">
+            <div className="live-badge" data-state={live} title="Studio WebSocket">
+              <span className="live-dot" />
+              <span>
+                {live === 'live' ? 'Live' : live === 'reconnecting' ? 'Reconnecting' : 'Offline'}
+              </span>
+            </div>
+            <button type="button" className="btn" disabled={refreshing} onClick={() => void refresh()}>
+              ↻ Refresh
+            </button>
+            <div className="badge">
+              <span className={`dot ${snapshot?.bot.online ? 'ok' : ''}`} />
+              {snapshot?.bot.online ? (
+                <>
+                  <span className="ok" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                    Online
+                  </span>
+                  <span>·</span>
+                  <span className="tag">{snapshot.bot.tag ?? 'bot'}</span>
+                </>
+              ) : snapshot ? (
+                <span className="phase">Phase: {snapshot.bot.phase}</span>
+              ) : (
+                'Connecting…'
+              )}
+            </div>
           </div>
         </div>
 
@@ -101,9 +210,22 @@ export function App() {
           <div className="error-banner">
             {error}
             <div className="muted" style={{ marginTop: '0.4rem' }}>
-              Start your bot with <code>createDevServer(bot)</code> (API on :3920). Studio UI:
-              :3002.
+              Start your bot with <code>createDevServer(bot)</code> (API on :3920). Studio UI: :3002.
             </div>
+          </div>
+        )}
+
+        {snapshot && tab !== 'docs' && (
+          <div className="stats">
+            <StatCard
+              label="Commands"
+              value={String(counts?.commands ?? snapshot.commands.length)}
+              sub={counts?.slash != null ? `${counts.slash} slash` : undefined}
+            />
+            <StatCard label="Events" value={String(counts?.events ?? snapshot.events.length)} />
+            <StatCard label="Plugins" value={String(counts?.plugins ?? snapshot.plugins.length)} />
+            <StatCard label="Guilds" value={String(snapshot.bot.guilds)} />
+            <StatCard label="Uptime" value={formatUptime(snapshot.bot.uptimeMs)} />
           </div>
         )}
 
@@ -119,23 +241,41 @@ export function App() {
   );
 }
 
+function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="stat">
+      <h3>{label}</h3>
+      <div className="value">{value}</div>
+      {sub && <div className="sub">{sub}</div>}
+    </div>
+  );
+}
+
 function Overview({ snapshot }: { snapshot: StudioSnapshot }) {
+  const c = snapshot.meta.counts;
   return (
     <>
-      <div className="grid">
-        <StatCard label="Commands" value={String(snapshot.commands.length)} />
-        <StatCard label="Events" value={String(snapshot.events.length)} />
-        <StatCard label="Plugins" value={String(snapshot.plugins.length)} />
-        <StatCard label="Guilds" value={String(snapshot.bot.guilds)} />
-      </div>
-
-      <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+      <div className="two-col">
         <div className="panel">
           <div className="panel-head">
             <h2>Bot status</h2>
           </div>
           <div className="panel-body">
             <ul className="list">
+              <li>
+                <span>Status</span>
+                <span className={`pill ${snapshot.bot.online ? 'ok' : 'warn'}`}>
+                  {snapshot.bot.online ? 'online' : 'offline'}
+                </span>
+              </li>
+              <li>
+                <span>Tag</span>
+                <span>{snapshot.bot.tag ?? '—'}</span>
+              </li>
+              <li>
+                <span>User ID</span>
+                <span>{snapshot.bot.id ? <code>{snapshot.bot.id}</code> : '—'}</span>
+              </li>
               <li>
                 <span>Phase</span>
                 <span>{snapshot.bot.phase}</span>
@@ -145,17 +285,68 @@ function Overview({ snapshot }: { snapshot: StudioSnapshot }) {
                 <span>{formatUptime(snapshot.bot.uptimeMs)}</span>
               </li>
               <li>
-                <span>Studio API</span>
-                <span>: {snapshot.meta.ports.api}</span>
+                <span>Started</span>
+                <span>
+                  {snapshot.bot.startedAt
+                    ? new Date(snapshot.bot.startedAt).toLocaleString()
+                    : '—'}
+                </span>
               </li>
               <li>
-                <span>Studio UI</span>
-                <span>: {snapshot.meta.ports.studio}</span>
+                <span>Guilds</span>
+                <span>{snapshot.bot.guilds}</span>
               </li>
             </ul>
           </div>
         </div>
 
+        <div className="panel">
+          <div className="panel-head">
+            <h2>Runtime</h2>
+          </div>
+          <div className="panel-body">
+            <ul className="list">
+              <li>
+                <span>Slash commands</span>
+                <span>{c?.slash ?? '—'}</span>
+              </li>
+              <li>
+                <span>Command groups</span>
+                <span>{c?.groups ?? '—'}</span>
+              </li>
+              <li>
+                <span>Context menus</span>
+                <span>{c?.contextMenus ?? '—'}</span>
+              </li>
+              <li>
+                <span>Message commands</span>
+                <span>{c?.messageCommands ?? '—'}</span>
+              </li>
+              <li>
+                <span>Events</span>
+                <span>{c?.events ?? snapshot.events.length}</span>
+              </li>
+              <li>
+                <span>Plugins</span>
+                <span>{c?.plugins ?? snapshot.plugins.length}</span>
+              </li>
+              <li>
+                <span>Studio API</span>
+                <span>: {snapshot.meta.ports.api}</span>
+              </li>
+              <li>
+                <span>Studio UI</span>
+                <span>
+                  : {snapshot.meta.ports.studio}
+                  {snapshot.meta.ui ? ` · ${snapshot.meta.ui}` : ''}
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: '0.75rem' }}>
         <div className="panel">
           <div className="panel-head">
             <h2>Database</h2>
@@ -186,41 +377,175 @@ function Overview({ snapshot }: { snapshot: StudioSnapshot }) {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function TypePill({ type }: { type: StudioCommandInfo['type'] }) {
+  const cls =
+    type === 'slash' ? 'cyan' : type === 'group' ? 'blurple' : '';
+  return <span className={`pill ${cls}`}>{typeLabel(type)}</span>;
+}
+
+function Commands({ snapshot }: { snapshot: StudioSnapshot }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [filter, setFilter] = useState('');
+  const q = filter.trim().toLowerCase();
+  const filtered = snapshot.commands.filter((c) => {
+    if (!q) return true;
+    return (
+      c.name.toLowerCase().includes(q) ||
+      (c.description || '').toLowerCase().includes(q) ||
+      c.type.toLowerCase().includes(q)
+    );
+  });
+  const sel =
+    snapshot.commands.find((c) => commandKey(c) === selected) ?? null;
+
   return (
-    <div className="card">
-      <h3>{label}</h3>
-      <div className="value">{value}</div>
+    <div className="split">
+      <div className="panel">
+        <div className="panel-head">
+          <h2>Command registry</h2>
+          <span className="muted">
+            {filtered.length}
+            {q ? ` / ${snapshot.commands.length}` : ''}
+          </span>
+        </div>
+        <div className="panel-body filter-pad">
+          <div className="filter-bar">
+            <input
+              type="search"
+              placeholder="Filter by name, type…"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="panel-body tight">
+          {filtered.length === 0 ? (
+            <div className="detail-empty">No commands match.</div>
+          ) : (
+            filtered.map((cmd) => {
+              const key = commandKey(cmd);
+              return (
+                <button
+                  type="button"
+                  key={key}
+                  className={`cmd-row ${selected === key ? 'active' : ''}`}
+                  onClick={() => setSelected(key)}
+                >
+                  <div className="cmd-name">
+                    <TypePill type={cmd.type} />
+                    <span>/{cmd.name}</span>
+                  </div>
+                  <div className="cmd-meta">
+                    {cmd.guildOnly && <span className="pill warn">guild</span>}
+                    {cmd.adminOnly && <span className="pill warn">admin</span>}
+                    {cmd.guardsCount > 0 && (
+                      <span className="pill">{cmd.guardsCount} guards</span>
+                    )}
+                    {cmd.optionsCount > 0 && (
+                      <span className="pill">{cmd.optionsCount} opts</span>
+                    )}
+                    {cmd.subcommands != null && (
+                      <span className="pill">{cmd.subcommands} subs</span>
+                    )}
+                    {cmd.cooldownMs ? (
+                      <span className="pill">{formatCooldown(cmd.cooldownMs)}</span>
+                    ) : null}
+                  </div>
+                  <div className="cmd-desc">{cmd.description || 'No description'}</div>
+                </button>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="panel-head">
+          <h2>Details</h2>
+        </div>
+        <div className="panel-body">
+          {!sel ? (
+            <div className="detail-empty">
+              Select a command to inspect options, cooldown, and flags.
+            </div>
+          ) : (
+            <CommandDetail cmd={sel} />
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
-function Commands({ snapshot }: { snapshot: StudioSnapshot }) {
+function CommandDetail({ cmd }: { cmd: StudioCommandInfo }) {
   return (
-    <div className="panel">
-      <div className="panel-head">
-        <h2>Command tree</h2>
-        <span className="muted">{snapshot.commands.length} found</span>
+    <>
+      <div className="detail-title">/{cmd.name}</div>
+      <div className="muted" style={{ fontSize: '0.82rem' }}>
+        {cmd.description}
       </div>
-      <div className="panel-body">
-        {snapshot.commands.length === 0 ? (
-          <p className="muted">No commands registered yet.</p>
-        ) : (
-          <ul className="tree">
-            <li>
-              <span>/</span>
-              <span className="muted">root</span>
-            </li>
-            {snapshot.commands.map((cmd) => (
-              <li key={cmd.name}>
-                <span>├── {cmd.name}</span>
-                <span className="muted">{cmd.description}</span>
-              </li>
-            ))}
-          </ul>
+      <div style={{ marginTop: '0.55rem', display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+        <TypePill type={cmd.type} />
+        {cmd.guildOnly && <span className="pill warn">guildOnly</span>}
+        {cmd.adminOnly && <span className="pill warn">adminOnly</span>}
+        {cmd.guardsCount > 0 && <span className="pill">{cmd.guardsCount} guards</span>}
+      </div>
+      <div className="kv">
+        <div className="kv-row">
+          <span>Source</span>
+          <span>{cmd.source ? <code>{cmd.source}</code> : '—'}</span>
+        </div>
+        <div className="kv-row">
+          <span>Cooldown</span>
+          <span>{formatCooldown(cmd.cooldownMs)}</span>
+        </div>
+        <div className="kv-row">
+          <span>Options</span>
+          <span>{cmd.optionsCount}</span>
+        </div>
+        {cmd.subcommands != null && (
+          <div className="kv-row">
+            <span>Subcommands</span>
+            <span>{cmd.subcommands}</span>
+          </div>
         )}
+        {cmd.aliases?.length ? (
+          <div className="kv-row">
+            <span>Aliases</span>
+            <span>{cmd.aliases.join(', ')}</span>
+          </div>
+        ) : null}
       </div>
-    </div>
+      <div style={{ fontSize: '0.78rem', fontWeight: 600, marginTop: '0.35rem' }}>Options</div>
+      {cmd.options.length === 0 ? (
+        <p className="muted" style={{ margin: '0.5rem 0 0', fontSize: '0.8rem' }}>
+          No options.
+        </p>
+      ) : (
+        <table className="opt-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Req</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {cmd.options.map((opt) => (
+              <tr key={opt.name}>
+                <td>
+                  <code>{opt.name}</code>
+                </td>
+                <td>{opt.type}</td>
+                <td>{opt.required ? 'yes' : '—'}</td>
+                <td className="muted">{opt.description}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </>
   );
 }
 
@@ -231,15 +556,30 @@ function Events({ snapshot }: { snapshot: StudioSnapshot }) {
         <h2>Registered events</h2>
         <span className="muted">{snapshot.events.length}</span>
       </div>
-      <div className="panel-body">
-        <ul className="list">
-          {snapshot.events.map((evt, index) => (
-            <li key={`${evt.name}-${index}`}>
-              <span>{evt.name}</span>
-              <span className="muted">{evt.once ? 'once' : 'on'}</span>
-            </li>
-          ))}
-        </ul>
+      <div className="panel-body tight">
+        {snapshot.events.length === 0 ? (
+          <p className="muted" style={{ padding: '0.85rem' }}>
+            No events registered.
+          </p>
+        ) : (
+          snapshot.events.map((evt, index) => (
+            <div className="evt-row" key={`${evt.name}-${index}`}>
+              <div>
+                <div className="evt-name">{evt.name}</div>
+                {evt.source && (
+                  <div className="muted" style={{ fontSize: '0.75rem', marginTop: '0.15rem' }}>
+                    {evt.source}
+                  </div>
+                )}
+              </div>
+              <div className="cmd-meta">
+                <span className={`pill ${evt.once ? 'warn' : 'cyan'}`}>
+                  {evt.once ? 'once' : 'on'}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
@@ -250,27 +590,38 @@ function Plugins({ snapshot }: { snapshot: StudioSnapshot }) {
     <div className="panel">
       <div className="panel-head">
         <h2>Installed plugins</h2>
+        <span className="muted">{snapshot.plugins.length}</span>
       </div>
-      <div className="panel-body">
+      <div className="panel-body tight">
         {snapshot.plugins.length === 0 ? (
-          <p className="muted">No plugins loaded. Drop packages into ./plugins or use nexora add.</p>
+          <p className="muted" style={{ padding: '0.85rem' }}>
+            No plugins loaded. Drop packages into ./plugins or use nexora add.
+          </p>
         ) : (
-          <ul className="list">
-            {snapshot.plugins.map((plugin) => (
-              <li key={plugin.name}>
-                <span>
+          snapshot.plugins.map((plugin) => (
+            <div className="plug-row" key={plugin.name}>
+              <div>
+                <div className="plug-name">
                   <span className={plugin.enabled ? 'ok' : 'warn'}>
-                    {plugin.enabled ? '✓' : '✗'}
+                    {plugin.enabled ? '●' : '○'}
                   </span>{' '}
-                  {plugin.name}{' '}
-                  <span className="muted">v{plugin.version}</span>
+                  {plugin.name} <span className="muted">v{plugin.version}</span>
+                </div>
+                {plugin.description && (
+                  <div className="muted" style={{ fontSize: '0.78rem', marginTop: '0.2rem' }}>
+                    {plugin.description}
+                  </div>
+                )}
+              </div>
+              <div className="cmd-meta">
+                <span className="pill">{plugin.commands} cmds</span>
+                <span className="pill">{plugin.events} events</span>
+                <span className={`pill ${plugin.enabled ? 'ok' : 'warn'}`}>
+                  {plugin.enabled ? 'enabled' : 'disabled'}
                 </span>
-                <span className="muted">
-                  {plugin.commands} cmds · {plugin.events} events
-                </span>
-              </li>
-            ))}
-          </ul>
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>
@@ -322,47 +673,48 @@ function LogsView({ logs }: { logs: LogEntry[] }) {
 
 function DocsView() {
   return (
-    <div className="panel">
-      <div className="panel-head">
-        <h2>Documentation</h2>
+    <>
+      <div className="panel">
+        <div className="panel-body docs-hero">
+          <h3>Nexora.js documentation</h3>
+          <p className="muted" style={{ margin: '0 0 0.75rem' }}>
+            Studio is your local control panel. Framework guides live on GitBook.
+          </p>
+          <p>
+            <a
+              className="docs-link"
+              href="https://cjays-organization.gitbook.io/nexorajs"
+              target="_blank"
+              rel="noreferrer"
+            >
+              https://cjays-organization.gitbook.io/nexorajs
+            </a>
+          </p>
+        </div>
       </div>
-      <div className="panel-body">
-        <p>
-          <strong>Nexora Studio</strong> is your local control panel for this project.
-        </p>
-        <p className="muted">Framework docs:</p>
-        <p>
-          <a
-            className="docs-link"
-            href="https://cjays-organization.gitbook.io/nexorajs"
-            target="_blank"
-            rel="noreferrer"
-          >
-            https://cjays-organization.gitbook.io/nexorajs
-          </a>
-        </p>
-        <p className="muted" style={{ marginTop: '1rem' }}>
-          Typical local ports when developing:
-        </p>
-        <ul className="list">
-          <li>
-            <span>Dashboard</span>
-            <span>http://localhost:3000</span>
-          </li>
-          <li>
-            <span>Public docs (optional preview)</span>
-            <span>http://localhost:5173 / VitePress</span>
-          </li>
-          <li>
-            <span>Nexora Studio</span>
-            <span>http://localhost:3002</span>
-          </li>
-          <li>
-            <span>Studio API</span>
-            <span>http://127.0.0.1:3920</span>
-          </li>
-        </ul>
+      <div style={{ marginTop: '0.75rem' }}>
+        <div className="panel">
+          <div className="panel-head">
+            <h2>Local ports</h2>
+          </div>
+          <div className="panel-body">
+            <ul className="list">
+              <li>
+                <span>Nexora Studio</span>
+                <span>http://localhost:3002</span>
+              </li>
+              <li>
+                <span>Studio API</span>
+                <span>http://127.0.0.1:3920</span>
+              </li>
+              <li>
+                <span>Dashboard</span>
+                <span>http://localhost:3000</span>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

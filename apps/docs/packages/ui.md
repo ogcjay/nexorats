@@ -1,11 +1,7 @@
 # @nexora.ts/ui
 
-Reusable React components for the Nexora dashboard.
+> **Unreleased** — this package is private and is **not** published to npm with `pnpm release`. It backs the upcoming Dashboard.
 
-Includes: `SettingsCard`, `StatCard`, `Switch`, `ServerSelector`, `GuildSidebar`, `Modal`, `DataTable`, `SearchInput`, `Pagination`, `ChannelPicker`, `RolePicker`, `UserPicker`.
+Reusable React components for the Nexora dashboard (planned): `SettingsCard`, `StatCard`, `Switch`, `ServerSelector`, `GuildSidebar`, `Modal`, `DataTable`, and pickers.
 
-```tsx
-import { SettingsCard, Switch } from '@nexora.ts/ui';
-```
-
-See [Dashboard](../guide/dashboard.md).
+See [Dashboard (coming soon)](../guide/dashboard.md).

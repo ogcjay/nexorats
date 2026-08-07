@@ -11,6 +11,11 @@ export default defineConfig({
         target: 'http://127.0.0.1:3920',
         changeOrigin: true,
       },
+      '/ws': {
+        target: 'ws://127.0.0.1:3920',
+        ws: true,
+        changeOrigin: true,
+      },
     },
   },
   preview: {
@@ -19,6 +24,11 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:3920',
+        changeOrigin: true,
+      },
+      '/ws': {
+        target: 'ws://127.0.0.1:3920',
+        ws: true,
         changeOrigin: true,
       },
     },

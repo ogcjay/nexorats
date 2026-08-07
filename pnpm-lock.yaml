@@ -263,6 +263,9 @@ importers:
       '@nexora.ts/logger':
         specifier: workspace:*
         version: link:../logger
+      '@nexora.ts/websocket':
+        specifier: workspace:*
+        version: link:../websocket
     devDependencies:
       '@types/node':
         specifier: ^22.10.0

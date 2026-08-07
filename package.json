@@ -2,7 +2,7 @@
   "name": "nexora",
   "version": "0.1.0",
   "private": true,
-  "description": "Open-source TypeScript framework for Discord bots — CLI, commands, plugins, dashboard, and auth",
+  "description": "Open-source TypeScript framework for Discord bots — CLI, commands, plugins, Studio, and auth",
   "license": "MIT",
   "homepage": "https://github.com/ogcjay/nexorajs#readme",
   "repository": {
@@ -42,8 +42,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,md,json,mjs}\"",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release:dry": "pnpm build:packages && pnpm -r --filter \"./packages/**\" publish --dry-run --no-git-checks --access public",
-    "release": "pnpm build:packages && pnpm -r --filter \"./packages/**\" publish --no-git-checks --access public"
+    "release:dry": "pnpm build:packages && pnpm -r --filter \"./packages/**\" --filter \"!@nexora.ts/ui\" publish --dry-run --no-git-checks --access public",
+    "release": "pnpm build:packages && pnpm -r --filter \"./packages/**\" --filter \"!@nexora.ts/ui\" publish --no-git-checks --access public"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.11",
