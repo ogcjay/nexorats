@@ -395,6 +395,9 @@ export class DevServer {
     // Align DI Config token with this package's @nexora.ts/core copy
     // (avoids Symbol identity mismatch across nested installs).
     ensureConfigRegistered(this.bot);
+    // Subscribe ASAP so logs during bot.start() are not lost if start()
+    // is called after createDevServer() but before studioApi.start().
+    this.attachLiveLogBuffer();
     // CLI `nexora dev` sets NEXORA_STUDIO=1 and starts the Vite UI separately.
     const cliOwnsUi =
       process.env.NEXORA_STUDIO === '1' || process.env.NEXORA_STUDIO === 'true';
@@ -415,17 +418,30 @@ export class DevServer {
     this.schedulePush('plugins');
   }
 
-  async start(): Promise<void> {
-    if (this.server) return;
-
-    this.startedAt = new Date();
+  /**
+   * Buffer live logger entries for Studio. Safe to call multiple times
+   * (constructor + start) — only one subscription is kept.
+   */
+  private attachLiveLogBuffer(): void {
+    if (this.unsubscribeLogs) return;
     this.unsubscribeLogs = subscribeLiveLogs((entry) => {
       this.logBuffer.push(entry);
       if (this.logBuffer.length > this.logBufferSize) {
         this.logBuffer.shift();
       }
+      // Immediate log fan-out for open Studio clients (full state still debounced).
+      if (this.wsHub.connectionCount > 0) {
+        this.wsHub.sendStudioLogs([...this.logBuffer]);
+      }
       this.schedulePush('logs');
     });
+  }
+
+  async start(): Promise<void> {
+    if (this.server) return;
+
+    this.startedAt = new Date();
+    this.attachLiveLogBuffer();
 
     this.server = createServer((req, res) => {
       void this.handleApi(req, res);

@@ -476,8 +476,33 @@ function Overview({ snapshot }: { snapshot: StudioSnapshot }) {
 }
 
 function logTime(timestamp: string): string {
-  const match = /(\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?)/.exec(timestamp);
-  return match ? match[1]! : timestamp;
+  const d = new Date(timestamp);
+  if (Number.isNaN(d.getTime())) {
+    const match = /(\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?)/.exec(timestamp);
+    return match ? match[1]! : timestamp;
+  }
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  const ms = String(d.getMilliseconds()).padStart(3, '0');
+  return `${hh}:${mm}:${ss}.${ms}`;
+}
+
+function displayLevel(entry: LogEntry): string {
+  if (entry.meta?.type === 'command') return 'cmd';
+  return entry.level;
+}
+
+function formatLogMeta(meta?: Record<string, unknown>): string {
+  if (!meta) return '';
+  const parts: string[] = [];
+  if (typeof meta.user === 'string') parts.push(meta.user);
+  if (typeof meta.name === 'string' && meta.type === 'command') parts.push(`/${meta.name}`);
+  if (typeof meta.duration === 'number') parts.push(`${meta.duration}ms`);
+  else if (typeof meta.duration === 'string') parts.push(meta.duration);
+  if (typeof meta.file === 'string') parts.push(meta.file);
+  if (parts.length === 0) return '';
+  return ` · ${parts.join(' · ')}`;
 }
 
 function LogsView({ logs }: { logs: LogEntry[] }) {
@@ -489,27 +514,34 @@ function LogsView({ logs }: { logs: LogEntry[] }) {
       </div>
       <div className="panel-body logs">
         {logs.length === 0 ? (
-          <p className="empty-note">Waiting for log events…</p>
+          <p className="empty-note">
+            Waiting for log events from <code>@nexora.ts/logger</code> (via{' '}
+            <code>createLiveLogger</code>)…
+          </p>
         ) : (
-          [...logs].reverse().map((line, index) => (
-            <div
-              className={`log-line ${line.level === 'error' ? 'is-err' : line.level === 'warn' ? 'is-warn' : ''}`}
-              key={`${line.timestamp}-${index}`}
-            >
-              <span className="ts" title={line.timestamp}>
-                {logTime(line.timestamp)}
-              </span>
-              <span
-                className={`lvl ${line.level === 'error' ? 'err' : line.level === 'warn' ? 'warn' : ''}`}
+          [...logs].reverse().map((line, index) => {
+            const level = displayLevel(line);
+            return (
+              <div
+                className={`log-line ${line.level === 'error' ? 'is-err' : line.level === 'warn' ? 'is-warn' : level === 'cmd' ? 'is-cmd' : ''}`}
+                key={`${line.timestamp}-${index}`}
               >
-                {line.level}
-              </span>
-              <span className="msg">
-                {line.context ? `[${line.context}] ` : ''}
-                {line.message}
-              </span>
-            </div>
-          ))
+                <span className="ts" title={line.timestamp}>
+                  {logTime(line.timestamp)}
+                </span>
+                <span
+                  className={`lvl ${line.level === 'error' ? 'err' : line.level === 'warn' ? 'warn' : level === 'cmd' ? 'cmd' : ''}`}
+                >
+                  {level}
+                </span>
+                <span className="msg">
+                  {line.context ? `[${line.context}] ` : ''}
+                  {line.message}
+                  <span className="meta">{formatLogMeta(line.meta)}</span>
+                </span>
+              </div>
+            );
+          })
         )}
       </div>
     </div>

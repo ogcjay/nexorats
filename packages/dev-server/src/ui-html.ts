@@ -295,12 +295,17 @@ export function getStudioHtml(): string {
     .log-line:hover { background: rgba(255, 255, 255, 0.025); }
     .log-line.is-warn { border-left-color: var(--warn); }
     .log-line.is-err { border-left-color: var(--err); }
+    .log-line.is-cmd { border-left-color: #8b6bb8; }
     .log-line .ts { color: var(--text-mute); font-variant-numeric: tabular-nums; white-space: nowrap; }
     .log-line .lvl {
       text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em;
       color: var(--text-mute); padding-top: 1px;
     }
+    .log-line .lvl.err { color: var(--err); }
+    .log-line .lvl.warn { color: var(--warn); }
+    .log-line .lvl.cmd { color: #b39ddb; }
     .log-line .msg { color: var(--text-dim); word-break: break-word; }
+    .log-line .msg .meta { color: var(--text-mute); }
     .log-line.is-err .msg { color: var(--text); }
 
     .docs-hero { padding: 26px 22px 24px; }
@@ -552,9 +557,28 @@ export function getStudioHtml(): string {
     }
 
     function logTime(ts) {
-      const s = String(ts ?? '');
-      const m = s.match(/(\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,3})?)/);
-      return m ? m[1] : s;
+      var d = new Date(ts);
+      if (Number.isNaN(d.getTime())) {
+        var m = String(ts ?? '').match(/(\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?)/);
+        return m ? m[1] : String(ts ?? '');
+      }
+      function pad(n, w) { return String(n).padStart(w || 2, '0'); }
+      return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + '.' + pad(d.getMilliseconds(), 3);
+    }
+
+    function displayLevel(entry) {
+      return entry && entry.meta && entry.meta.type === 'command' ? 'cmd' : (entry && entry.level) || 'info';
+    }
+
+    function formatLogMeta(meta) {
+      if (!meta) return '';
+      var parts = [];
+      if (typeof meta.user === 'string') parts.push(meta.user);
+      if (typeof meta.name === 'string' && meta.type === 'command') parts.push('/' + meta.name);
+      if (typeof meta.duration === 'number') parts.push(meta.duration + 'ms');
+      else if (typeof meta.duration === 'string') parts.push(meta.duration);
+      if (typeof meta.file === 'string') parts.push(meta.file);
+      return parts.length ? ' · ' + parts.join(' · ') : '';
     }
 
     function formatCooldown(ms) {
@@ -937,19 +961,22 @@ export function getStudioHtml(): string {
 
     function renderLogs(el) {
       const lines = [...logs].reverse().map((l) => {
-        const mod = l.level === 'error' ? ' is-err' : l.level === 'warn' ? ' is-warn' : '';
-        const lvlCls = l.level === 'error' ? ' err' : l.level === 'warn' ? ' warn' : '';
+        const level = displayLevel(l);
+        const mod = l.level === 'error' ? ' is-err' : l.level === 'warn' ? ' is-warn' : level === 'cmd' ? ' is-cmd' : '';
+        const lvlCls = l.level === 'error' ? ' err' : l.level === 'warn' ? ' warn' : level === 'cmd' ? ' cmd' : '';
+        const meta = formatLogMeta(l.meta);
         return '<div class="log-line' + mod + '">' +
           '<span class="ts" title="' + esc(l.timestamp) + '">' + esc(logTime(l.timestamp)) + '</span>' +
-          '<span class="lvl' + lvlCls + '">' + esc(l.level) + '</span>' +
-          '<span class="msg">' + esc((l.context ? '[' + l.context + '] ' : '') + l.message) + '</span>' +
-          '</div>';
+          '<span class="lvl' + lvlCls + '">' + esc(level) + '</span>' +
+          '<span class="msg">' + esc((l.context ? '[' + l.context + '] ' : '') + l.message) +
+          (meta ? '<span class="meta">' + esc(meta) + '</span>' : '') +
+          '</span></div>';
       }).join('');
       el.innerHTML =
         '<div class="panel logs-panel">' +
         '<div class="panel-head"><h2>Live logs</h2><span class="muted">' + logs.length + ' buffered</span></div>' +
         '<div class="panel-body logs">' +
-        (lines || '<p class="empty-note">Waiting for log events…</p>') +
+        (lines || '<p class="empty-note">Waiting for log events from <code>@nexora.ts/logger</code>…</p>') +
         '</div></div>';
     }
 

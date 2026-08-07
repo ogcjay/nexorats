@@ -68,6 +68,7 @@ export interface LogEntry {
   level: string;
   message: string;
   context?: string;
+  meta?: Record<string, unknown>;
 }
 
 export type LiveConnectionState = 'live' | 'reconnecting' | 'offline';

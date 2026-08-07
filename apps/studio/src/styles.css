@@ -908,18 +908,30 @@ table {
   border-left-color: var(--err);
 }
 
+.log-line.is-cmd {
+  border-left-color: #8b6bb8;
+}
+
+.log-line .msg .meta {
+  color: var(--text-mute);
+}
+
 .log-line .ts {
   color: var(--text-mute);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.log-line .lvl {
-  text-transform: uppercase;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  color: var(--text-mute);
-  padding-top: 1px;
+.log-line .lvl.err {
+  color: var(--err);
+}
+
+.log-line .lvl.warn {
+  color: var(--warn);
+}
+
+.log-line .lvl.cmd {
+  color: #b39ddb;
 }
 
 .log-line .msg {
