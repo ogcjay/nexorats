@@ -12,7 +12,7 @@ Nexora aims to be the shared platform:
 
 | Building block | What you get |
 | --- | --- |
-| **CLI** | `create-nexora.ts@latest` scaffolds a project with Studio + `.env` |
+| **CLI** | `create-nexora-ts@latest` scaffolds a project with Studio + `.env` |
 | **Commands & events** | Typed helpers or classes + auto-discovery + guards |
 | **Plugins** | Manifest or `NexoraPlugin` class — extend without forking core |
 | **Studio** | Local Developer Center (`localhost:3002`) |

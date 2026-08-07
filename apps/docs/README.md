@@ -13,7 +13,7 @@ Nexora is a complete foundation — CLI, command system, plugin system, dashboar
 ## Quick start
 
 ```bash
-npx create-nexora.ts my-bot
+npx @nexora.ts/create my-bot
 cd my-bot
 pnpm install
 cp .env.example .env   # add your Discord token
@@ -26,7 +26,7 @@ Continue with **[Quick start](guide/quick-start.md)**, **[Classes](classes/index
 
 | Building block | What you get |
 | --- | --- |
-| **CLI** | `create-nexora.ts` scaffolds a full project |
+| **CLI** | `@nexora.ts/create` scaffolds a full project |
 | **Classes** | `Nexora`, `SlashCommand`, `EmbedBuilder`, Components V2 — see [Classes](classes/index.md) |
 | **Commands & events** | `command()` / `event()` or class-based commands |
 | **Plugin system** | Commands, events, dashboard, API, migrations |

@@ -13,7 +13,7 @@ It is **not** the public documentation website.
 
 ## Scaffold includes Studio
 
-Projects from `create-nexora.ts@latest` wire `@nexora.ts/dev-server` so Studio’s API starts with the bot. After `cp .env.example .env` and `pnpm install`:
+Projects from `create-nexora-ts@latest` wire `@nexora.ts/dev-server` so Studio’s API starts with the bot. After `cp .env.example .env` and `pnpm install`:
 
 ```bash
 pnpm dev

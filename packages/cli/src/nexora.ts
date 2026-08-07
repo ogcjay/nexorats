@@ -138,7 +138,7 @@ async function runDev(): Promise<void> {
   const pkgPath = resolve(cwd, 'package.json');
   if (!existsSync(pkgPath)) {
     console.error('\n  ❌ No package.json in the current directory.');
-    console.error('     Run this from your bot project root (after create-nexora.ts).\n');
+    console.error('     Run this from your bot project root (after create-nexora-ts).\n');
     process.exit(1);
   }
 

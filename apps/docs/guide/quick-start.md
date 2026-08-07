@@ -14,7 +14,7 @@ npm install -g pnpm@9.15.0
 ## Scaffold a project
 
 ```bash
-npx create-nexora.ts@latest my-bot
+npx @nexora.ts/create@latest my-bot
 cd my-bot
 pnpm install
 cp .env.example .env

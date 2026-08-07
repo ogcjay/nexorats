@@ -1,11 +1,12 @@
-{
-  "name": "create-nexora.ts",
-  "version": "0.1.4",
+﻿{
+  "name": "@nexora.ts/create",
+  "version": "0.1.7",
   "description": "CLI to scaffold new Nexora Discord bot projects",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "create-nexora.ts": "./dist/index.js",
+    "create": "./dist/index.js",
+    "create-nexora-ts": "./dist/index.js",
     "nexora": "./dist/nexora.js"
   },
   "files": [

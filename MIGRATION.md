@@ -7,7 +7,7 @@ Nexora’s npm scope is **`@nexora.ts`** (TypeScript branding). The product name
 | Old | New |
 | --- | --- |
 | `@nexorajs/*` / `@nexorats/*` | `@nexora.ts/*` |
-| `create-nexorajs` / `create-nexorats` | `create-nexora.ts` |
+| `create-nexorajs` / `create-nexorats` | `@nexora.ts/create` |
 | GitHub | `ogcjay/nexorajs` (repo name; npm org is separate) |
 | GitBook | Space slug as you configure (e.g. `nexora.ts`) |
 
@@ -36,8 +36,10 @@ import { Nexora, command } from '@nexora.ts/core';
 Scaffold CLI:
 
 ```bash
-npx create-nexora.ts@latest my-bot
+npx @nexora.ts/create@latest my-bot
 ```
+
+> **Note:** Unscoped names like `create-nexora.ts` / `create-nexora-ts` are blocked by npm (file extension / name similarity). The official CLI is the scoped package **`@nexora.ts/create`** (bins: `create-nexora-ts`, `nexora`).
 
 ## First publish under `@nexora.ts`
 

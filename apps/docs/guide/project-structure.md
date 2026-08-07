@@ -34,7 +34,7 @@ packages/
   plugin-system/
   websocket/
   ui/
-  cli/            create-nexora.ts
+  cli/            create-nexora-ts
 ```
 
 ## Entry point

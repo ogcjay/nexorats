@@ -57,7 +57,7 @@
 * [@nexora.ts/plugin-system](packages/plugin-system.md)
 * [@nexora.ts/websocket](packages/websocket.md)
 * [@nexora.ts/ui](packages/ui.md)
-* [create-nexora.ts](packages/cli.md)
+* [create-nexora-ts](packages/cli.md)
 
 ## Community
 

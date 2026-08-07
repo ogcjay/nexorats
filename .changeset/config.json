@@ -15,7 +15,7 @@
       "@nexora.ts/websocket",
       "@nexora.ts/ui",
       "@nexora.ts/dev-server",
-      "create-nexora.ts"
+      "@nexora.ts/create"
     ]
   ],
   "access": "public",

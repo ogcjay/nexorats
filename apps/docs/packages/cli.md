@@ -1,9 +1,9 @@
-# create-nexora.ts
+# @nexora.ts/create
 
 CLI to scaffold a new Nexora bot project (Studio + `.env` ready).
 
 ```bash
-npx create-nexora.ts@latest my-bot
+npx @nexora.ts/create@latest my-bot
 cd my-bot
 pnpm install
 cp .env.example .env

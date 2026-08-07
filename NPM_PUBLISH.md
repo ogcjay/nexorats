@@ -16,7 +16,7 @@ Du hast noch nie ein Framework veröffentlicht — hier ist der komplette Weg vo
 | `packages/websocket` | `@nexora.ts/websocket` | Live events |
 | `packages/ui` | `@nexora.ts/ui` | Dashboard-Komponenten |
 | `packages/dev-server` | `@nexora.ts/dev-server` | Studio-API |
-| `packages/cli` | `create-nexora.ts` | `npx create-nexora.ts` / `nexora` |
+| `packages/cli` | `@nexora.ts/create` | `npx @nexora.ts/create` / `nexora` |
 
 **Nicht** auf npm: `apps/*` (Dashboard, Docs, Studio, Playground).
 
@@ -66,7 +66,7 @@ pnpm build
 pnpm release:dry
 ```
 
-`release:dry` lädt **nichts** hoch. Du solltest eine Liste der Packages sehen (`@nexora.ts/core`, `create-nexora.ts`, …).
+`release:dry` lädt **nichts** hoch. Du solltest eine Liste der Packages sehen (`@nexora.ts/core`, `@nexora.ts/create`, …).
 
 ---
 
@@ -87,7 +87,7 @@ Wenn 2FA an ist: **OTP** aus der Authenticator-App eingeben.
 
 ```powershell
 npm view @nexora.ts/core version
-npm view create-nexora.ts version
+npm view create-nexora-ts version
 ```
 
 Browser: https://www.npmjs.com/package/@nexora.ts/core
@@ -98,7 +98,7 @@ Browser: https://www.npmjs.com/package/@nexora.ts/core
 
 ```powershell
 cd C:\Users\Raphael\Documents
-npx create-nexora.ts@0.1.0 my-bot-test
+npx @nexora.ts/create@latest my-bot-test
 ```
 
 Oder minimal:
@@ -143,6 +143,6 @@ pnpm release              # build + publish
 - [ ] `pnpm build:packages` ok  
 - [ ] `pnpm release:dry` sieht gut aus  
 - [ ] Keine `.env` / Secrets in `packages/*/dist`  
-- [ ] Danach: `npx create-nexora.ts` testen  
+- [ ] Danach: `npx @nexora.ts/create` testen  
 
 Ausführliche Repo-Hinweise: [PUBLISHING.md](./PUBLISHING.md) (GitHub). Dieses File = **nur npm**.

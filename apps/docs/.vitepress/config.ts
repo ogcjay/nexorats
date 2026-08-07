@@ -139,7 +139,7 @@ export default defineConfig({
             { text: '@nexora.ts/plugin-system', link: '/packages/plugin-system' },
             { text: '@nexora.ts/websocket', link: '/packages/websocket' },
             { text: '@nexora.ts/ui', link: '/packages/ui' },
-            { text: 'create-nexora.ts', link: '/packages/cli' },
+            { text: 'create-nexora-ts', link: '/packages/cli' },
           ],
         },
       ],

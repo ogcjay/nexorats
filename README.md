@@ -32,7 +32,7 @@ You get a production-ready bot stack in minutes. The community grows it into a p
 
 | Building block        | What you get                                     |
 | --------------------- | ------------------------------------------------ |
-| **CLI**               | `create-nexora.ts` scaffolds a full project         |
+| **CLI**               | `@nexora.ts/create` scaffolds a full project         |
 | **Commands & events** | `command()` / `event()` with auto-discovery      |
 | **Plugin system**     | Commands, events, dashboard, API, migrations     |
 | **Dashboard**         | Next.js UI for guild settings, modules, logs     |
@@ -44,7 +44,7 @@ You get a production-ready bot stack in minutes. The community grows it into a p
 ## Quick Start
 
 ```bash
-npx create-nexora.ts my-bot
+npx @nexora.ts/create my-bot
 cd my-bot
 pnpm install
 cp .env.example .env   # add your Discord token
@@ -135,7 +135,7 @@ packages/
   websocket/      Live dashboard events
   ui/             Shared dashboard components
   dev-server/     Introspection API for Studio
-  cli/            create-nexora.ts + nexora
+  cli/            create-nexora-ts + nexora
 examples/
 templates/
 ```

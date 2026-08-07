@@ -10,5 +10,5 @@ Initial public preview of the Nexora monorepo:
 - Config, logger, database, auth, API
 - Plugin system & WebSocket
 - Dashboard + UI kit
-- `create-nexora.ts` CLI
+- `@nexora.ts/create` CLI
 - Hosted documentation (this site)
