@@ -12,7 +12,7 @@ Nexora aims to be the shared platform:
 
 | Building block | What you get |
 | --- | --- |
-| **CLI** | `create-nexorajs@latest` scaffolds a project with Studio + `.env` |
+| **CLI** | `create-nexora.ts@latest` scaffolds a project with Studio + `.env` |
 | **Commands & events** | Typed helpers or classes + auto-discovery + guards |
 | **Plugins** | Manifest or `NexoraPlugin` class — extend without forking core |
 | **Studio** | Local Developer Center (`localhost:3002`) |
@@ -35,4 +35,6 @@ This documentation is published for everyone via **GitBook** (and optionally Git
 
 ## Status
 
-Early preview (`0.1.0`). APIs may change before `1.0.0`. Feedback and contributions are welcome.
+Early preview (`0.1.x`). APIs may change before `1.0.0`. Feedback and contributions are welcome.
+
+On bot start, Nexora can notify you when a newer `@nexora.ts/core` is on npm — see [Updating packages](quick-start.md#updating-nexora-packages).

@@ -1,5 +1,5 @@
 {
-  "name": "@nexorajs/plugin-system",
+  "name": "@nexora.ts/plugin-system",
   "version": "0.1.2",
   "description": "Plugin API, dependency management, hooks, and lifecycle",
   "license": "MIT",
@@ -22,8 +22,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@nexorajs/core": "workspace:*",
-    "@nexorajs/logger": "workspace:*",
+    "@nexora.ts/core": "workspace:*",
+    "@nexora.ts/logger": "workspace:*",
     "glob": "^11.0.0"
   },
   "devDependencies": {

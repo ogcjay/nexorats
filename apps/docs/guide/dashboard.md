@@ -7,7 +7,7 @@ The dashboard (`apps/dashboard`) is a Next.js App Router app with:
 - Dark mode & responsive layout
 - Module management, stats, logs, settings UI
 
-It uses `@nexorajs/ui` components (SettingsCard, StatCard, ServerSelector, GuildSidebar, pickers, tables, …).
+It uses `@nexora.ts/ui` components (SettingsCard, StatCard, ServerSelector, GuildSidebar, pickers, tables, …).
 
 ## Architecture rule
 
@@ -24,7 +24,7 @@ const settings = await api.guildSettings(guildId);
 From the monorepo root:
 
 ```bash
-pnpm --filter @nexorajs/dashboard dev
+pnpm --filter @nexora.ts/dashboard dev
 ```
 
 Opens at `http://localhost:3000`.

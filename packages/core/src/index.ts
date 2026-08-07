@@ -14,6 +14,13 @@ export {
   BaseCommand,
   isCommandClass,
   resolveCommandExport,
+  SlashCommandGroup,
+  isCommandGroupClass,
+  resolveCommandGroupExport,
+  ContextMenuCommand,
+  createContextMenuContext,
+  isContextMenuClass,
+  resolveContextMenuExport,
   CommandRegistry,
   discoverCommands,
   deployCommands,
@@ -28,12 +35,61 @@ export type {
   MessageCommandContext,
   CommandReplyOptions,
   BuilderReplyOptions,
+  ContextMenuType,
+  ContextMenuContext,
+  ContextMenuCommandDefinition,
   RegisteredCommand,
+  RegisteredCommandGroup,
+  RegisteredContextMenu,
   AttachCommandHandlersOptions,
 } from './commands/index.js';
 
-export { event, EventRegistry, discoverEvents, attachEventHandlers } from './events/index.js';
-export type { EventDefinition, EventHandler, RegisteredEvent } from './events/index.js';
+export {
+  event,
+  EventHandler,
+  isEventClass,
+  resolveEventExport,
+  EventRegistry,
+  discoverEvents,
+  attachEventHandlers,
+} from './events/index.js';
+export type {
+  EventDefinition,
+  EventExecuteFn,
+  RegisteredEvent,
+} from './events/index.js';
+
+export {
+  createComponentContext,
+  createModalContext,
+  ButtonHandler,
+  isButtonHandlerClass,
+  resolveButtonHandlerExport,
+  SelectHandler,
+  StringSelectHandler,
+  isSelectHandlerClass,
+  resolveSelectHandlerExport,
+  ModalHandler,
+  isModalHandlerClass,
+  resolveModalHandlerExport,
+  InteractionRegistry,
+  expandCustomIdVariants,
+  isPrefixMatch,
+  attachInteractionHandlers,
+  discoverInteractions,
+} from './interactions/index.js';
+export type {
+  ComponentContext,
+  ModalContext,
+  BaseInteractionContext,
+  ComponentInteraction,
+  InteractionReplyInput,
+  InteractionUpdateInput,
+  InteractionHandlerKind,
+  AnyInteractionHandler,
+  RegisteredInteraction,
+  InteractionRegistryGetOptions,
+} from './interactions/index.js';
 
 export { EventBus, FrameworkEvents } from './event-bus/index.js';
 export type { HookPhase, Middleware } from './event-bus/index.js';
@@ -46,6 +102,22 @@ export type { ScheduledJob } from './scheduler/index.js';
 
 export { Service, createService, registerService } from './services/index.js';
 export type { ServiceContext } from './services/index.js';
+
+export {
+  EmbedPaginator,
+  Paginator,
+  ConfirmDialog,
+  ChoicePrompt,
+} from './prompts/index.js';
+export type {
+  PromptContext,
+  PromptSendOptions,
+  PaginatorOptions,
+  PaginatorPage,
+  ConfirmDialogOptions,
+  ChoicePromptOptions,
+  ChoicePromptOption,
+} from './prompts/index.js';
 
 export {
   EmbedBuilder,
@@ -147,3 +219,11 @@ export type {
   SeparatorOptions,
   ComponentsV2CardOptions,
 } from './builders/index.js';
+
+export {
+  checkForCoreUpdate,
+  fetchLatestCoreVersion,
+  getInstalledCoreVersion,
+  isNewerVersion,
+} from './update-check.js';
+export type { UpdateCheckResult } from './update-check.js';

@@ -14,6 +14,9 @@
 * [Overview](classes/index.md)
 * [Nexora](classes/nexora.md)
 * [SlashCommand](classes/slash-command.md)
+* [SlashCommandGroup](classes/slash-command-group.md)
+* [EventHandler](classes/event-handler.md)
+* [ButtonHandler](classes/button-handler.md)
 * [Service](classes/service.md)
 * [NexoraPlugin](classes/nexora-plugin.md)
 * [Logger](classes/logger.md)
@@ -21,6 +24,7 @@
 * [ButtonBuilder](classes/button-builder.md)
 * [ModalBuilder](classes/modal-builder.md)
 * [LayoutContainerBuilder](classes/layout-container.md)
+* [Paginator](classes/paginator.md)
 
 ## Core concepts
 
@@ -44,16 +48,16 @@
 
 ## Packages
 
-* [@nexorajs/core](packages/core.md)
-* [@nexorajs/config](packages/config.md)
-* [@nexorajs/logger](packages/logger.md)
-* [@nexorajs/database](packages/database.md)
-* [@nexorajs/auth](packages/auth.md)
-* [@nexorajs/api](packages/api.md)
-* [@nexorajs/plugin-system](packages/plugin-system.md)
-* [@nexorajs/websocket](packages/websocket.md)
-* [@nexorajs/ui](packages/ui.md)
-* [create-nexorajs](packages/cli.md)
+* [@nexora.ts/core](packages/core.md)
+* [@nexora.ts/config](packages/config.md)
+* [@nexora.ts/logger](packages/logger.md)
+* [@nexora.ts/database](packages/database.md)
+* [@nexora.ts/auth](packages/auth.md)
+* [@nexora.ts/api](packages/api.md)
+* [@nexora.ts/plugin-system](packages/plugin-system.md)
+* [@nexora.ts/websocket](packages/websocket.md)
+* [@nexora.ts/ui](packages/ui.md)
+* [create-nexora.ts](packages/cli.md)
 
 ## Community
 

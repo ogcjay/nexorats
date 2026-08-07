@@ -1,8 +1,8 @@
 import { createServer } from 'node:http';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import type { AuthService, AuthSession } from '@nexorajs/auth';
-import type { RepositoryFactory } from '@nexorajs/database';
-import type { Logger } from '@nexorajs/logger';
+import type { AuthService, AuthSession } from '@nexora.ts/auth';
+import type { RepositoryFactory } from '@nexora.ts/database';
+import type { Logger } from '@nexora.ts/logger';
 import { ApiError, errorResponse, success } from './errors.js';
 
 /** Extended request with auth context */
@@ -130,7 +130,7 @@ export class ApiRouter {
               const allowed = await this.auth.permissions.hasPermission(
                 apiReq.session.user.id,
                 guildId,
-                perm as import('@nexorajs/auth').Permission,
+                perm as import('@nexora.ts/auth').Permission,
               );
               if (!allowed) throw ApiError.forbidden();
             }

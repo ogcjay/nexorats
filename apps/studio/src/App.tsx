@@ -336,11 +336,11 @@ function DocsView() {
         <p>
           <a
             className="docs-link"
-            href="https://ogcjay.github.io/nexorajs/"
+            href="https://ogcjay.github.io/nexora.ts/"
             target="_blank"
             rel="noreferrer"
           >
-            https://ogcjay.github.io/nexorajs/
+            https://ogcjay.github.io/nexora.ts/
           </a>
         </p>
         <p className="muted" style={{ marginTop: '1rem' }}>

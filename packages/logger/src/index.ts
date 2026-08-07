@@ -1,4 +1,4 @@
-import type { LogLevel } from '@nexorajs/config';
+import type { LogLevel } from '@nexora.ts/config';
 import { appendFileSync, existsSync, mkdirSync, renameSync, statSync } from 'node:fs';
 import { dirname } from 'node:path';
 import {
@@ -23,7 +23,7 @@ export type {
   LoggerOptions,
   StartupBannerOptions,
 };
-export type { LoggerConsoleMode } from '@nexorajs/config';
+export type { LoggerConsoleMode } from '@nexora.ts/config';
 export { printStartupBanner };
 
 const LOG_LEVELS: Record<LogLevel, number> = {

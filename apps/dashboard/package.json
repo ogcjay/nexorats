@@ -1,5 +1,5 @@
 {
-  "name": "@nexorajs/dashboard",
+  "name": "@nexora.ts/dashboard",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@nexorajs/ui": "workspace:*",
+    "@nexora.ts/ui": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.469.0",

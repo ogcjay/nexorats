@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { GuildSidebar, ServerSelector, StatCard, SettingsCard, Switch } from '@nexorajs/ui';
+import { GuildSidebar, ServerSelector, StatCard, SettingsCard, Switch } from '@nexora.ts/ui';
 import { LayoutDashboard, Settings, Puzzle, BarChart3, ScrollText, Users } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 

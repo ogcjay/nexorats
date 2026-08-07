@@ -1,4 +1,4 @@
-import type { DatabaseConfig } from '@nexorajs/config';
+import type { DatabaseConfig } from '@nexora.ts/config';
 import { drizzle as drizzlePg } from 'drizzle-orm/postgres-js';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as schema from './schema/index.js';

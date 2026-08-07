@@ -3,7 +3,7 @@
 Nexora uses a per-instance `Container` — **no global singletons**.
 
 ```ts
-import { TOKENS } from '@nexorajs/core';
+import { TOKENS } from '@nexora.ts/core';
 
 const logger = bot.container.resolve(TOKENS.Logger);
 const cache = bot.container.resolve(TOKENS.Cache);
@@ -16,6 +16,6 @@ bot.container.registerSingleton('MyService', () => new MyService());
 bot.container.registerInstance('ConfigFlag', true);
 ```
 
-Prefer extending `Service` from `@nexorajs/core` for a child logger and a consistent base — see [Service](../classes/service.md).
+Prefer extending `Service` from `@nexora.ts/core` for a child logger and a consistent base — see [Service](../classes/service.md).
 
 Plugins can register their own services during `onLoad`. Prefer tokens / symbols over stringly-typed globals.

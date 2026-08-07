@@ -3,8 +3,8 @@ import type {
   Container,
   EventDefinition,
   Nexora,
-} from '@nexorajs/core';
-import type { Logger } from '@nexorajs/logger';
+} from '@nexora.ts/core';
+import type { Logger } from '@nexora.ts/logger';
 
 /** Dashboard page definition for plugins */
 export interface PluginDashboardPage {

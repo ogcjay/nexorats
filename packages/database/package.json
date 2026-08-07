@@ -1,5 +1,5 @@
 {
-  "name": "@nexorajs/database",
+  "name": "@nexora.ts/database",
   "version": "0.1.1",
   "description": "Drizzle ORM database layer with repository pattern",
   "license": "MIT",
@@ -29,7 +29,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@nexorajs/config": "workspace:*",
+    "@nexora.ts/config": "workspace:*",
     "drizzle-orm": "^0.38.3"
   },
   "devDependencies": {

@@ -71,7 +71,7 @@ gh repo create nexora --public --source=. --remote=origin --push
 - **Docs (GitHub Pages):** Settings → Pages → Source = **GitHub Actions**
   - Workflow: `.github/workflows/docs.yml`
   - Live URL: `https://<user-or-org>.github.io/nexora/`
-  - If your repo/org name differs from `nexorajs/nexora`, update `DOCS_BASE` and README badge links
+  - If your repo/org name differs from `nexora.ts`, update `DOCS_BASE` and README badge links
 - Invite contributors via [CONTRIBUTING.md](./CONTRIBUTING.md) — plugins especially welcome
 - Confirm [apps/docs](./apps/docs) deploys via Pages (readers never need a local docs server)
 

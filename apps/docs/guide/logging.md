@@ -1,6 +1,6 @@
 # Logging
 
-`@nexorajs/logger` provides structured logging with:
+`@nexora.ts/logger` provides structured logging with:
 
 - Console modes: **pretty** (default in development), **compact**, **json**
 - Colored level badges and short timestamps (`HH:mm:ss`)
@@ -10,7 +10,7 @@
 - Startup banner and command traces
 
 ```ts
-import { createLogger, printStartupBanner } from '@nexorajs/logger';
+import { createLogger, printStartupBanner } from '@nexora.ts/logger';
 
 const log = createLogger({
   level: 'info',
@@ -76,4 +76,4 @@ Typical output:
 
 Use `logger.command(…)` (or meta `type: 'command'`) so successful runs show as `CMD` lines with name, user, and duration — useful next to Studio’s live log buffer.
 
-See [@nexorajs/logger](../packages/logger.md).
+See [@nexora.ts/logger](../packages/logger.md).

@@ -1,4 +1,4 @@
-# @nexorajs/core
+# @nexora.ts/core
 
 Heart of the Nexora framework: Discord client, slash commands, events, DI container, cache, and scheduler.
 
@@ -7,7 +7,7 @@ Not a thin Discord.js wrapper — the foundation bots and plugins build on.
 ## Usage
 
 ```ts
-import { Nexora, command, event } from '@nexorajs/core';
+import { Nexora, command, event } from '@nexora.ts/core';
 import config from './nexora.config.js';
 
 const bot = new Nexora({

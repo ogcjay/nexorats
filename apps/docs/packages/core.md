@@ -1,9 +1,9 @@
-# @nexorajs/core
+# @nexora.ts/core
 
 Discord client, commands, events, message builders, DI container, event bus, cache, and scheduler.
 
 ```ts
-import { Nexora, command, event, SlashCommand, EmbedBuilder } from '@nexorajs/core';
+import { Nexora, command, event, SlashCommand, EmbedBuilder } from '@nexora.ts/core';
 
 const bot = new Nexora({ config, commandsPath: './commands/**/*.ts' });
 await bot.start();
@@ -16,7 +16,10 @@ await bot.start();
 | `Nexora` | Bot lifecycle |
 | `command` / `event` | Typed command / event helpers |
 | `SlashCommand` / `BaseCommand` | Class-based slash commands |
+| `SlashCommandGroup` / `ContextMenuCommand` | Subcommands + context menus |
 | `EventHandler` | Class-based Discord events |
+| `ButtonHandler` / `StringSelectHandler` / `ModalHandler` | Interaction handlers (`interactions/`) |
+| `Paginator` / `ConfirmDialog` / `ChoicePrompt` | Prompt / UI helpers |
 | `Service` | Injectable service base (child logger) |
 | `Container` / `TOKENS` | Dependency injection |
 | `EventBus` / `FrameworkEvents` | Internal events (`COMMAND_EXECUTED`, …) |

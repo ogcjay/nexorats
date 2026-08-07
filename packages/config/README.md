@@ -1,9 +1,9 @@
-# @nexorajs/config
+# @nexora.ts/config
 
 Type-safe configuration with `defineConfig()` and Zod validation.
 
 ```ts
-import { defineConfig } from '@nexorajs/config';
+import { defineConfig } from '@nexora.ts/config';
 
 export default defineConfig({
   bot: {

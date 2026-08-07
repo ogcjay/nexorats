@@ -1,4 +1,4 @@
-# @nexorajs/ui
+# @nexora.ts/ui
 
 Reusable React components for the Nexora dashboard.
 
@@ -14,7 +14,7 @@ import {
   ChannelPicker,
   RolePicker,
   UserPicker,
-} from '@nexorajs/ui';
+} from '@nexora.ts/ui';
 ```
 
 Built for Tailwind CSS. Peer dependency: React 18+.

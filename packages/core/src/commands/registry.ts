@@ -1,10 +1,14 @@
 import {
+  ApplicationCommandType,
   MessageFlags,
   PermissionFlagsBits,
+  type ApplicationCommandDataResolvable,
   type Client,
   type ChatInputCommandInteraction,
+  type MessageContextMenuCommandInteraction,
+  type UserContextMenuCommandInteraction,
 } from 'discord.js';
-import type { Logger } from '@nexorajs/logger';
+import type { Logger } from '@nexora.ts/logger';
 import type { EventBus } from '../event-bus/index.js';
 import { FrameworkEvents } from '../event-bus/index.js';
 import type { CommandDefinition, MessageCommandDefinition } from './define.js';
@@ -13,21 +17,54 @@ import {
   createMessageCommandContext,
 } from './define.js';
 import { resolveCommandExport } from './command-class.js';
+import {
+  resolveCommandGroupExport,
+  type SlashCommandGroup,
+} from './command-group.js';
+import {
+  createContextMenuContext,
+  resolveContextMenuExport,
+  type ContextMenuCommandDefinition,
+  type ContextMenuType,
+} from './context-menu.js';
 
 /** Registered command with metadata */
 export interface RegisteredCommand extends CommandDefinition {
   source?: string;
 }
 
+/** Registered slash command group (top-level + subcommands) */
+export interface RegisteredCommandGroup {
+  name: string;
+  description: string;
+  commands: CommandDefinition[];
+  source?: string;
+}
+
+/** Registered context-menu command with metadata */
+export interface RegisteredContextMenu extends ContextMenuCommandDefinition {
+  source?: string;
+}
+
 /** Command registry — holds all discovered commands */
 export class CommandRegistry {
   private readonly commands = new Map<string, RegisteredCommand>();
+  private readonly groups = new Map<string, RegisteredCommandGroup>();
+  private readonly contextMenus = new Map<string, RegisteredContextMenu>();
   /** Primary name → definition (aliases live only in lookup map) */
   private readonly messageCommandDefs = new Map<string, MessageCommandDefinition>();
   private readonly messageLookup = new Map<string, MessageCommandDefinition>();
 
   register(command: RegisteredCommand): void {
     this.commands.set(command.name, command);
+  }
+
+  registerGroup(group: RegisteredCommandGroup): void {
+    this.groups.set(group.name, group);
+  }
+
+  registerContextMenu(command: RegisteredContextMenu): void {
+    this.contextMenus.set(contextMenuKey(command.type, command.name), command);
   }
 
   registerMessage(command: MessageCommandDefinition): void {
@@ -42,6 +79,17 @@ export class CommandRegistry {
     return this.commands.get(name);
   }
 
+  getGroup(name: string): RegisteredCommandGroup | undefined {
+    return this.groups.get(name);
+  }
+
+  getContextMenu(
+    type: ContextMenuType,
+    name: string,
+  ): RegisteredContextMenu | undefined {
+    return this.contextMenus.get(contextMenuKey(type, name));
+  }
+
   getMessage(name: string): MessageCommandDefinition | undefined {
     return this.messageLookup.get(name.toLowerCase());
   }
@@ -50,17 +98,38 @@ export class CommandRegistry {
     return [...this.commands.values()];
   }
 
+  getAllGroups(): RegisteredCommandGroup[] {
+    return [...this.groups.values()];
+  }
+
+  getAllContextMenus(): RegisteredContextMenu[] {
+    return [...this.contextMenus.values()];
+  }
+
   getAllMessage(): MessageCommandDefinition[] {
     return [...this.messageCommandDefs.values()];
   }
 
+  /** Top-level chat-input commands (standalone + groups) */
   get size(): number {
-    return this.commands.size;
+    return this.commands.size + this.groups.size;
+  }
+
+  get groupCount(): number {
+    return this.groups.size;
+  }
+
+  get contextMenuCount(): number {
+    return this.contextMenus.size;
   }
 
   get messageCommandCount(): number {
     return this.messageCommandDefs.size;
   }
+}
+
+function contextMenuKey(type: ContextMenuType, name: string): string {
+  return `${type}:${name}`;
 }
 
 /** Options for {@link attachCommandHandlers} */
@@ -92,6 +161,28 @@ export async function discoverCommands(
           continue;
         }
 
+        const contextMenuDef = resolveContextMenuExport(exported);
+        if (contextMenuDef) {
+          registry.registerContextMenu(
+            Object.assign(contextMenuDef, { source: file }),
+          );
+          logger.debug(
+            `Registered context menu (${contextMenuDef.type}): ${contextMenuDef.name}`,
+            { file },
+          );
+          continue;
+        }
+
+        const groupDef = resolveCommandGroupExport(exported);
+        if (groupDef) {
+          registry.registerGroup(toRegisteredGroup(groupDef, file));
+          logger.debug(`Registered command group: ${groupDef.name}`, {
+            file,
+            subcommands: groupDef.commands.map((c) => c.name),
+          });
+          continue;
+        }
+
         const commandDef = resolveCommandExport(exported);
         if (commandDef) {
           registry.register(Object.assign(commandDef, { source: file }));
@@ -106,37 +197,80 @@ export async function discoverCommands(
   }
 
   logger.info(
-    `Discovered ${registry.size} slash command(s), ${registry.messageCommandCount} message command(s)`,
+    `Discovered ${registry.size} slash command(s)` +
+      (registry.groupCount ? ` (${registry.groupCount} group(s))` : '') +
+      `, ${registry.contextMenuCount} context menu(s)` +
+      `, ${registry.messageCommandCount} message command(s)`,
   );
+}
+
+function toRegisteredGroup(
+  group: SlashCommandGroup,
+  source: string,
+): RegisteredCommandGroup {
+  return {
+    name: group.name,
+    description: group.description,
+    commands: group.commands.map((cmd) => ({
+      name: cmd.name,
+      description: cmd.description,
+      options: cmd.options,
+      guildOnly: cmd.guildOnly,
+      adminOnly: cmd.adminOnly,
+      permissions: cmd.permissions,
+      cooldown: cmd.cooldown,
+      type: 'slash' as const,
+      execute: (ctx) => cmd.execute(ctx),
+      autocomplete: cmd.autocomplete
+        ? (interaction) => cmd.autocomplete!(interaction)
+        : undefined,
+    })),
+    source,
+  };
 }
 
 function resolveMessageExport(exported: unknown): MessageCommandDefinition | null {
   if (exported == null || typeof exported !== 'object') return null;
   const obj = exported as Record<string, unknown>;
+  // Context menus also use type: 'message' — exclude them
+  if (obj.kind === 'context-menu') return null;
   if (obj.type !== 'message') return null;
   if (typeof obj.name !== 'string' || typeof obj.execute !== 'function') return null;
   return exported as MessageCommandDefinition;
 }
 
-/** Register slash commands with Discord API */
+/** Discord Application Command option type: SUB_COMMAND */
+const OPTION_TYPE_SUB_COMMAND = 1;
+
+/** Register slash + context-menu commands with Discord API */
 export async function deployCommands(
   client: Client,
   registry: CommandRegistry,
   guildIds?: string[],
   logger?: Logger,
 ): Promise<void> {
-  const payload = registry.getAll().map((cmd) => ({
-    name: cmd.name,
-    description: cmd.description,
-    options: cmd.options?.map((opt) => ({
-      name: opt.name,
-      description: opt.description,
-      type: mapOptionType(opt.type),
-      required: opt.required ?? false,
-      choices: opt.choices,
-      autocomplete: opt.autocomplete,
+  const payload = [
+    ...registry.getAll().map((cmd) => ({
+      name: cmd.name,
+      description: cmd.description,
+      options: cmd.options?.map(mapCommandOption),
     })),
-  }));
+    ...registry.getAllGroups().map((group) => ({
+      name: group.name,
+      description: group.description,
+      options: group.commands.map((sub) => ({
+        type: OPTION_TYPE_SUB_COMMAND,
+        name: sub.name,
+        description: sub.description,
+        options: sub.options?.map(mapCommandOption),
+      })),
+    })),
+    ...registry.getAllContextMenus().map((cmd) =>
+      cmd.type === 'user'
+        ? { name: cmd.name, type: ApplicationCommandType.User as const }
+        : { name: cmd.name, type: ApplicationCommandType.Message as const },
+    ),
+  ] as ApplicationCommandDataResolvable[];
 
   if (guildIds?.length) {
     for (const guildId of guildIds) {
@@ -148,6 +282,17 @@ export async function deployCommands(
     await client.application?.commands.set(payload);
     logger?.info(`Deployed ${payload.length} global command(s)`);
   }
+}
+
+function mapCommandOption(opt: NonNullable<CommandDefinition['options']>[number]) {
+  return {
+    name: opt.name,
+    description: opt.description,
+    type: mapOptionType(opt.type),
+    required: opt.required ?? false,
+    choices: opt.choices,
+    autocomplete: opt.autocomplete,
+  };
 }
 
 function mapOptionType(type: string): number {
@@ -164,7 +309,7 @@ function mapOptionType(type: string): number {
   return types[type] ?? 3;
 }
 
-/** Attach slash + message command handlers to the client */
+/** Attach slash + context-menu + message command handlers to the client */
 export function attachCommandHandlers(
   client: Client,
   registry: CommandRegistry,
@@ -177,6 +322,18 @@ export function attachCommandHandlers(
 
   client.on('interactionCreate', async (interaction) => {
     if (interaction.isAutocomplete()) {
+      const group = registry.getGroup(interaction.commandName);
+      if (group) {
+        const subName = interaction.options.getSubcommand(false);
+        const sub = subName
+          ? group.commands.find((c) => c.name === subName)
+          : undefined;
+        if (sub?.autocomplete) {
+          await sub.autocomplete(interaction);
+        }
+        return;
+      }
+
       const cmd = registry.get(interaction.commandName);
       if (cmd?.autocomplete) {
         await cmd.autocomplete(interaction);
@@ -184,7 +341,78 @@ export function attachCommandHandlers(
       return;
     }
 
+    if (interaction.isUserContextMenuCommand()) {
+      await runContextMenu(
+        interaction,
+        registry.getContextMenu('user', interaction.commandName),
+        client,
+        logger,
+        eventBus,
+      );
+      return;
+    }
+
+    if (interaction.isMessageContextMenuCommand()) {
+      await runContextMenu(
+        interaction,
+        registry.getContextMenu('message', interaction.commandName),
+        client,
+        logger,
+        eventBus,
+      );
+      return;
+    }
+
     if (!interaction.isChatInputCommand()) return;
+
+    const group = registry.getGroup(interaction.commandName);
+    if (group) {
+      const subName = interaction.options.getSubcommand(true);
+      const sub = group.commands.find((c) => c.name === subName);
+      if (!sub) return;
+
+      const blocked = await enforceGuards(interaction, sub, cooldowns, `${group.name}:${sub.name}`);
+      if (blocked) return;
+
+      const ctx = createCommandContext(interaction, client);
+      const commandLabel = `${group.name} ${sub.name}`;
+      const started = Date.now();
+
+      try {
+        await sub.execute(ctx);
+        const duration = Date.now() - started;
+
+        logger.command(`/${commandLabel}`, {
+          name: commandLabel,
+          user: interaction.user.tag,
+          duration,
+        });
+
+        await eventBus?.emit(FrameworkEvents.COMMAND_EXECUTED, {
+          command: commandLabel,
+          userId: interaction.user.id,
+          guildId: interaction.guildId,
+          interaction,
+          duration,
+        });
+      } catch (error) {
+        logger.error(
+          `Command error: /${commandLabel}`,
+          error instanceof Error ? error : { error: String(error) },
+        );
+
+        await eventBus?.emit(FrameworkEvents.COMMAND_ERROR, {
+          command: commandLabel,
+          userId: interaction.user.id,
+          guildId: interaction.guildId,
+          error,
+          interaction,
+        });
+
+        await replyCommandError(interaction);
+      }
+      return;
+    }
 
     const cmd = registry.get(interaction.commandName);
     if (!cmd) return;
@@ -226,15 +454,7 @@ export function attachCommandHandlers(
         interaction,
       });
 
-      const reply = {
-        content: 'An error occurred while executing this command.',
-        flags: MessageFlags.Ephemeral as const,
-      };
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp(reply);
-      } else {
-        await interaction.reply(reply);
-      }
+      await replyCommandError(interaction);
     }
   });
 
@@ -289,11 +509,79 @@ export function attachCommandHandlers(
   });
 }
 
+async function runContextMenu(
+  interaction: UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction,
+  cmd: RegisteredContextMenu | undefined,
+  client: Client,
+  logger: Logger,
+  eventBus?: EventBus,
+): Promise<void> {
+  if (!cmd) return;
+
+  const ctx = createContextMenuContext(interaction, client);
+  const started = Date.now();
+  const label = `ctx:${cmd.type}:${cmd.name}`;
+
+  try {
+    await cmd.execute(ctx);
+    const duration = Date.now() - started;
+
+    logger.command(label, {
+      name: cmd.name,
+      user: interaction.user.tag,
+      duration,
+    });
+
+    await eventBus?.emit(FrameworkEvents.COMMAND_EXECUTED, {
+      command: cmd.name,
+      userId: interaction.user.id,
+      guildId: interaction.guildId,
+      interaction,
+      kind: 'context-menu' as const,
+      duration,
+    });
+  } catch (error) {
+    logger.error(
+      `Context menu error: ${cmd.name}`,
+      error instanceof Error ? error : { error: String(error) },
+    );
+
+    await eventBus?.emit(FrameworkEvents.COMMAND_ERROR, {
+      command: cmd.name,
+      userId: interaction.user.id,
+      guildId: interaction.guildId,
+      error,
+      interaction,
+      kind: 'context-menu' as const,
+    });
+
+    await replyCommandError(interaction);
+  }
+}
+
+async function replyCommandError(
+  interaction:
+    | ChatInputCommandInteraction
+    | UserContextMenuCommandInteraction
+    | MessageContextMenuCommandInteraction,
+): Promise<void> {
+  const reply = {
+    content: 'An error occurred while executing this command.',
+    flags: MessageFlags.Ephemeral as const,
+  };
+  if (interaction.replied || interaction.deferred) {
+    await interaction.followUp(reply);
+  } else {
+    await interaction.reply(reply);
+  }
+}
+
 /** @returns true if execution should abort */
 async function enforceGuards(
   interaction: ChatInputCommandInteraction,
   cmd: CommandDefinition,
   cooldowns: Map<string, number>,
+  cooldownKeyPrefix?: string,
 ): Promise<boolean> {
   if (cmd.guildOnly && !interaction.guildId) {
     await replyEphemeral(interaction, 'This command can only be used in a server.');
@@ -317,7 +605,7 @@ async function enforceGuards(
   }
 
   if (cmd.cooldown != null && cmd.cooldown > 0) {
-    const key = `${cmd.name}:${interaction.user.id}`;
+    const key = `${cooldownKeyPrefix ?? cmd.name}:${interaction.user.id}`;
     const now = Date.now();
     const expiresAt = cooldowns.get(key);
 

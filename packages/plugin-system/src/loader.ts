@@ -1,5 +1,5 @@
-import type { Logger } from '@nexorajs/logger';
-import { FrameworkEvents, type Nexora } from '@nexorajs/core';
+import type { Logger } from '@nexora.ts/logger';
+import { FrameworkEvents, type Nexora } from '@nexora.ts/core';
 import {
   isNexoraPluginClass,
   isPluginManifest,

@@ -1,9 +1,9 @@
-# @nexorajs/plugin-system
+# @nexora.ts/plugin-system
 
 Plugin manifests, class-based plugins, dependency resolution, and loader lifecycle.
 
 ```ts
-import { PluginLoader, plugin, NexoraPlugin } from '@nexorajs/plugin-system';
+import { PluginLoader, plugin, NexoraPlugin } from '@nexora.ts/plugin-system';
 
 const loader = new PluginLoader(bot, bot.logger);
 await loader.loadAll({ pluginsPath: './plugins' });

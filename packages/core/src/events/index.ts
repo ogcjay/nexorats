@@ -1,7 +1,14 @@
 import type { Client, ClientEvents } from 'discord.js';
+import { resolveEventExport } from './event-class.js';
+
+export {
+  EventHandler,
+  isEventClass,
+  resolveEventExport,
+} from './event-class.js';
 
 /** Event handler function */
-export type EventHandler<K extends keyof ClientEvents = keyof ClientEvents> = (
+export type EventExecuteFn<K extends keyof ClientEvents = keyof ClientEvents> = (
   ...args: ClientEvents[K]
 ) => Promise<void> | void;
 
@@ -9,7 +16,7 @@ export type EventHandler<K extends keyof ClientEvents = keyof ClientEvents> = (
 export interface EventDefinition<K extends keyof ClientEvents = keyof ClientEvents> {
   name: K;
   once?: boolean;
-  execute: EventHandler<K>;
+  execute: EventExecuteFn<K>;
 }
 
 /**
@@ -22,7 +29,7 @@ export interface EventDefinition<K extends keyof ClientEvents = keyof ClientEven
  */
 export function event<K extends keyof ClientEvents>(
   name: K,
-  execute: EventHandler<K>,
+  execute: EventExecuteFn<K>,
   once = false,
 ): EventDefinition<K> {
   return { name, execute, once };
@@ -62,7 +69,7 @@ export class EventRegistry {
 export async function discoverEvents(
   patterns: string[],
   registry: EventRegistry,
-  logger: import('@nexorajs/logger').Logger,
+  logger: import('@nexora.ts/logger').Logger,
 ): Promise<void> {
   const { glob } = await import('glob');
   const { pathToFileURL } = await import('node:url');
@@ -73,10 +80,10 @@ export async function discoverEvents(
     for (const file of files) {
       try {
         const module = await import(pathToFileURL(file).href);
-        const eventDef = module.default as EventDefinition | undefined;
+        const eventDef = resolveEventExport(module.default);
 
-        if (eventDef?.name && typeof eventDef.execute === 'function') {
-          registry.register({ ...eventDef, source: file });
+        if (eventDef) {
+          registry.register(Object.assign(eventDef, { source: file }));
           logger.debug(`Registered event: ${String(eventDef.name)}`, { file });
         }
       } catch (error) {

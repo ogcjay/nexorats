@@ -2,14 +2,14 @@
 
 Main bot class — wires Discord client, command/event discovery, DI container, cache, scheduler, and logging.
 
-**Package:** `@nexorajs/core`
+**Package:** `@nexora.ts/core`
 
 ## Create & start
 
 ```ts
 import config from '../nexora.config.js';
-import { Nexora } from '@nexorajs/core';
-import { createDevServer } from '@nexorajs/dev-server';
+import { Nexora } from '@nexora.ts/core';
+import { createDevServer } from '@nexora.ts/dev-server';
 
 const bot = new Nexora({
   config,

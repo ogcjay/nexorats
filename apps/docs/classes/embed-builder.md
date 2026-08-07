@@ -2,12 +2,12 @@
 
 Fluent embed builder with presets — shorter than discord.js for common cases.
 
-**Package:** `@nexorajs/core`
+**Package:** `@nexora.ts/core`
 
 ## Presets
 
 ```ts
-import { EmbedBuilder } from '@nexorajs/core';
+import { EmbedBuilder } from '@nexora.ts/core';
 
 EmbedBuilder.success('Done', 'User was banned.');
 EmbedBuilder.error('Failed', 'Missing permissions.');
@@ -18,7 +18,7 @@ EmbedBuilder.info('Info', 'Queue position: 3');
 ## Full example
 
 ```ts
-import { EmbedBuilder, type CommandContext } from '@nexorajs/core';
+import { EmbedBuilder, type CommandContext } from '@nexora.ts/core';
 
 async function showProfile(ctx: CommandContext) {
   const embed = EmbedBuilder.info('Profile', `Stats for ${ctx.user.tag}`)
@@ -50,7 +50,7 @@ Colors: number (`0x5865f2`), `#5865f2`, or `EmbedColor.Success` etc.
 ## With classic components
 
 ```ts
-import { EmbedBuilder, ButtonBuilder, ActionRowBuilder } from '@nexorajs/core';
+import { EmbedBuilder, ButtonBuilder, ActionRowBuilder } from '@nexora.ts/core';
 
 await ctx.reply({
   embeds: [EmbedBuilder.success('Confirm', 'Delete this item?').toJSON()],

@@ -2,14 +2,14 @@
 
 Abstract plugin class with lifecycle hooks. Additive to `plugin({…})` manifests.
 
-**Package:** `@nexorajs/plugin-system`  
+**Package:** `@nexora.ts/plugin-system`  
 **Alias:** `Plugin`
 
 ## Example
 
 ```ts
-import { NexoraPlugin, type PluginContext } from '@nexorajs/plugin-system';
-import { command } from '@nexorajs/core';
+import { NexoraPlugin, type PluginContext } from '@nexora.ts/plugin-system';
+import { command } from '@nexora.ts/core';
 
 export default class TicketsPlugin extends NexoraPlugin {
   readonly manifest = {
@@ -53,7 +53,7 @@ export default class TicketsPlugin extends NexoraPlugin {
 ## Declarative alternative
 
 ```ts
-import { plugin } from '@nexorajs/plugin-system';
+import { plugin } from '@nexora.ts/plugin-system';
 
 export default plugin({
   name: 'tickets',

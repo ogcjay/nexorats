@@ -34,7 +34,7 @@ export class FileBuilder {
   validate(): this {
     if (!this.fileValue.url.startsWith('attachment://')) {
       console.warn(
-        '[nexorajs] File: Discord only accepts attachment:// URLs for File components.',
+        '[nexora.ts] File: Discord only accepts attachment:// URLs for File components.',
       );
     }
     warnIfOverComponentLimit(this.toJSON(), 'File');

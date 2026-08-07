@@ -6,17 +6,17 @@ Du hast noch nie ein Framework veröffentlicht — hier ist der komplette Weg vo
 
 | Package | npm-Name | Zweck |
 | --- | --- | --- |
-| `packages/config` | `@nexorajs/config` | `defineConfig()` |
-| `packages/logger` | `@nexorajs/logger` | Logging |
-| `packages/core` | `@nexorajs/core` | Bot, commands, events |
-| `packages/database` | `@nexorajs/database` | Drizzle + repos |
-| `packages/auth` | `@nexorajs/auth` | OAuth |
-| `packages/api` | `@nexorajs/api` | REST API |
-| `packages/plugin-system` | `@nexorajs/plugin-system` | Plugins |
-| `packages/websocket` | `@nexorajs/websocket` | Live events |
-| `packages/ui` | `@nexorajs/ui` | Dashboard-Komponenten |
-| `packages/dev-server` | `@nexorajs/dev-server` | Studio-API |
-| `packages/cli` | `create-nexorajs` | `npx create-nexorajs` / `nexora` |
+| `packages/config` | `@nexora.ts/config` | `defineConfig()` |
+| `packages/logger` | `@nexora.ts/logger` | Logging |
+| `packages/core` | `@nexora.ts/core` | Bot, commands, events |
+| `packages/database` | `@nexora.ts/database` | Drizzle + repos |
+| `packages/auth` | `@nexora.ts/auth` | OAuth |
+| `packages/api` | `@nexora.ts/api` | REST API |
+| `packages/plugin-system` | `@nexora.ts/plugin-system` | Plugins |
+| `packages/websocket` | `@nexora.ts/websocket` | Live events |
+| `packages/ui` | `@nexora.ts/ui` | Dashboard-Komponenten |
+| `packages/dev-server` | `@nexora.ts/dev-server` | Studio-API |
+| `packages/cli` | `create-nexora.ts` | `npx create-nexora.ts` / `nexora` |
 
 **Nicht** auf npm: `apps/*` (Dashboard, Docs, Studio, Playground).
 
@@ -30,17 +30,17 @@ Du hast noch nie ein Framework veröffentlicht — hier ist der komplette Weg vo
 
 ---
 
-## Schritt 2 — Scope `@nexorajs` (Organisation)
+## Schritt 2 — Scope `@nexora.ts` (Organisation)
 
-Unsere Packages heißen `@nexorajs/...`. Dafür:
+Unsere Packages heißen `@nexora.ts/...`. Dafür:
 
 1. https://www.npmjs.com/org/create  
-2. Organisation **`nexorajs`** anlegen (kostenlos für **öffentliche** Packages)  
+2. Organisation **`nexora.ts`** anlegen (kostenlos für **öffentliche** Packages)  
 
 Prüfen, ob schon etwas existiert:
 
 ```powershell
-npm view @nexorajs/core
+npm view @nexora.ts/core
 ```
 
 - **404 Not Found** → gut, Name ist frei  
@@ -66,7 +66,7 @@ pnpm build
 pnpm release:dry
 ```
 
-`release:dry` lädt **nichts** hoch. Du solltest eine Liste der Packages sehen (`@nexorajs/core`, `create-nexorajs`, …).
+`release:dry` lädt **nichts** hoch. Du solltest eine Liste der Packages sehen (`@nexora.ts/core`, `create-nexora.ts`, …).
 
 ---
 
@@ -86,11 +86,11 @@ Wenn 2FA an ist: **OTP** aus der Authenticator-App eingeben.
 ### Erfolg prüfen
 
 ```powershell
-npm view @nexorajs/core version
-npm view create-nexorajs version
+npm view @nexora.ts/core version
+npm view create-nexora.ts version
 ```
 
-Browser: https://www.npmjs.com/package/@nexorajs/core
+Browser: https://www.npmjs.com/package/@nexora.ts/core
 
 ---
 
@@ -98,7 +98,7 @@ Browser: https://www.npmjs.com/package/@nexorajs/core
 
 ```powershell
 cd C:\Users\Raphael\Documents
-npx create-nexorajs@0.1.0 my-bot-test
+npx create-nexora.ts@0.1.0 my-bot-test
 ```
 
 Oder minimal:
@@ -106,7 +106,7 @@ Oder minimal:
 ```powershell
 mkdir nexora-smoke && cd nexora-smoke
 npm init -y
-npm install @nexorajs/core@0.1.0 @nexorajs/config@0.1.0
+npm install @nexora.ts/core@0.1.0 @nexora.ts/config@0.1.0
 ```
 
 ---
@@ -127,7 +127,7 @@ pnpm release              # build + publish
 | Meldung | Fix |
 | --- | --- |
 | `ENEEDAUTH` | `npm login` |
-| `403` / scope | Org `@nexorajs` anlegen, Rechte prüfen |
+| `403` / scope | Org `@nexora.ts` anlegen, Rechte prüfen |
 | `OTP required` | 2FA-Code eingeben |
 | `You cannot publish over existing version` | Version erhöhen (`pnpm changeset`) |
 | `No files` / leeres Package | `pnpm build:packages` — `dist/` muss existieren |
@@ -139,10 +139,10 @@ pnpm release              # build + publish
 ## Checkliste
 
 - [ ] `npm whoami` funktioniert  
-- [ ] Org/Scope `@nexorajs` ist deiner  
+- [ ] Org/Scope `@nexora.ts` ist deiner  
 - [ ] `pnpm build:packages` ok  
 - [ ] `pnpm release:dry` sieht gut aus  
 - [ ] Keine `.env` / Secrets in `packages/*/dist`  
-- [ ] Danach: `npx create-nexorajs` testen  
+- [ ] Danach: `npx create-nexora.ts` testen  
 
 Ausführliche Repo-Hinweise: [PUBLISHING.md](./PUBLISHING.md) (GitHub). Dieses File = **nur npm**.

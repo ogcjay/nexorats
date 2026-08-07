@@ -1,9 +1,9 @@
-# @nexorajs/logger
+# @nexora.ts/logger
 
 Structured logging with pretty / compact / json console modes, stacks, startup banner, and command traces.
 
 ```ts
-import { createLiveLogger, printStartupBanner, subscribeLiveLogs } from '@nexorajs/logger';
+import { createLiveLogger, printStartupBanner, subscribeLiveLogs } from '@nexora.ts/logger';
 
 const log = createLiveLogger({
   level: 'info',

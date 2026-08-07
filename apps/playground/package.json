@@ -1,5 +1,5 @@
 {
-  "name": "@nexorajs/playground",
+  "name": "@nexora.ts/playground",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,11 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@nexorajs/config": "workspace:*",
-    "@nexorajs/core": "workspace:*",
-    "@nexorajs/dev-server": "workspace:*",
-    "@nexorajs/logger": "workspace:*",
-    "@nexorajs/plugin-system": "workspace:*"
+    "@nexora.ts/config": "workspace:*",
+    "@nexora.ts/core": "workspace:*",
+    "@nexora.ts/dev-server": "workspace:*",
+    "@nexora.ts/logger": "workspace:*",
+    "@nexora.ts/plugin-system": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

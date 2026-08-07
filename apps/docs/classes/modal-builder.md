@@ -2,7 +2,7 @@
 
 Build modals and text inputs for forms (reports, tickets, settings).
 
-**Package:** `@nexorajs/core`
+**Package:** `@nexora.ts/core`
 
 ## Example
 
@@ -13,7 +13,7 @@ import {
   ButtonBuilder,
   ActionRowBuilder,
   type CommandContext,
-} from '@nexorajs/core';
+} from '@nexora.ts/core';
 
 // Show modal from a command or button handler
 export async function openReportModal(ctx: CommandContext) {

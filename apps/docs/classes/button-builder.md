@@ -2,7 +2,7 @@
 
 Interactive buttons and action rows as plain API objects (`toJSON()`).
 
-**Package:** `@nexorajs/core`
+**Package:** `@nexora.ts/core`
 
 ## Buttons in a row
 
@@ -12,7 +12,7 @@ import {
   ActionRowBuilder,
   EmbedBuilder,
   type CommandContext,
-} from '@nexorajs/core';
+} from '@nexora.ts/core';
 
 export async function confirmDelete(ctx: CommandContext) {
   const row = new ActionRowBuilder().add(
@@ -21,7 +21,7 @@ export async function confirmDelete(ctx: CommandContext) {
       .label('Delete')
       .danger(),
     new ButtonBuilder().customId('delete:cancel').label('Cancel').secondary(),
-    new ButtonBuilder().label('Docs').link('https://cjays-organization.gitbook.io/nexorajs/'),
+    new ButtonBuilder().label('Docs').link('https://cjays-organization.gitbook.io/nexora.ts/'),
   );
 
   await ctx.reply({
@@ -46,7 +46,7 @@ Also: `.label()`, `.emoji()`, `.disabled()`, `.customId(id, { prefix?: true })`.
 ## Selects (same rows)
 
 ```ts
-import { ActionRowBuilder, StringSelectBuilder } from '@nexorajs/core';
+import { ActionRowBuilder, StringSelectBuilder } from '@nexora.ts/core';
 
 const row = new ActionRowBuilder().add(
   new StringSelectBuilder()

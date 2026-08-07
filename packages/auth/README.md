@@ -1,9 +1,9 @@
-# @nexorajs/auth
+# @nexora.ts/auth
 
 Discord OAuth, session management, and permission checks for the Nexora dashboard.
 
 ```ts
-import { createAuthService, Permissions } from '@nexorajs/auth';
+import { createAuthService, Permissions } from '@nexora.ts/auth';
 
 const auth = createAuthService(config.auth!, repos);
 const url = auth.oauth.getAuthorizationUrl(state);

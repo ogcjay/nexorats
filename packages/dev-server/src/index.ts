@@ -1,7 +1,7 @@
-import type { NexoraConfig } from '@nexorajs/config';
-import { TOKENS, type Nexora, type LifecyclePhase } from '@nexorajs/core';
-import type { LogEntry } from '@nexorajs/logger';
-import { subscribeLiveLogs } from '@nexorajs/logger';
+import type { NexoraConfig } from '@nexora.ts/config';
+import { TOKENS, type Nexora, type LifecyclePhase } from '@nexora.ts/core';
+import type { LogEntry } from '@nexora.ts/logger';
+import { subscribeLiveLogs } from '@nexora.ts/logger';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 
 /** Plugin snapshot for Studio */

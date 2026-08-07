@@ -14,7 +14,7 @@ Full guide: [CONTRIBUTING.md](https://github.com/ogcjay/nexorajs/blob/main/CONTR
 ## Docs contributions
 
 ```bash
-pnpm --filter @nexorajs/docs dev
+pnpm --filter @nexora.ts/docs dev
 ```
 
 Edit Markdown under `apps/docs/`. After merge to `main`, GitHub Pages rebuilds automatically.

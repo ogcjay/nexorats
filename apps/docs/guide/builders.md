@@ -46,7 +46,7 @@ import {
   ButtonBuilder,
   ActionRowBuilder,
   command,
-} from '@nexorajs/core';
+} from '@nexora.ts/core';
 
 export default command({
   name: 'ban',
@@ -69,7 +69,7 @@ export default command({
 ## EmbedBuilder
 
 ```ts
-import { EmbedBuilder, EmbedColor } from '@nexorajs/core';
+import { EmbedBuilder, EmbedColor } from '@nexora.ts/core';
 
 EmbedBuilder.success('OK', 'Saved.');
 EmbedBuilder.error('Failed', 'Missing permission.');
@@ -106,7 +106,7 @@ await ctx.embed(embed);               // shortcut
 ## ButtonBuilder
 
 ```ts
-import { ButtonBuilder } from '@nexorajs/core';
+import { ButtonBuilder } from '@nexora.ts/core';
 
 new ButtonBuilder()
   .customId('ok', { prefix: true }) // → nexora:ok
@@ -114,7 +114,7 @@ new ButtonBuilder()
   .emoji('✅')
   .success();
 
-new ButtonBuilder().label('Docs').link('https://cjays-organization.gitbook.io/nexorajs/');
+new ButtonBuilder().label('Docs').link('https://cjays-organization.gitbook.io/nexora.ts/');
 ```
 
 Style shortcuts: `.primary()`, `.secondary()`, `.success()`, `.danger()`, `.link(url)` / `.url(url)`.
@@ -126,7 +126,7 @@ Non-link buttons require a `customId`. Link buttons require a URL and clear `cus
 Holds up to **5** message components (buttons / selects), or a single text input when used in a modal.
 
 ```ts
-import { ActionRowBuilder, ButtonBuilder } from '@nexorajs/core';
+import { ActionRowBuilder, ButtonBuilder } from '@nexora.ts/core';
 
 const row = new ActionRowBuilder().add(
   new ButtonBuilder().customId('yes').label('Yes').success(),
@@ -147,7 +147,7 @@ import {
   RoleSelectBuilder,
   ChannelSelectBuilder,
   ActionRowBuilder,
-} from '@nexorajs/core';
+} from '@nexora.ts/core';
 
 const menu = new StringSelectBuilder()
   .customId('plan', { prefix: true })
@@ -168,7 +168,7 @@ Also available: `UserSelectBuilder`, `RoleSelectBuilder`, `MentionableSelectBuil
 Modals auto-wrap each text input in an action row.
 
 ```ts
-import { ModalBuilder, TextInputBuilder } from '@nexorajs/core';
+import { ModalBuilder, TextInputBuilder } from '@nexora.ts/core';
 
 const modal = new ModalBuilder()
   .customId('report', { prefix: true })
@@ -190,7 +190,7 @@ Text input shortcuts: `.short()`, `.paragraph()`, plus `.minLength()` / `.maxLen
 ## customId
 
 ```ts
-import { customId } from '@nexorajs/core';
+import { customId } from '@nexora.ts/core';
 
 customId('confirm');                       // confirm
 customId('confirm', { prefix: true });     // nexora:confirm

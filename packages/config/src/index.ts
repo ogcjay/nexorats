@@ -42,7 +42,7 @@ export interface AuthConfig {
   scopes?: string[];
 }
 
-/** Console output mode for @nexorajs/logger */
+/** Console output mode for @nexora.ts/logger */
 export type LoggerConsoleMode = 'pretty' | 'compact' | 'json';
 
 /** Logger configuration */
@@ -85,6 +85,11 @@ export interface NexoraConfig {
   logger?: LoggerConfig;
   cache?: CacheConfig;
   plugins?: Record<string, PluginConfigEntry>;
+  /**
+   * Check npm on bot start for a newer `@nexora.ts/core` and print update commands.
+   * Default: `true`. Set `false` or env `NEXORA_UPDATE_CHECK=0` to disable.
+   */
+  updateCheck?: boolean;
 }
 
 /** Zod schema for runtime validation */
@@ -153,6 +158,7 @@ export const nexoraConfigSchema = z.object({
       }),
     )
     .optional(),
+  updateCheck: z.boolean().optional(),
 });
 
 /** Deep partial type helper */

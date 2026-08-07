@@ -1,5 +1,5 @@
 {
-  "name": "@nexorajs/auth",
+  "name": "@nexora.ts/auth",
   "version": "0.1.1",
   "description": "Discord OAuth, session management, and permissions",
   "license": "MIT",
@@ -22,8 +22,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@nexorajs/config": "workspace:*",
-    "@nexorajs/database": "workspace:*"
+    "@nexora.ts/config": "workspace:*",
+    "@nexora.ts/database": "workspace:*"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",

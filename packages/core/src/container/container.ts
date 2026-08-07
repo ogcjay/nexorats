@@ -80,6 +80,7 @@ export const TOKENS = {
   Client: Symbol('Client'),
   CommandRegistry: Symbol('CommandRegistry'),
   EventRegistry: Symbol('EventRegistry'),
+  InteractionRegistry: Symbol('InteractionRegistry'),
   EventBus: Symbol('EventBus'),
   Cache: Symbol('Cache'),
   Scheduler: Symbol('Scheduler'),

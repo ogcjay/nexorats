@@ -1,5 +1,5 @@
 {
-  "name": "@nexorajs/logger",
+  "name": "@nexora.ts/logger",
   "version": "0.1.2",
   "description": "Modern terminal logging — pretty/compact/json, command traces, startup banner, live streaming",
   "license": "MIT",
@@ -23,7 +23,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@nexorajs/config": "workspace:*"
+    "@nexora.ts/config": "workspace:*"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",

@@ -1,6 +1,6 @@
 {
-  "name": "@nexorajs/core",
-  "version": "0.1.3",
+  "name": "@nexora.ts/core",
+  "version": "0.1.5",
   "description": "Discord client, commands, events, and lifecycle management",
   "license": "MIT",
   "type": "module",
@@ -22,8 +22,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@nexorajs/config": "workspace:*",
-    "@nexorajs/logger": "workspace:*",
+    "@nexora.ts/config": "workspace:*",
+    "@nexora.ts/logger": "workspace:*",
     "discord.js": "^14.16.3",
     "glob": "^11.0.0"
   },

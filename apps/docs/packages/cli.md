@@ -1,9 +1,9 @@
-# create-nexorajs
+# create-nexora.ts
 
 CLI to scaffold a new Nexora bot project (Studio + `.env` ready).
 
 ```bash
-npx create-nexorajs@latest my-bot
+npx create-nexora.ts@latest my-bot
 cd my-bot
 pnpm install
 cp .env.example .env
@@ -13,7 +13,7 @@ pnpm dev
 ## What you get
 
 - `dev` / `start` scripts with `--env-file=.env`
-- `@nexorajs/config` (auto `loadEnv`), core, logger, and **dev-server** for Studio
+- `@nexora.ts/config` (auto `loadEnv`), core, logger, and **dev-server** for Studio
 - Optional dashboard packages, Docker, linting, examples
 - Example commands/events when selected
 

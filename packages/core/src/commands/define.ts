@@ -211,7 +211,7 @@ export interface CommandOption {
 }
 
 /** Discriminator for discovered command modules */
-export type CommandModuleType = 'slash' | 'message';
+export type CommandModuleType = 'slash' | 'message' | 'slash-group' | 'context-menu';
 
 /** Command definition */
 export interface CommandDefinition {

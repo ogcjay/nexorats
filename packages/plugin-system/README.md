@@ -1,9 +1,9 @@
-# @nexorajs/plugin-system
+# @nexora.ts/plugin-system
 
 First-class plugin API for the Nexora ecosystem. Plugins extend the framework without modifying core.
 
 ```ts
-import { PluginLoader, plugin } from '@nexorajs/plugin-system';
+import { PluginLoader, plugin } from '@nexora.ts/plugin-system';
 
 export default plugin({
   name: 'tickets',

@@ -1,4 +1,4 @@
-import { defineConfig } from '@nexorajs/config';
+import { defineConfig } from '@nexora.ts/config';
 
 export default defineConfig({
   bot: {

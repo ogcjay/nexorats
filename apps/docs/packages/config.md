@@ -1,9 +1,9 @@
-# @nexorajs/config
+# @nexora.ts/config
 
 Type-safe configuration with `defineConfig()` and Zod validation. Loads `.env` via `loadEnv()` on import so secrets are available before you read `process.env`.
 
 ```ts
-import { defineConfig } from '@nexorajs/config';
+import { defineConfig } from '@nexora.ts/config';
 
 export default defineConfig({
   bot: { token: process.env.DISCORD_TOKEN!, clientId: process.env.DISCORD_CLIENT_ID! },
@@ -19,7 +19,7 @@ export default defineConfig({
 
 | Area | Notes |
 | --- | --- |
-| `logger.console.mode` | Console formatting for `@nexorajs/logger` |
+| `logger.console.mode` | Console formatting for `@nexora.ts/logger` |
 | `loadEnv()` | Also exported for explicit calls |
 | `NEXORA_*` env | Common overrides (token, DB URL, log level, …) |
 

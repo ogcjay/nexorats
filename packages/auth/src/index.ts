@@ -1,5 +1,5 @@
-import type { AuthConfig } from '@nexorajs/config';
-import type { RepositoryFactory, User } from '@nexorajs/database';
+import type { AuthConfig } from '@nexora.ts/config';
+import type { RepositoryFactory, User } from '@nexora.ts/database';
 import { randomBytes } from 'node:crypto';
 
 /** Discord OAuth token response */

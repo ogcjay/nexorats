@@ -1,7 +1,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
-import type { Logger } from '@nexorajs/logger';
-import type { LogEntry } from '@nexorajs/logger';
-import { subscribeLiveLogs } from '@nexorajs/logger';
+import type { Logger } from '@nexora.ts/logger';
+import type { LogEntry } from '@nexora.ts/logger';
+import { subscribeLiveLogs } from '@nexora.ts/logger';
 
 /** WebSocket event types */
 export const WsEvents = {

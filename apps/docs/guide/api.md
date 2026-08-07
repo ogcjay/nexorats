@@ -2,7 +2,7 @@
 
 The dashboard talks **only** to the internal REST API — never directly to the database.
 
-`@nexorajs/api` provides:
+`@nexora.ts/api` provides:
 
 - Router with path params
 - Auth + permission middleware
@@ -10,7 +10,7 @@ The dashboard talks **only** to the internal REST API — never directly to the 
 - Structured `ApiError` responses
 
 ```ts
-import { createApiServer } from '@nexorajs/api';
+import { createApiServer } from '@nexora.ts/api';
 
 const api = createApiServer(auth, repos, logger, 4000);
 await api.start();

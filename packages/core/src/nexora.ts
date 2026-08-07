@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, Partials, type ClientOptions } from 'discord.js';
-import type { NexoraConfig } from '@nexorajs/config';
-import { createLiveLogger, printStartupBanner, type Logger } from '@nexorajs/logger';
+import type { NexoraConfig } from '@nexora.ts/config';
+import { createLiveLogger, printStartupBanner, type Logger } from '@nexora.ts/logger';
 import { Container, TOKENS } from './container/index.js';
 import {
   CommandRegistry,
@@ -9,15 +9,23 @@ import {
   attachCommandHandlers,
 } from './commands/index.js';
 import { EventRegistry, discoverEvents, attachEventHandlers } from './events/index.js';
+import {
+  InteractionRegistry,
+  discoverInteractions,
+  attachInteractionHandlers,
+} from './interactions/index.js';
 import { EventBus, FrameworkEvents } from './event-bus/index.js';
 import { Cache, MemoryCacheAdapter } from './cache/index.js';
 import { Scheduler } from './scheduler/index.js';
+import { checkForCoreUpdate, getInstalledCoreVersion } from './update-check.js';
 
 /** Nexora bootstrap options */
 export interface NexoraOptions {
   config: NexoraConfig;
   commandsPath?: string | string[];
   eventsPath?: string | string[];
+  /** Glob(s) for button/select/modal handlers — default `./interactions/` + recursive `*.ts` */
+  interactionsPath?: string | string[];
   clientOptions?: Partial<ClientOptions>;
 }
 
@@ -34,6 +42,7 @@ export class Nexora {
   readonly client: Client;
   readonly commandRegistry: CommandRegistry;
   readonly eventRegistry: EventRegistry;
+  readonly interactionRegistry: InteractionRegistry;
   readonly eventBus: EventBus;
   readonly cache: Cache;
   readonly scheduler: Scheduler;
@@ -41,12 +50,16 @@ export class Nexora {
   private readonly config: NexoraConfig;
   private readonly commandsPath: string[];
   private readonly eventsPath: string[];
+  private readonly interactionsPath: string[];
   private phase: LifecyclePhase = 'idle';
 
   constructor(options: NexoraOptions) {
     this.config = options.config;
     this.commandsPath = normalizePaths(options.commandsPath ?? './commands/**/*.ts');
     this.eventsPath = normalizePaths(options.eventsPath ?? './events/**/*.ts');
+    this.interactionsPath = normalizePaths(
+      options.interactionsPath ?? './interactions/**/*.ts',
+    );
 
     this.container = new Container();
     this.logger = createLiveLogger({
@@ -64,6 +77,7 @@ export class Nexora {
 
     this.commandRegistry = new CommandRegistry();
     this.eventRegistry = new EventRegistry();
+    this.interactionRegistry = new InteractionRegistry();
     this.eventBus = new EventBus();
     this.cache = new Cache(new MemoryCacheAdapter(), options.config.cache?.defaultTtl);
     this.scheduler = new Scheduler();
@@ -82,6 +96,7 @@ export class Nexora {
     this.container.registerInstance(TOKENS.Client, this.client);
     this.container.registerInstance(TOKENS.CommandRegistry, this.commandRegistry);
     this.container.registerInstance(TOKENS.EventRegistry, this.eventRegistry);
+    this.container.registerInstance(TOKENS.InteractionRegistry, this.interactionRegistry);
     this.container.registerInstance(TOKENS.EventBus, this.eventBus);
     this.container.registerInstance(TOKENS.Cache, this.cache);
     this.container.registerInstance(TOKENS.Scheduler, this.scheduler);
@@ -98,23 +113,25 @@ export class Nexora {
 
     if (!this.config.bot.token?.trim()) {
       throw new Error(
-        'DISCORD_TOKEN fehlt oder ist leer. Lege eine .env im Projektroot an und starte mit --env-file=.env (oder nutze @nexorajs/config loadEnv).',
+        'DISCORD_TOKEN fehlt oder ist leer. Lege eine .env im Projektroot an und starte mit --env-file=.env (oder nutze @nexora.ts/config loadEnv).',
       );
     }
 
     await discoverCommands(this.commandsPath, this.commandRegistry, this.logger);
     await discoverEvents(this.eventsPath, this.eventRegistry, this.logger);
+    await discoverInteractions(this.interactionsPath, this.interactionRegistry, this.logger);
 
     attachCommandHandlers(this.client, this.commandRegistry, this.logger, {
       eventBus: this.eventBus,
     });
     attachEventHandlers(this.client, this.eventRegistry);
+    attachInteractionHandlers(this.client, this.interactionRegistry, this.logger);
 
     this.client.once('ready', (readyClient) => {
       this.phase = 'ready';
       printStartupBanner({
         name: 'Nexora',
-        version: '0.1.2',
+        version: getInstalledCoreVersion(),
         userTag: readyClient.user.tag,
         commands: this.commandRegistry.size,
         events: this.eventRegistry.size,
@@ -125,6 +142,7 @@ export class Nexora {
             : 'http://localhost:3002'),
       });
       void this.eventBus.emit(FrameworkEvents.BOT_READY, { client: readyClient });
+      void this.maybeCheckForUpdates();
     });
 
     await this.client.login(this.config.bot.token);
@@ -137,6 +155,17 @@ export class Nexora {
         this.logger,
       );
     }
+  }
+
+  /** Non-blocking npm update notice (opt-out via config / env). */
+  private async maybeCheckForUpdates(): Promise<void> {
+    const envDisabled =
+      process.env.NEXORA_UPDATE_CHECK === '0' ||
+      process.env.NEXORA_UPDATE_CHECK === 'false';
+    const enabled = this.config.updateCheck !== false && !envDisabled;
+    if (!enabled) return;
+
+    await checkForCoreUpdate(this.logger);
   }
 
   /** Gracefully stop the bot */

@@ -46,8 +46,15 @@ export function isCommandClass(
   value: unknown,
 ): value is new (...args: never[]) => CommandDefinition {
   if (typeof value !== 'function') return false;
-  const proto = value.prototype as { execute?: unknown } | undefined;
-  return proto != null && typeof proto.execute === 'function';
+  // Prefer SlashCommand subclasses; fall back to duck-typed execute for custom classes
+  if (value.prototype instanceof SlashCommand) return true;
+  const proto = value.prototype as { execute?: unknown; description?: unknown } | undefined;
+  return (
+    proto != null &&
+    typeof proto.execute === 'function' &&
+    // Exclude ContextMenuCommand (has execute, no slash description on prototype)
+    !('kind' in proto && (proto as { kind?: unknown }).kind === 'context-menu')
+  );
 }
 
 /**

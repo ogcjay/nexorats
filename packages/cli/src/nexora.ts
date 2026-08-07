@@ -7,14 +7,14 @@
  * - Bot process (tsx watch / npm run dev)
  * - Nexora Studio UI (localhost:3002)
  *
- * The Studio API is started by the bot via @nexorajs/dev-server.
+ * The Studio API is started by the bot via @nexora.ts/dev-server.
  */
 
 import { spawn, type ChildProcess } from 'node:child_process';
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
-const DOCS_PLUGINS = 'https://ogcjay.github.io/nexorajs/guide/plugins.html';
+const DOCS_PLUGINS = 'https://ogcjay.github.io/nexora.ts/guide/plugins.html';
 const STUDIO_URL = 'http://localhost:3002';
 const STUDIO_API = 'http://127.0.0.1:3920';
 
@@ -58,7 +58,7 @@ function handleAdd(pluginName: string | undefined): void {
 
   Remote plugin install is not available yet.
   For now, place a local plugin under ./plugins/${pluginName}/
-  and load it with @nexorajs/plugin-system.
+  and load it with @nexora.ts/plugin-system.
 
   Docs: ${DOCS_PLUGINS}
 `);
@@ -130,7 +130,7 @@ function printHelp(): void {
     Studio API       ${STUDIO_API}
 
   Studio is a local Developer Center for THIS project (commands, plugins, logs…).
-  Public docs: https://ogcjay.github.io/nexorajs/
+  Public docs: https://ogcjay.github.io/nexora.ts/
 `);
 }
 
@@ -138,7 +138,7 @@ async function runDev(): Promise<void> {
   const pkgPath = resolve(cwd, 'package.json');
   if (!existsSync(pkgPath)) {
     console.error('\n  ❌ No package.json in the current directory.');
-    console.error('     Run this from your bot project root (after create-nexorajs).\n');
+    console.error('     Run this from your bot project root (after create-nexora.ts).\n');
     process.exit(1);
   }
 
@@ -157,7 +157,7 @@ async function runDev(): Promise<void> {
   Open Studio once the UI is ready:
     ${STUDIO_URL}
 
-  Tip: API must be up (${STUDIO_API}) — your bot starts it via @nexorajs/dev-server.
+  Tip: API must be up (${STUDIO_API}) — your bot starts it via @nexora.ts/dev-server.
 `);
 
   const children: ChildProcess[] = [];
@@ -203,8 +203,8 @@ async function runStudioOnly(): Promise<void> {
   const child = spawnStudio();
   if (!child) {
     console.error(
-      '  ❌ Could not locate @nexorajs/studio.\n' +
-        '     From the monorepo: pnpm --filter @nexorajs/studio dev\n',
+      '  ❌ Could not locate @nexora.ts/studio.\n' +
+        '     From the monorepo: pnpm --filter @nexora.ts/studio dev\n',
     );
     process.exit(1);
   }
@@ -214,10 +214,10 @@ async function runStudioOnly(): Promise<void> {
 function spawnStudio(): ChildProcess | null {
   // Prefer monorepo studio app when developing Nexora itself
   const monorepoStudio = resolve(cwd, 'apps/studio/package.json');
-  const nestedStudio = resolve(cwd, 'node_modules/@nexorajs/studio/package.json');
+  const nestedStudio = resolve(cwd, 'node_modules/@nexora.ts/studio/package.json');
 
   if (existsSync(monorepoStudio)) {
-    return spawn(pnpmOrNpm(), ['--filter', '@nexorajs/studio', 'dev'], {
+    return spawn(pnpmOrNpm(), ['--filter', '@nexora.ts/studio', 'dev'], {
       cwd,
       stdio: 'inherit',
       shell: true,
@@ -226,15 +226,15 @@ function spawnStudio(): ChildProcess | null {
 
   if (existsSync(nestedStudio)) {
     return spawn(pnpmOrNpm(), ['exec', 'vite', '--port', '3002'], {
-      cwd: resolve(cwd, 'node_modules/@nexorajs/studio'),
+      cwd: resolve(cwd, 'node_modules/@nexora.ts/studio'),
       stdio: 'inherit',
       shell: true,
     });
   }
 
   console.warn(
-    '  ⚠️  @nexorajs/studio not found next to this project.\n' +
-      '     Start it manually: pnpm --filter @nexorajs/studio dev\n',
+    '  ⚠️  @nexora.ts/studio not found next to this project.\n' +
+      '     Start it manually: pnpm --filter @nexora.ts/studio dev\n',
   );
   return null;
 }

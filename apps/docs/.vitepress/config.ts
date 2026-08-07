@@ -3,10 +3,10 @@ import { defineConfig } from 'vitepress';
 /**
  * Docs are built statically and deployed to GitHub Pages.
  * Change `base` if your repo name is not `nexora`:
- *   user.github.io/nexorajs  →  base: '/nexorajs/'
+ *   user.github.io/nexorajs  →  base: '/nexora.ts/'
  *   custom domain / org root →  base: '/'
  */
-const base = process.env.DOCS_BASE ?? '/nexorajs/';
+const base = process.env.DOCS_BASE ?? '/nexora.ts/';
 
 export default defineConfig({
   title: 'Nexora',
@@ -46,6 +46,9 @@ export default defineConfig({
             { text: 'Overview', link: '/classes/' },
             { text: 'Nexora', link: '/classes/nexora' },
             { text: 'SlashCommand', link: '/classes/slash-command' },
+            { text: 'SlashCommandGroup', link: '/classes/slash-command-group' },
+            { text: 'EventHandler', link: '/classes/event-handler' },
+            { text: 'ButtonHandler', link: '/classes/button-handler' },
             { text: 'Service', link: '/classes/service' },
             { text: 'NexoraPlugin', link: '/classes/nexora-plugin' },
             { text: 'Logger', link: '/classes/logger' },
@@ -58,6 +61,7 @@ export default defineConfig({
             { text: 'ButtonBuilder', link: '/classes/button-builder' },
             { text: 'ModalBuilder', link: '/classes/modal-builder' },
             { text: 'LayoutContainerBuilder', link: '/classes/layout-container' },
+            { text: 'Paginator', link: '/classes/paginator' },
           ],
         },
       ],
@@ -89,6 +93,9 @@ export default defineConfig({
             { text: 'Overview', link: '/classes/' },
             { text: 'Nexora', link: '/classes/nexora' },
             { text: 'SlashCommand', link: '/classes/slash-command' },
+            { text: 'SlashCommandGroup', link: '/classes/slash-command-group' },
+            { text: 'EventHandler', link: '/classes/event-handler' },
+            { text: 'ButtonHandler', link: '/classes/button-handler' },
             { text: 'Service', link: '/classes/service' },
             { text: 'NexoraPlugin', link: '/classes/nexora-plugin' },
             { text: 'Logger', link: '/classes/logger' },
@@ -96,6 +103,7 @@ export default defineConfig({
             { text: 'ButtonBuilder', link: '/classes/button-builder' },
             { text: 'ModalBuilder', link: '/classes/modal-builder' },
             { text: 'LayoutContainerBuilder', link: '/classes/layout-container' },
+            { text: 'Paginator', link: '/classes/paginator' },
           ],
         },
         {
@@ -122,16 +130,16 @@ export default defineConfig({
         {
           text: 'Packages',
           items: [
-            { text: '@nexorajs/core', link: '/packages/core' },
-            { text: '@nexorajs/config', link: '/packages/config' },
-            { text: '@nexorajs/logger', link: '/packages/logger' },
-            { text: '@nexorajs/database', link: '/packages/database' },
-            { text: '@nexorajs/auth', link: '/packages/auth' },
-            { text: '@nexorajs/api', link: '/packages/api' },
-            { text: '@nexorajs/plugin-system', link: '/packages/plugin-system' },
-            { text: '@nexorajs/websocket', link: '/packages/websocket' },
-            { text: '@nexorajs/ui', link: '/packages/ui' },
-            { text: 'create-nexorajs', link: '/packages/cli' },
+            { text: '@nexora.ts/core', link: '/packages/core' },
+            { text: '@nexora.ts/config', link: '/packages/config' },
+            { text: '@nexora.ts/logger', link: '/packages/logger' },
+            { text: '@nexora.ts/database', link: '/packages/database' },
+            { text: '@nexora.ts/auth', link: '/packages/auth' },
+            { text: '@nexora.ts/api', link: '/packages/api' },
+            { text: '@nexora.ts/plugin-system', link: '/packages/plugin-system' },
+            { text: '@nexora.ts/websocket', link: '/packages/websocket' },
+            { text: '@nexora.ts/ui', link: '/packages/ui' },
+            { text: 'create-nexora.ts', link: '/packages/cli' },
           ],
         },
       ],

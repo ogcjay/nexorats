@@ -2,7 +2,7 @@
 
 Structured logging with pretty / compact / json console modes, command traces, file rotation, and live Studio stream.
 
-**Package:** `@nexorajs/logger`  
+**Package:** `@nexora.ts/logger`  
 Created automatically by `Nexora` via `createLiveLogger()`.
 
 ## Modes
@@ -43,7 +43,7 @@ tickets.info('Queue worker started');
 Printed by Core on ready:
 
 ```ts
-import { printStartupBanner } from '@nexorajs/logger';
+import { printStartupBanner } from '@nexora.ts/logger';
 
 printStartupBanner({
   name: 'Nexora',

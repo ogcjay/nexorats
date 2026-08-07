@@ -2,13 +2,13 @@
 
 Abstract base class for slash commands. Same discovery as `command({…})` — export `default class` from a file under `commands/`.
 
-**Package:** `@nexorajs/core`  
+**Package:** `@nexora.ts/core`  
 **Alias:** `BaseCommand` (extends `SlashCommand`)
 
 ## Minimal example
 
 ```ts
-import { SlashCommand, type CommandContext } from '@nexorajs/core';
+import { SlashCommand, type CommandContext } from '@nexora.ts/core';
 
 export default class PingCommand extends SlashCommand {
   name = 'ping';
@@ -23,7 +23,7 @@ export default class PingCommand extends SlashCommand {
 ## With options & guards
 
 ```ts
-import { SlashCommand, EmbedBuilder, type CommandContext } from '@nexorajs/core';
+import { SlashCommand, EmbedBuilder, type CommandContext } from '@nexora.ts/core';
 
 export default class BanCommand extends SlashCommand {
   name = 'ban';

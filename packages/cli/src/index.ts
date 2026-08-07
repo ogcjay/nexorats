@@ -137,16 +137,16 @@ OAUTH_REDIRECT_URI=http://localhost:3000/api/auth/callback
           'db:migrate': 'drizzle-kit migrate',
         },
         dependencies: {
-          '@nexorajs/config': '^0.1.2',
-          '@nexorajs/core': '^0.1.3',
-          '@nexorajs/logger': '^0.1.2',
-          '@nexorajs/dev-server': '^0.1.1',
+          '@nexora.ts/config': '^0.1.2',
+          '@nexora.ts/core': '^0.1.3',
+          '@nexora.ts/logger': '^0.1.2',
+          '@nexora.ts/dev-server': '^0.1.1',
           ...(options.dashboard
             ? {
-                '@nexorajs/database': '^0.1.1',
-                '@nexorajs/auth': '^0.1.1',
-                '@nexorajs/api': '^0.1.1',
-                '@nexorajs/websocket': '^0.1.1',
+                '@nexora.ts/database': '^0.1.1',
+                '@nexora.ts/auth': '^0.1.1',
+                '@nexora.ts/api': '^0.1.1',
+                '@nexora.ts/websocket': '^0.1.1',
               }
             : {}),
         },
@@ -169,7 +169,7 @@ OAUTH_REDIRECT_URI=http://localhost:3000/api/auth/callback
 
   writeFile(
     join(projectPath, 'nexora.config.ts'),
-    `import { defineConfig } from '@nexorajs/config';
+    `import { defineConfig } from '@nexora.ts/config';
 
 export default defineConfig({
   bot: {
@@ -207,8 +207,8 @@ export default defineConfig({
   writeFile(
     join(projectPath, 'src/index.ts'),
     `import config from '../nexora.config.js';
-import { Nexora } from '@nexorajs/core';
-import { createDevServer } from '@nexorajs/dev-server';
+import { Nexora } from '@nexora.ts/core';
+import { createDevServer } from '@nexora.ts/dev-server';
 
 const bot = new Nexora({
   config,
@@ -267,7 +267,7 @@ process.on('SIGINT', async () => {
   if (options.example) {
     writeFile(
       join(projectPath, 'commands/ping.ts'),
-      `import { command } from '@nexorajs/core';
+      `import { command } from '@nexora.ts/core';
 
 export default command({
   name: 'ping',
@@ -283,7 +283,7 @@ export default command({
 
     writeFile(
       join(projectPath, 'events/ready.ts'),
-      `import { event } from '@nexorajs/core';
+      `import { event } from '@nexora.ts/core';
 
 export default event('ready', (client) => {
   console.log(\`Logged in as \${client.user.tag}\`);

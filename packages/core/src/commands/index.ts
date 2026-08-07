@@ -22,10 +22,28 @@ export {
 } from './command-class.js';
 
 export {
+  SlashCommandGroup,
+  isCommandGroupClass,
+  resolveCommandGroupExport,
+} from './command-group.js';
+
+export {
+  ContextMenuCommand,
+  createContextMenuContext,
+  isContextMenuClass,
+  resolveContextMenuExport,
+  type ContextMenuType,
+  type ContextMenuContext,
+  type ContextMenuCommandDefinition,
+} from './context-menu.js';
+
+export {
   CommandRegistry,
   discoverCommands,
   deployCommands,
   attachCommandHandlers,
   type RegisteredCommand,
+  type RegisteredCommandGroup,
+  type RegisteredContextMenu,
   type AttachCommandHandlersOptions,
 } from './registry.js';

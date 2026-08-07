@@ -1,4 +1,4 @@
-import type { Logger } from '@nexorajs/logger';
+import type { Logger } from '@nexora.ts/logger';
 import type { Container, ServiceToken } from '../container/index.js';
 
 /** Context passed into every {@link Service} constructor */

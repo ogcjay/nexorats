@@ -37,11 +37,11 @@ export class SectionBuilder {
   validate(): this {
     if (this.children.length < 1 || this.children.length > 3) {
       console.warn(
-        `[nexorajs] Section: expected 1–3 Text Display children, got ${this.children.length}.`,
+        `[nexora.ts] Section: expected 1–3 Text Display children, got ${this.children.length}.`,
       );
     }
     if (!this.accessoryValue) {
-      console.warn('[nexorajs] Section: accessory is required (Thumbnail or Button).');
+      console.warn('[nexora.ts] Section: accessory is required (Thumbnail or Button).');
     }
     warnIfOverComponentLimit(this.toJSON(), 'Section');
     return this;

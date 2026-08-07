@@ -1,4 +1,4 @@
-import type { LogLevel, LoggerConsoleMode } from '@nexorajs/config';
+import type { LogLevel, LoggerConsoleMode } from '@nexora.ts/config';
 
 /** Console output mode */
 export type ConsoleMode = LoggerConsoleMode;

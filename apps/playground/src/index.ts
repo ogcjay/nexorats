@@ -1,7 +1,7 @@
 import config from '../nexora.config.js';
-import { Nexora } from '@nexorajs/core';
-import { PluginLoader } from '@nexorajs/plugin-system';
-import { createDevServer } from '@nexorajs/dev-server';
+import { Nexora } from '@nexora.ts/core';
+import { PluginLoader } from '@nexora.ts/plugin-system';
+import { createDevServer } from '@nexora.ts/dev-server';
 
 const bot = new Nexora({
   config,

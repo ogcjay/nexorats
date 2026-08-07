@@ -1,9 +1,9 @@
-# @nexorajs/database
+# @nexora.ts/database
 
 Drizzle ORM layer with a **repository pattern**. All database access goes through repositories — never from the dashboard directly.
 
 ```ts
-import { createDatabase, RepositoryFactory } from '@nexorajs/database';
+import { createDatabase, RepositoryFactory } from '@nexora.ts/database';
 
 const db = await createDatabase({
   provider: 'postgresql',

@@ -14,5 +14,5 @@ Standalone example packages will be added under this folder.
 # from repo root
 cp .env.example apps/playground/.env
 # set DISCORD_TOKEN + DISCORD_CLIENT_ID
-pnpm --filter @nexorajs/playground dev
+pnpm --filter @nexora.ts/playground dev
 ```

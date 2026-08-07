@@ -3,7 +3,7 @@
 Define slash commands with the typed `command()` helper — or as a class. Files under your commands path are loaded automatically.
 
 ```ts
-import { command } from '@nexorajs/core';
+import { command } from '@nexora.ts/core';
 
 export default command({
   name: 'ping',
@@ -58,7 +58,7 @@ You can still use `ctx.interaction.reply(…)` when you need the full Discord.js
 `reply` accepts builder-friendly options: `embed` / `embeds`, `components`, and `v2` (auto flag). See [Builders](builders.md) and [Components V2](components-v2.md).
 
 ```ts
-import { command, EmbedBuilder } from '@nexorajs/core';
+import { command, EmbedBuilder } from '@nexora.ts/core';
 
 export default command({
   name: 'status',
@@ -70,7 +70,7 @@ export default command({
 ```
 
 ```ts
-import { command, text, container } from '@nexorajs/core';
+import { command, text, container } from '@nexora.ts/core';
 
 export default command({
   name: 'panel',
@@ -114,7 +114,7 @@ export default command({
 Prefer classes when you want shared structure, reuse, or DI-friendly services. Discovery accepts both styles.
 
 ```ts
-import { SlashCommand, type CommandContext } from '@nexorajs/core';
+import { SlashCommand, type CommandContext } from '@nexora.ts/core';
 
 export default class PingCommand extends SlashCommand {
   name = 'ping';
@@ -128,7 +128,16 @@ export default class PingCommand extends SlashCommand {
 }
 ```
 
-See [Classes](../classes/index.md) for `SlashCommand`, `Service`, builders, and plugins with full examples.
+### Groups, menus & prompts
+
+| Need | Class / helper |
+| --- | --- |
+| Subcommands under one root | [SlashCommandGroup](../classes/slash-command-group.md) |
+| User / message context menu | [ContextMenuCommand](../classes/slash-command-group.md) |
+| Persistent buttons / selects / modals | [ButtonHandler](../classes/button-handler.md) (+ `interactions/`) |
+| Paginated embeds, confirm, choice | [Paginator](../classes/paginator.md) · ConfirmDialog · ChoicePrompt |
+
+See [Classes](../classes/index.md) for `SlashCommand`, groups, handlers, builders, and plugins with full examples.
 
 ## Options
 

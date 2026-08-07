@@ -32,9 +32,9 @@ Discord’s type **17** is a **Container**. discord.js calls it `ContainerBuilde
 Nexora uses **`LayoutContainerBuilder`** (alias **`MessageContainerBuilder`**) so it never clashes with the DI [`Container`](dependency-injection.md). Factory: `container(…)`.
 
 ```ts
-import { MessageContainerBuilder, text } from '@nexorajs/core';
+import { MessageContainerBuilder, text } from '@nexora.ts/core';
 // same class:
-import { LayoutContainerBuilder, container } from '@nexorajs/core';
+import { LayoutContainerBuilder, container } from '@nexora.ts/core';
 ```
 
 ## Component builders
@@ -76,7 +76,7 @@ await interaction.reply({
 
 ```ts
 // Nexora — flag set automatically
-import { command, container, text } from '@nexorajs/core';
+import { command, container, text } from '@nexora.ts/core';
 
 export default command({
   name: 'welcome',
@@ -92,7 +92,7 @@ export default command({
 ## Reply helpers
 
 ```ts
-import { command, text, separator } from '@nexorajs/core';
+import { command, text, separator } from '@nexora.ts/core';
 
 export default command({
   name: 'panel',
@@ -135,7 +135,7 @@ const payload = ComponentsV2.card({
 await ctx.reply({ ...payload });
 ```
 
-Imports for the snippets above: `container`, `ComponentsV2`, `ButtonBuilder` from `@nexorajs/core`.
+Imports for the snippets above: `container`, `ComponentsV2`, `ButtonBuilder` from `@nexora.ts/core`.
 
 
 ## Layout examples
@@ -153,7 +153,7 @@ await ctx.componentsV2(
 ### Section with thumbnail
 
 ```ts
-import { section, text, thumbnail } from '@nexorajs/core';
+import { section, text, thumbnail } from '@nexora.ts/core';
 
 await ctx.componentsV2(
   section('# Profile', ctx.user.tag).accessory(
@@ -165,7 +165,7 @@ await ctx.componentsV2(
 ### Media gallery
 
 ```ts
-import { gallery } from '@nexorajs/core';
+import { gallery } from '@nexora.ts/core';
 
 await ctx.componentsV2(
   text('Screenshots'),
@@ -185,7 +185,7 @@ import {
   separator,
   ActionRowBuilder,
   ButtonBuilder,
-} from '@nexorajs/core';
+} from '@nexora.ts/core';
 
 const panel = new MessageContainerBuilder()
   .accent(0x5865f2)
@@ -205,7 +205,7 @@ await ctx.componentsV2(panel);
 ### `ComponentsV2Message`
 
 ```ts
-import { v2Message, text, container } from '@nexorajs/core';
+import { v2Message, text, container } from '@nexora.ts/core';
 
 const msg = v2Message(
   container(text('# Alert'), text('Deploy finished.')).accent(0x57f287),
@@ -217,7 +217,7 @@ await ctx.interaction.reply(msg.toJSON());
 ## Constants
 
 ```ts
-import { IsComponentsV2, MAX_V2_COMPONENTS, SeparatorSpacing, V2ComponentType } from '@nexorajs/core';
+import { IsComponentsV2, MAX_V2_COMPONENTS, SeparatorSpacing, V2ComponentType } from '@nexora.ts/core';
 
 IsComponentsV2;      // 1 << 15
 MAX_V2_COMPONENTS;   // 40

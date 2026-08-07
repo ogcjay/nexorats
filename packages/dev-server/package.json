@@ -1,5 +1,5 @@
 {
-  "name": "@nexorajs/dev-server",
+  "name": "@nexora.ts/dev-server",
   "version": "0.1.1",
   "description": "Local introspection API for Nexora Studio (Developer Center)",
   "license": "MIT",
@@ -22,9 +22,9 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@nexorajs/config": "workspace:*",
-    "@nexorajs/core": "workspace:*",
-    "@nexorajs/logger": "workspace:*"
+    "@nexora.ts/config": "workspace:*",
+    "@nexora.ts/core": "workspace:*",
+    "@nexora.ts/logger": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

@@ -1,4 +1,4 @@
-import { command } from '@nexorajs/core';
+import { command } from '@nexora.ts/core';
 
 export default command({
   name: 'info',

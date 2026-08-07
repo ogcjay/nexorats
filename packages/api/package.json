@@ -1,5 +1,5 @@
 {
-  "name": "@nexorajs/api",
+  "name": "@nexora.ts/api",
   "version": "0.1.1",
   "description": "REST API with validation and error handling",
   "license": "MIT",
@@ -22,9 +22,9 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@nexorajs/auth": "workspace:*",
-    "@nexorajs/database": "workspace:*",
-    "@nexorajs/logger": "workspace:*",
+    "@nexora.ts/auth": "workspace:*",
+    "@nexora.ts/database": "workspace:*",
+    "@nexora.ts/logger": "workspace:*",
     "zod": "^3.24.1"
   },
   "devDependencies": {

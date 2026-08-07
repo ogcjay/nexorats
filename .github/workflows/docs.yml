@@ -43,7 +43,7 @@ jobs:
         working-directory: apps/docs
         env:
           # Change to "/" if you use a custom domain or org root site
-          DOCS_BASE: /nexorajs/
+          DOCS_BASE: /nexora.ts/
         run: pnpm build
 
       - name: Upload artifact

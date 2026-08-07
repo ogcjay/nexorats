@@ -6,6 +6,7 @@ A typical Nexora bot project looks like this:
 my-bot/
 ├── commands/           # Slash commands (auto-discovered)
 ├── events/             # Discord events (auto-discovered)
+├── interactions/       # Button / select / modal handlers
 ├── plugins/            # Optional local plugins
 ├── src/
 │   └── index.ts        # Bootstraps Nexora
@@ -33,19 +34,20 @@ packages/
   plugin-system/
   websocket/
   ui/
-  cli/            create-nexorajs
+  cli/            create-nexora.ts
 ```
 
 ## Entry point
 
 ```ts
 import config from '../nexora.config.js';
-import { Nexora } from '@nexorajs/core';
+import { Nexora } from '@nexora.ts/core';
 
 const bot = new Nexora({
   config,
   commandsPath: './commands/**/*.ts',
   eventsPath: './events/**/*.ts',
+  interactionsPath: './interactions/**/*.ts',
 });
 
 await bot.start();

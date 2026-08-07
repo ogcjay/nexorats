@@ -1,4 +1,4 @@
-import type { LogLevel } from '@nexorajs/config';
+import type { LogLevel } from '@nexora.ts/config';
 import type { LogEntry, ConsoleMode } from './types.js';
 
 const RESET = '\x1b[0m';

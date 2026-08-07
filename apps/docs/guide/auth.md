@@ -1,6 +1,6 @@
 # Auth
 
-`@nexorajs/auth` provides Discord OAuth, session management, and permission checks for the dashboard.
+`@nexora.ts/auth` provides Discord OAuth, session management, and permission checks for the dashboard.
 
 ## Flow
 

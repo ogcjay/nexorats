@@ -3,7 +3,7 @@
 All bot configuration goes through type-safe `defineConfig()`.
 
 ```ts
-import { defineConfig } from '@nexorajs/config';
+import { defineConfig } from '@nexora.ts/config';
 
 export default defineConfig({
   bot: {
@@ -36,14 +36,18 @@ export default defineConfig({
   plugins: {
     tickets: { enabled: true },
   },
+  // Notify in the console when a newer @nexora.ts/core is on npm (default: true)
+  updateCheck: true,
 });
 ```
 
 ## Environment overrides
 
-Importing `@nexorajs/config` loads `.env` via `loadEnv()`. Scaffold scripts also pass `--env-file=.env`.
+Importing `@nexora.ts/config` loads `.env` via `loadEnv()`. Scaffold scripts also pass `--env-file=.env`.
 
-`@nexorajs/config` can merge common `NEXORA_*` env vars (token, database URL, log level, dashboard secret). Prefer keeping secrets in `.env`, never in git.
+`@nexora.ts/config` can merge common `NEXORA_*` env vars (token, database URL, log level, dashboard secret). Prefer keeping secrets in `.env`, never in git.
+
+Set `NEXORA_UPDATE_CHECK=0` to disable the startup update notice without changing config.
 
 ## Validation
 

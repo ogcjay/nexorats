@@ -1,6 +1,6 @@
 # Database
 
-`@nexorajs/database` uses **Drizzle ORM** with a **repository layer**.
+`@nexora.ts/database` uses **Drizzle ORM** with a **repository layer**.
 
 Supported providers:
 
@@ -8,7 +8,7 @@ Supported providers:
 - SQLite (optional peer; useful for local/dev)
 
 ```ts
-import { createDatabase, RepositoryFactory } from '@nexorajs/database';
+import { createDatabase, RepositoryFactory } from '@nexora.ts/database';
 
 const db = await createDatabase(config.database);
 const repos = new RepositoryFactory(db);

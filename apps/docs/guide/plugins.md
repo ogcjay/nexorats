@@ -9,7 +9,7 @@ Plugins are the heart of the Nexora ecosystem. A plugin can add:
 - Config extensions
 - Custom services
 
-…without modifying `@nexorajs/core`.
+…without modifying `@nexora.ts/core`.
 
 ## Plugin layout
 
@@ -38,7 +38,7 @@ my-plugin/
 Or via the typed helper:
 
 ```ts
-import { plugin } from '@nexorajs/plugin-system';
+import { plugin } from '@nexora.ts/plugin-system';
 
 export default plugin({
   name: 'tickets',
@@ -52,7 +52,7 @@ export default plugin({
 For lifecycle hooks and DI, export a class. The loader supports **both** `plugin({})` manifests and class defaults.
 
 ```ts
-import { NexoraPlugin, type PluginContext } from '@nexorajs/plugin-system';
+import { NexoraPlugin, type PluginContext } from '@nexora.ts/plugin-system';
 
 export default class TicketsPlugin extends NexoraPlugin {
   manifest = {
@@ -77,7 +77,7 @@ export default class TicketsPlugin extends NexoraPlugin {
 ## Loading
 
 ```ts
-import { PluginLoader } from '@nexorajs/plugin-system';
+import { PluginLoader } from '@nexora.ts/plugin-system';
 
 const loader = new PluginLoader(bot, bot.logger);
 await loader.loadAll({

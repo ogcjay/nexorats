@@ -1,9 +1,9 @@
-# create-nexorajs
+# create-nexora.ts
 
 CLI entry point for the Nexora ecosystem. Scaffold a production-ready Discord bot (optional dashboard, Docker, CI, examples) in minutes.
 
 ```bash
-npx create-nexorajs my-bot
+npx create-nexora.ts my-bot
 ```
 
 Prompts for bot name, database, dashboard, Docker, linting, GitHub Actions, and examples.

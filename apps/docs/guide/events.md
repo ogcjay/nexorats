@@ -3,7 +3,7 @@
 Register Discord.js client events with `event()`.
 
 ```ts
-import { event } from '@nexorajs/core';
+import { event } from '@nexora.ts/core';
 
 export default event('ready', (client) => {
   console.log(`Ready as ${client.user.tag}`);
@@ -24,7 +24,7 @@ export default event('ready', (client) => {
 For larger handlers you can export a class instead of `event()`:
 
 ```ts
-import { EventHandler } from '@nexorajs/core';
+import { EventHandler } from '@nexora.ts/core';
 
 export default class ReadyHandler extends EventHandler {
   name = 'ready' as const;
@@ -36,8 +36,8 @@ export default class ReadyHandler extends EventHandler {
 }
 ```
 
-Discovery accepts both `event()` definitions and class exports. See [Classes](../classes/index.md).
+Discovery accepts both `event()` definitions and class exports. Full reference: [EventHandler](../classes/event-handler.md).
 
 ## Framework event bus
 
-Besides Discord events, Nexora has an internal `EventBus` with hooks, middleware, and priorities — used by plugins and platform features (for example `COMMAND_EXECUTED` after a slash command runs). See [@nexorajs/core](../packages/core.md).
+Besides Discord events, Nexora has an internal `EventBus` with hooks, middleware, and priorities — used by plugins and platform features (for example `COMMAND_EXECUTED` after a slash command runs). See [@nexora.ts/core](../packages/core.md).

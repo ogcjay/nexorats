@@ -6,7 +6,7 @@ const monorepoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: monorepoRoot,
-  transpilePackages: ['@nexorajs/ui'],
+  transpilePackages: ['@nexora.ts/ui'],
   env: {
     NEXORA_API_URL: process.env.NEXORA_API_URL ?? 'http://localhost:4000',
     NEXORA_WS_URL: process.env.NEXORA_WS_URL ?? 'ws://localhost:4001',

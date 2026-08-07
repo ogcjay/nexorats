@@ -1,9 +1,9 @@
-# @nexorajs/websocket
+# @nexora.ts/websocket
 
 Live dashboard WebSocket hub for logs, status, and guild events.
 
 ```ts
-import { WebSocketHub } from '@nexorajs/websocket';
+import { WebSocketHub } from '@nexora.ts/websocket';
 
 const hub = new WebSocketHub(logger);
 hub.start(4001);

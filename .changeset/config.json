@@ -5,26 +5,26 @@
   "fixed": [],
   "linked": [
     [
-      "@nexorajs/config",
-      "@nexorajs/logger",
-      "@nexorajs/core",
-      "@nexorajs/database",
-      "@nexorajs/auth",
-      "@nexorajs/api",
-      "@nexorajs/plugin-system",
-      "@nexorajs/websocket",
-      "@nexorajs/ui",
-      "@nexorajs/dev-server",
-      "create-nexorajs"
+      "@nexora.ts/config",
+      "@nexora.ts/logger",
+      "@nexora.ts/core",
+      "@nexora.ts/database",
+      "@nexora.ts/auth",
+      "@nexora.ts/api",
+      "@nexora.ts/plugin-system",
+      "@nexora.ts/websocket",
+      "@nexora.ts/ui",
+      "@nexora.ts/dev-server",
+      "create-nexora.ts"
     ]
   ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@nexorajs/dashboard",
-    "@nexorajs/docs",
-    "@nexorajs/playground",
-    "@nexorajs/studio"
+    "@nexora.ts/dashboard",
+    "@nexora.ts/docs",
+    "@nexora.ts/playground",
+    "@nexora.ts/studio"
   ]
 }

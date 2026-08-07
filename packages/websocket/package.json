@@ -1,5 +1,5 @@
 {
-  "name": "@nexorajs/websocket",
+  "name": "@nexora.ts/websocket",
   "version": "0.1.1",
   "description": "WebSocket server for live dashboard events",
   "license": "MIT",
@@ -22,7 +22,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@nexorajs/logger": "workspace:*",
+    "@nexora.ts/logger": "workspace:*",
     "ws": "^8.18.0"
   },
   "devDependencies": {

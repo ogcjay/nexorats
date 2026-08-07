@@ -42,7 +42,7 @@ export class MediaGalleryBuilder {
   validate(): this {
     if (this.galleryItems.length < 1 || this.galleryItems.length > 10) {
       console.warn(
-        `[nexorajs] MediaGallery: expected 1–10 items, got ${this.galleryItems.length}.`,
+        `[nexora.ts] MediaGallery: expected 1–10 items, got ${this.galleryItems.length}.`,
       );
     }
     warnIfOverComponentLimit(this.toJSON(), 'MediaGallery');

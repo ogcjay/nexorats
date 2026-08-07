@@ -29,7 +29,7 @@ importers:
 
   apps/dashboard:
     dependencies:
-      '@nexorajs/ui':
+      '@nexora.ts/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       class-variance-authority:
@@ -87,19 +87,19 @@ importers:
 
   apps/playground:
     dependencies:
-      '@nexorajs/config':
+      '@nexora.ts/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@nexorajs/core':
+      '@nexora.ts/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@nexorajs/dev-server':
+      '@nexora.ts/dev-server':
         specifier: workspace:*
         version: link:../../packages/dev-server
-      '@nexorajs/logger':
+      '@nexora.ts/logger':
         specifier: workspace:*
         version: link:../../packages/logger
-      '@nexorajs/plugin-system':
+      '@nexora.ts/plugin-system':
         specifier: workspace:*
         version: link:../../packages/plugin-system
     devDependencies:
@@ -140,13 +140,13 @@ importers:
 
   packages/api:
     dependencies:
-      '@nexorajs/auth':
+      '@nexora.ts/auth':
         specifier: workspace:*
         version: link:../auth
-      '@nexorajs/database':
+      '@nexora.ts/database':
         specifier: workspace:*
         version: link:../database
-      '@nexorajs/logger':
+      '@nexora.ts/logger':
         specifier: workspace:*
         version: link:../logger
       zod:
@@ -165,10 +165,10 @@ importers:
 
   packages/auth:
     dependencies:
-      '@nexorajs/config':
+      '@nexora.ts/config':
         specifier: workspace:*
         version: link:../config
-      '@nexorajs/database':
+      '@nexora.ts/database':
         specifier: workspace:*
         version: link:../database
     devDependencies:
@@ -210,10 +210,10 @@ importers:
 
   packages/core:
     dependencies:
-      '@nexorajs/config':
+      '@nexora.ts/config':
         specifier: workspace:*
         version: link:../config
-      '@nexorajs/logger':
+      '@nexora.ts/logger':
         specifier: workspace:*
         version: link:../logger
       discord.js:
@@ -232,7 +232,7 @@ importers:
 
   packages/database:
     dependencies:
-      '@nexorajs/config':
+      '@nexora.ts/config':
         specifier: workspace:*
         version: link:../config
       drizzle-orm:
@@ -254,13 +254,13 @@ importers:
 
   packages/dev-server:
     dependencies:
-      '@nexorajs/config':
+      '@nexora.ts/config':
         specifier: workspace:*
         version: link:../config
-      '@nexorajs/core':
+      '@nexora.ts/core':
         specifier: workspace:*
         version: link:../core
-      '@nexorajs/logger':
+      '@nexora.ts/logger':
         specifier: workspace:*
         version: link:../logger
     devDependencies:
@@ -276,7 +276,7 @@ importers:
 
   packages/logger:
     dependencies:
-      '@nexorajs/config':
+      '@nexora.ts/config':
         specifier: workspace:*
         version: link:../config
     devDependencies:
@@ -289,10 +289,10 @@ importers:
 
   packages/plugin-system:
     dependencies:
-      '@nexorajs/core':
+      '@nexora.ts/core':
         specifier: workspace:*
         version: link:../core
-      '@nexorajs/logger':
+      '@nexora.ts/logger':
         specifier: workspace:*
         version: link:../logger
       glob:
@@ -342,7 +342,7 @@ importers:
 
   packages/websocket:
     dependencies:
-      '@nexorajs/logger':
+      '@nexora.ts/logger':
         specifier: workspace:*
         version: link:../logger
       ws:

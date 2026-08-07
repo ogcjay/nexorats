@@ -2,7 +2,7 @@
 
 Components V2 layout container — groups text, media, sections, and interactive components. Prefer this over classic embeds for new UIs.
 
-**Package:** `@nexorajs/core`  
+**Package:** `@nexora.ts/core`  
 **Factories:** `container()`, alias `MessageContainerBuilder`  
 **Flag:** replies must use `IsComponentsV2` (`ctx.componentsV2` / `v2Message` set it for you)
 
@@ -11,7 +11,7 @@ Components V2 layout container — groups text, media, sections, and interactive
 ## Quick example
 
 ```ts
-import { container, text, separator, type CommandContext } from '@nexorajs/core';
+import { container, text, separator, type CommandContext } from '@nexora.ts/core';
 
 export async function welcome(ctx: CommandContext) {
   await ctx.componentsV2(
@@ -29,7 +29,7 @@ export async function welcome(ctx: CommandContext) {
 ## Card preset
 
 ```ts
-import { ComponentsV2, type CommandContext } from '@nexorajs/core';
+import { ComponentsV2, type CommandContext } from '@nexora.ts/core';
 
 await ctx.reply(
   ComponentsV2.card({
@@ -53,7 +53,7 @@ import {
   ButtonBuilder,
   ActionRowBuilder,
   type CommandContext,
-} from '@nexorajs/core';
+} from '@nexora.ts/core';
 
 await ctx.componentsV2(
   container()

@@ -1,6 +1,6 @@
 # WebSocket
 
-`@nexorajs/websocket` streams live events to the dashboard:
+`@nexora.ts/websocket` streams live events to the dashboard:
 
 - Log lines
 - Bot status
@@ -8,7 +8,7 @@
 - Stats updates
 
 ```ts
-import { WebSocketHub } from '@nexorajs/websocket';
+import { WebSocketHub } from '@nexora.ts/websocket';
 
 const hub = new WebSocketHub(logger);
 hub.start(4001);

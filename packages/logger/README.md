@@ -1,9 +1,9 @@
-# @nexorajs/logger
+# @nexora.ts/logger
 
 Structured logging for the Nexora framework — pretty terminal console, file rotation, and live stream hooks for the dashboard.
 
 ```ts
-import { createLiveLogger, printStartupBanner } from '@nexorajs/logger';
+import { createLiveLogger, printStartupBanner } from '@nexora.ts/logger';
 
 const logger = createLiveLogger({
   level: 'info',

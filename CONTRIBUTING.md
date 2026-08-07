@@ -106,7 +106,7 @@ Document your plugin’s options and permissions so others can reuse it.
 
 1. Create `packages/<name>/` with `package.json`, `src/`, `tsconfig.json`, `tsconfig.build.json`
 2. Export the public API from `src/index.ts`
-3. Use workspace protocol: `"@nexorajs/foo": "workspace:*"`
+3. Use workspace protocol: `"@nexora.ts/foo": "workspace:*"`
 4. Add a package `README.md` with examples
 
 ## Reporting Bugs / Features

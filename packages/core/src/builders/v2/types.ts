@@ -169,7 +169,7 @@ export function warnIfOverComponentLimit(root: unknown, context: string): void {
   const total = countComponents(root);
   if (total > MAX_V2_COMPONENTS) {
     console.warn(
-      `[nexorajs] ${context}: ${total} components exceeds Discord's Components V2 limit of ${MAX_V2_COMPONENTS}.`,
+      `[nexora.ts] ${context}: ${total} components exceeds Discord's Components V2 limit of ${MAX_V2_COMPONENTS}.`,
     );
   }
 }

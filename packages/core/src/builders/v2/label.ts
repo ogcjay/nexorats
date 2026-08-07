@@ -50,13 +50,13 @@ export class LabelBuilder {
 
   validate(): this {
     if (this.labelValue.length > 45) {
-      console.warn('[nexorajs] Label: label text exceeds 45 characters.');
+      console.warn('[nexora.ts] Label: label text exceeds 45 characters.');
     }
     if (this.descriptionValue !== undefined && this.descriptionValue.length > 100) {
-      console.warn('[nexorajs] Label: description exceeds 100 characters.');
+      console.warn('[nexora.ts] Label: description exceeds 100 characters.');
     }
     if (!this.componentValue) {
-      console.warn('[nexorajs] Label: an inner component is required.');
+      console.warn('[nexora.ts] Label: an inner component is required.');
     }
     warnIfOverComponentLimit(this.toJSON(), 'Label');
     return this;

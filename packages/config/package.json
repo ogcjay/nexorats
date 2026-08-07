@@ -1,6 +1,6 @@
 {
-  "name": "@nexorajs/config",
-  "version": "0.1.2",
+  "name": "@nexora.ts/config",
+  "version": "0.1.3",
   "description": "Configuration loader with type-safe defineConfig()",
   "license": "MIT",
   "type": "module",

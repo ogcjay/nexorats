@@ -1,9 +1,9 @@
-# @nexorajs/api
+# @nexora.ts/api
 
 Internal REST API used by the Nexora dashboard. Validation, auth middleware, and typed error responses.
 
 ```ts
-import { createApiServer, ApiError, success } from '@nexorajs/api';
+import { createApiServer, ApiError, success } from '@nexora.ts/api';
 
 const server = createApiServer(auth, repos, logger, 4000);
 await server.start();

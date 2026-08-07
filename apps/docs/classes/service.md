@@ -2,13 +2,13 @@
 
 Base class for injectable helpers with a child logger. Use for tickets, moderation, economy, etc.
 
-**Package:** `@nexorajs/core`
+**Package:** `@nexora.ts/core`
 
 ## Example
 
 ```ts
-import { Service, registerService, type ServiceContext } from '@nexorajs/core';
-import type { Nexora } from '@nexorajs/core';
+import { Service, registerService, type ServiceContext } from '@nexora.ts/core';
+import type { Nexora } from '@nexora.ts/core';
 
 export class TicketService extends Service {
   constructor(ctx: ServiceContext) {
@@ -33,7 +33,7 @@ export function registerTicketService(bot: Nexora) {
 ## Resolve in a command
 
 ```ts
-import { SlashCommand, type CommandContext } from '@nexorajs/core';
+import { SlashCommand, type CommandContext } from '@nexora.ts/core';
 import type { TicketService } from '../services/tickets.js';
 
 export default class TicketCommand extends SlashCommand {

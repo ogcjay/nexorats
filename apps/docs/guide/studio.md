@@ -6,14 +6,14 @@ It is **not** the public documentation website.
 
 | | Public docs | Nexora Studio |
 | --- | --- | --- |
-| Where | [GitBook](https://cjays-organization.gitbook.io/nexorajs/) | `localhost:3002` |
+| Where | [GitBook](https://cjays-organization.gitbook.io/nexora.ts/) | `localhost:3002` |
 | Audience | Everyone | You, on your machine |
 | Content | Framework guides | **Your** commands, plugins, logs, config |
 | Start | Open the URL | Scaffold + `nexora dev` / `pnpm studio:dev` |
 
 ## Scaffold includes Studio
 
-Projects from `create-nexorajs@latest` wire `@nexorajs/dev-server` so Studio’s API starts with the bot. After `cp .env.example .env` and `pnpm install`:
+Projects from `create-nexora.ts@latest` wire `@nexora.ts/dev-server` so Studio’s API starts with the bot. After `cp .env.example .env` and `pnpm install`:
 
 ```bash
 pnpm dev
@@ -45,7 +45,7 @@ Studio shows exactly that.
 ## Wire it in your bot
 
 ```ts
-import { createDevServer } from '@nexorajs/dev-server';
+import { createDevServer } from '@nexora.ts/dev-server';
 
 const studioApi = createDevServer(bot, { port: 3920, studioPort: 3002 });
 await studioApi.start();
@@ -64,7 +64,7 @@ nexora studio    # Studio UI only (expects API on :3920)
 In the monorepo:
 
 ```bash
-pnpm --filter @nexorajs/studio dev
+pnpm --filter @nexora.ts/studio dev
 ```
 
 ## Features (v0.1)

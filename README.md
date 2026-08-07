@@ -5,14 +5,14 @@
 Nexora is a complete foundation — CLI, command system, plugin system, dashboard, authentication, and more — so you can focus on your bot’s features instead of wiring libraries together.
 
 [![CI](https://github.com/ogcjay/nexorajs/actions/workflows/ci.yml/badge.svg)](https://github.com/ogcjay/nexorajs/actions/workflows/ci.yml)
-[![Docs](https://img.shields.io/badge/docs-GitBook-blue)](https://cjays-organization.gitbook.io/nexorajs/)
+[![Docs](https://img.shields.io/badge/docs-GitBook-blue)](https://cjays-organization.gitbook.io/nexora.ts/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
 [![pnpm](https://img.shields.io/badge/pnpm-9.x-orange)](https://pnpm.io)
 
 > **Status:** early preview (`0.1.1`). APIs may change before `1.0.0`.
 >
-> **Documentation:** [https://cjays-organization.gitbook.io/nexorajs/](https://cjays-organization.gitbook.io/nexorajs/)  
+> **Documentation:** [https://cjays-organization.gitbook.io/nexora.ts/](https://cjays-organization.gitbook.io/nexora.ts/)  
 > **Nexora Studio (local):** `http://localhost:3002` — Developer Center for *your* running project (commands, plugins, logs, status)
 
 ---
@@ -32,7 +32,7 @@ You get a production-ready bot stack in minutes. The community grows it into a p
 
 | Building block        | What you get                                     |
 | --------------------- | ------------------------------------------------ |
-| **CLI**               | `create-nexorajs` scaffolds a full project         |
+| **CLI**               | `create-nexora.ts` scaffolds a full project         |
 | **Commands & events** | `command()` / `event()` with auto-discovery      |
 | **Plugin system**     | Commands, events, dashboard, API, migrations     |
 | **Dashboard**         | Next.js UI for guild settings, modules, logs     |
@@ -44,7 +44,7 @@ You get a production-ready bot stack in minutes. The community grows it into a p
 ## Quick Start
 
 ```bash
-npx create-nexorajs my-bot
+npx create-nexora.ts my-bot
 cd my-bot
 pnpm install
 cp .env.example .env   # add your Discord token
@@ -54,8 +54,8 @@ pnpm dev
 ### Minimal bot
 
 ```ts
-import { command, event } from '@nexorajs/core';
-import { defineConfig } from '@nexorajs/config';
+import { command, event } from '@nexora.ts/core';
+import { defineConfig } from '@nexora.ts/config';
 
 export default defineConfig({
   bot: {
@@ -99,11 +99,11 @@ Studio shows **project-specific** data: registered commands, events, plugins, sa
 
 ```bash
 # monorepo
-pnpm --filter @nexorajs/playground dev   # bot + Studio API
+pnpm --filter @nexora.ts/playground dev   # bot + Studio API
 pnpm studio:dev                        # Studio UI
 ```
 
-See the docs guide: [Nexora Studio](https://cjays-organization.gitbook.io/nexorajs/platform/nexora-studio).
+See the docs guide: [Nexora Studio](https://cjays-organization.gitbook.io/nexora.ts/platform/nexora-studio).
 
 ## Build plugins, grow the ecosystem
 
@@ -135,7 +135,7 @@ packages/
   websocket/      Live dashboard events
   ui/             Shared dashboard components
   dev-server/     Introspection API for Studio
-  cli/            create-nexorajs + nexora
+  cli/            create-nexora.ts + nexora
 examples/
 templates/
 ```
