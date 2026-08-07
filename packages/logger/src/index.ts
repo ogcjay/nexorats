@@ -1,29 +1,30 @@
 import type { LogLevel } from '@nexorajs/config';
 import { appendFileSync, existsSync, mkdirSync, renameSync, statSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname } from 'node:path';
+import {
+  formatCompact,
+  formatConsole,
+  serializeMeta,
+  writeToConsole,
+} from './format.js';
+import { printStartupBanner } from './banner.js';
+import type {
+  CommandMeta,
+  ConsoleMode,
+  LogEntry,
+  LoggerOptions,
+  StartupBannerOptions,
+} from './types.js';
 
-/** Log entry structure for file and live stream output */
-export interface LogEntry {
-  timestamp: string;
-  level: LogLevel;
-  message: string;
-  context?: string;
-  meta?: Record<string, unknown>;
-}
-
-/** Logger options */
-export interface LoggerOptions {
-  level?: LogLevel;
-  context?: string;
-  file?: {
-    enabled: boolean;
-    path?: string;
-    maxSize?: string;
-    maxFiles?: number;
-  };
-  liveStream?: boolean;
-  onLiveEntry?: (entry: LogEntry) => void;
-}
+export type {
+  CommandMeta,
+  ConsoleMode,
+  LogEntry,
+  LoggerOptions,
+  StartupBannerOptions,
+};
+export type { LoggerConsoleMode } from '@nexorajs/config';
+export { printStartupBanner };
 
 const LOG_LEVELS: Record<LogLevel, number> = {
   debug: 0,
@@ -31,15 +32,6 @@ const LOG_LEVELS: Record<LogLevel, number> = {
   warn: 2,
   error: 3,
 };
-
-const COLORS: Record<LogLevel, string> = {
-  debug: '\x1b[90m',
-  info: '\x1b[36m',
-  warn: '\x1b[33m',
-  error: '\x1b[31m',
-};
-
-const RESET = '\x1b[0m';
 
 /** Parse size string like "10mb" to bytes */
 function parseSize(size: string): number {
@@ -58,10 +50,15 @@ function parseSize(size: string): number {
   return value * (multipliers[unit] ?? 1024 * 1024);
 }
 
+function defaultConsoleMode(): ConsoleMode {
+  return process.env.NODE_ENV === 'production' ? 'compact' : 'pretty';
+}
+
 /** Structured logger with console, file, and live stream support */
 export class Logger {
   private readonly level: LogLevel;
   private readonly context?: string;
+  private readonly consoleMode: ConsoleMode;
   private readonly fileConfig?: LoggerOptions['file'];
   private readonly liveStream: boolean;
   private readonly onLiveEntry?: (entry: LogEntry) => void;
@@ -69,6 +66,7 @@ export class Logger {
   constructor(options: LoggerOptions = {}) {
     this.level = options.level ?? 'info';
     this.context = options.context;
+    this.consoleMode = options.console?.mode ?? defaultConsoleMode();
     this.fileConfig = options.file;
     this.liveStream = options.liveStream ?? false;
     this.onLiveEntry = options.onLiveEntry;
@@ -80,6 +78,7 @@ export class Logger {
     return new Logger({
       level: this.level,
       context: childContext,
+      console: { mode: this.consoleMode },
       file: this.fileConfig,
       liveStream: this.liveStream,
       onLiveEntry: this.onLiveEntry,
@@ -98,8 +97,20 @@ export class Logger {
     this.log('warn', message, meta);
   }
 
-  error(message: string, meta?: Record<string, unknown>): void {
+  error(message: string, meta?: Record<string, unknown> | Error): void {
+    if (meta instanceof Error) {
+      this.log('error', message, { error: meta });
+      return;
+    }
     this.log('error', message, meta);
+  }
+
+  /**
+   * Command execution trace — pretty mode shows a CMD badge.
+   * Equivalent to `info(msg, { type: 'command', ... })`.
+   */
+  command(message: string, meta?: CommandMeta): void {
+    this.log('info', message, { ...meta, type: 'command' });
   }
 
   private log(level: LogLevel, message: string, meta?: Record<string, unknown>): void {
@@ -117,23 +128,21 @@ export class Logger {
     this.writeFile(entry);
 
     if (this.liveStream && this.onLiveEntry) {
-      this.onLiveEntry(entry);
+      this.onLiveEntry(this.toLiveEntry(entry));
     }
   }
 
-  private writeConsole(entry: LogEntry): void {
-    const color = COLORS[entry.level];
-    const contextStr = entry.context ? `[${entry.context}] ` : '';
-    const metaStr = entry.meta ? ` ${JSON.stringify(entry.meta)}` : '';
-    const line = `${color}${entry.timestamp} ${entry.level.toUpperCase().padEnd(5)}${RESET} ${contextStr}${entry.message}${metaStr}`;
+  /** Live / dashboard entries stay structured; Errors are serialized */
+  private toLiveEntry(entry: LogEntry): LogEntry {
+    return {
+      ...entry,
+      meta: serializeMeta(entry.meta),
+    };
+  }
 
-    if (entry.level === 'error') {
-      console.error(line);
-    } else if (entry.level === 'warn') {
-      console.warn(line);
-    } else {
-      console.log(line);
-    }
+  private writeConsole(entry: LogEntry): void {
+    const line = formatConsole(entry, this.consoleMode);
+    writeToConsole(entry.level, line);
   }
 
   private writeFile(entry: LogEntry): void {
@@ -148,9 +157,11 @@ export class Logger {
 
     this.rotateIfNeeded(filePath);
 
-    const contextStr = entry.context ? `[${entry.context}] ` : '';
-    const metaStr = entry.meta ? ` ${JSON.stringify(entry.meta)}` : '';
-    const line = `${entry.timestamp} ${entry.level.toUpperCase().padEnd(5)} ${contextStr}${entry.message}${metaStr}\n`;
+    // File output stays compact + serializable (no ANSI)
+    const line = `${formatCompact({
+      ...entry,
+      meta: serializeMeta(entry.meta),
+    })}\n`;
 
     appendFileSync(filePath, line, 'utf-8');
   }

@@ -1,6 +1,6 @@
 {
   "name": "@nexorajs/plugin-system",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Plugin API, dependency management, hooks, and lifecycle",
   "license": "MIT",
   "type": "module",

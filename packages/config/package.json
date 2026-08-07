@@ -1,6 +1,6 @@
 {
   "name": "@nexorajs/config",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Configuration loader with type-safe defineConfig()",
   "license": "MIT",
   "type": "module",
@@ -49,5 +49,7 @@
     "bot",
     "typescript"
   ],
-  "sideEffects": false
+  "sideEffects": [
+    "./dist/index.js"
+  ]
 }

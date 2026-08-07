@@ -1,11 +1,8 @@
 #!/usr/bin/env node
 
 import prompts from 'prompts';
-import { mkdirSync, writeFileSync, cpSync, existsSync } from 'node:fs';
+import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 interface ProjectOptions {
   name: string;
@@ -96,9 +93,19 @@ async function main(): Promise<void> {
   console.log('  Next steps:\n');
   console.log(`    cd ${options.name}`);
   console.log('    pnpm install');
-  console.log('    cp .env.example .env');
   console.log('    # Edit .env with your Discord bot token');
-  console.log('    pnpm dev\n');
+  console.log('    pnpm dev');
+  console.log('    # or: npx nexora dev  → bot + Studio UI\n');
+  console.log('  Nexora Studio: http://localhost:3002  (API :3920)\n');
+}
+
+function ensureDir(filePath: string): void {
+  mkdirSync(dirname(filePath), { recursive: true });
+}
+
+function writeFile(filePath: string, content: string): void {
+  ensureDir(filePath);
+  writeFileSync(filePath, content);
 }
 
 function scaffoldProject(projectPath: string, options: ProjectOptions): void {
@@ -107,7 +114,15 @@ function scaffoldProject(projectPath: string, options: ProjectOptions): void {
       ? 'sqlite:./data/nexora.db'
       : 'postgresql://nexora:nexora@localhost:5432/nexora';
 
-  writeFileSync(
+  const envContent = `DISCORD_TOKEN=your_bot_token
+DISCORD_CLIENT_ID=your_client_id
+DISCORD_CLIENT_SECRET=your_client_secret
+DATABASE_URL=${dbUrl}
+DASHBOARD_SECRET=change_me_to_random_string
+OAUTH_REDIRECT_URI=http://localhost:3000/api/auth/callback
+`;
+
+  writeFile(
     join(projectPath, 'package.json'),
     JSON.stringify(
       {
@@ -116,21 +131,22 @@ function scaffoldProject(projectPath: string, options: ProjectOptions): void {
         private: true,
         type: 'module',
         scripts: {
-          dev: 'tsx watch src/index.ts',
-          start: 'node dist/index.js',
+          dev: 'tsx watch --env-file=.env src/index.ts',
+          start: 'node --env-file=.env dist/index.js',
           build: 'tsc',
           'db:migrate': 'drizzle-kit migrate',
         },
         dependencies: {
-          '@nexorajs/config': '^0.1.0',
-          '@nexorajs/core': '^0.1.0',
-          '@nexorajs/logger': '^0.1.0',
+          '@nexorajs/config': '^0.1.2',
+          '@nexorajs/core': '^0.1.1',
+          '@nexorajs/logger': '^0.1.1',
+          '@nexorajs/dev-server': '^0.1.1',
           ...(options.dashboard
             ? {
-                '@nexorajs/database': '^0.1.0',
-                '@nexorajs/auth': '^0.1.0',
-                '@nexorajs/api': '^0.1.0',
-                '@nexorajs/websocket': '^0.1.0',
+                '@nexorajs/database': '^0.1.1',
+                '@nexorajs/auth': '^0.1.1',
+                '@nexorajs/api': '^0.1.1',
+                '@nexorajs/websocket': '^0.1.1',
               }
             : {}),
         },
@@ -138,6 +154,12 @@ function scaffoldProject(projectPath: string, options: ProjectOptions): void {
           '@types/node': '^22.10.0',
           tsx: '^4.19.2',
           typescript: '^5.7.2',
+          ...(options.linting
+            ? {
+                eslint: '^9.17.0',
+                prettier: '^3.4.2',
+              }
+            : {}),
         },
       },
       null,
@@ -145,7 +167,7 @@ function scaffoldProject(projectPath: string, options: ProjectOptions): void {
     ),
   );
 
-  writeFileSync(
+  writeFile(
     join(projectPath, 'nexora.config.ts'),
     `import { defineConfig } from '@nexorajs/config';
 
@@ -182,10 +204,11 @@ export default defineConfig({
 `,
   );
 
-  writeFileSync(
+  writeFile(
     join(projectPath, 'src/index.ts'),
     `import config from '../nexora.config.js';
 import { Nexora } from '@nexorajs/core';
+import { createDevServer } from '@nexorajs/dev-server';
 
 const bot = new Nexora({
   config,
@@ -193,16 +216,26 @@ const bot = new Nexora({
   eventsPath: './events/**/*.ts',
 });
 
+const studioApi = createDevServer(bot, {
+  port: 3920,
+  studioPort: 3002,
+});
+
+await studioApi.start();
 await bot.start();
 
+bot.logger.info('Nexora Studio → http://localhost:3002 (API :3920)');
+bot.logger.info('Start the Studio UI with: npx nexora studio  (or nexora dev)');
+
 process.on('SIGINT', async () => {
+  await studioApi.stop();
   await bot.stop();
   process.exit(0);
 });
 `,
   );
 
-  writeFileSync(
+  writeFile(
     join(projectPath, 'tsconfig.json'),
     JSON.stringify(
       {
@@ -223,24 +256,16 @@ process.on('SIGINT', async () => {
     ),
   );
 
-  writeFileSync(
-    join(projectPath, '.env.example'),
-    `DISCORD_TOKEN=your_bot_token
-DISCORD_CLIENT_ID=your_client_id
-DISCORD_CLIENT_SECRET=your_client_secret
-DATABASE_URL=${dbUrl}
-DASHBOARD_SECRET=change_me_to_random_string
-OAUTH_REDIRECT_URI=http://localhost:3000/api/auth/callback
-`,
-  );
+  writeFile(join(projectPath, '.env.example'), envContent);
+  writeFile(join(projectPath, '.env'), envContent);
 
-  writeFileSync(join(projectPath, '.gitignore'), 'node_modules/\ndist/\n.env\nlogs/\ndata/\n');
+  writeFile(join(projectPath, '.gitignore'), 'node_modules/\ndist/\n.env\nlogs/\ndata/\n');
+
+  // Ensure empty plugins/ exists for local plugin discovery
+  writeFile(join(projectPath, 'plugins/.gitkeep'), '');
 
   if (options.example) {
-    mkdirSync(join(projectPath, 'commands'), { recursive: true });
-    mkdirSync(join(projectPath, 'events'), { recursive: true });
-
-    writeFileSync(
+    writeFile(
       join(projectPath, 'commands/ping.ts'),
       `import { command } from '@nexorajs/core';
 
@@ -256,7 +281,7 @@ export default command({
 `,
     );
 
-    writeFileSync(
+    writeFile(
       join(projectPath, 'events/ready.ts'),
       `import { event } from '@nexorajs/core';
 
@@ -269,7 +294,7 @@ export default event('ready', (client) => {
   }
 
   if (options.docker) {
-    writeFileSync(
+    writeFile(
       join(projectPath, 'docker-compose.yml'),
       options.database === 'postgresql'
         ? `services:
@@ -293,8 +318,7 @@ volumes:
   }
 
   if (options.githubActions) {
-    mkdirSync(join(projectPath, '.github/workflows'), { recursive: true });
-    writeFileSync(
+    writeFile(
       join(projectPath, '.github/workflows/ci.yml'),
       `name: CI
 on: [push, pull_request]

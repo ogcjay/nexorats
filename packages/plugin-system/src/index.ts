@@ -1,4 +1,10 @@
-export { plugin } from './define.js';
+export {
+  plugin,
+  NexoraPlugin,
+  Plugin,
+  isNexoraPluginClass,
+  isPluginManifest,
+} from './define.js';
 export type {
   PluginManifest,
   PluginDashboardPage,

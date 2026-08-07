@@ -139,6 +139,7 @@ export const FrameworkEvents = {
   BOT_READY: 'bot:ready',
   BOT_SHUTDOWN: 'bot:shutdown',
   COMMAND_EXECUTED: 'command:executed',
+  COMMAND_ERROR: 'command:error',
   PLUGIN_LOADED: 'plugin:loaded',
   PLUGIN_UNLOADED: 'plugin:unloaded',
   GUILD_JOINED: 'guild:joined',

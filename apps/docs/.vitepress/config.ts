@@ -53,6 +53,7 @@ export default defineConfig({
           items: [
             { text: 'Commands', link: '/guide/commands' },
             { text: 'Events', link: '/guide/events' },
+            { text: 'Classes', link: '/guide/classes' },
             { text: 'Dependency injection', link: '/guide/dependency-injection' },
             { text: 'Logging', link: '/guide/logging' },
             { text: 'Cache & scheduler', link: '/guide/cache-scheduler' },

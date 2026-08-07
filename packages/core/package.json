@@ -1,6 +1,6 @@
 {
   "name": "@nexorajs/core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Discord client, commands, events, and lifecycle management",
   "license": "MIT",
   "type": "module",

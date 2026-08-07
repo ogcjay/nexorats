@@ -24,7 +24,7 @@ my-plugin/
 └── config/
 ```
 
-## Manifest
+## Manifest helper
 
 ```json
 {
@@ -47,6 +47,33 @@ export default plugin({
 });
 ```
 
+## Plugin class (`NexoraPlugin`)
+
+For lifecycle hooks and DI, export a class. The loader supports **both** `plugin({})` manifests and class defaults.
+
+```ts
+import { NexoraPlugin, type PluginContext } from '@nexorajs/plugin-system';
+
+export default class TicketsPlugin extends NexoraPlugin {
+  manifest = {
+    name: 'tickets',
+    version: '1.0.0',
+    description: 'Support ticket system',
+  };
+
+  async onLoad(ctx: PluginContext) {
+    ctx.logger.info('Tickets plugin loaded');
+    // register services, commands, etc.
+  }
+
+  async onUnload(ctx: PluginContext) {
+    ctx.logger.info('Tickets plugin unloaded');
+  }
+}
+```
+
+`PluginContext` exposes logger, container, config, and bot-related refs so plugins can register commands/services without touching core.
+
 ## Loading
 
 ```ts
@@ -59,6 +86,8 @@ await loader.loadAll({
 });
 ```
 
+`onLoad` runs after the plugin is loaded; `onUnload` runs when the plugin is unloaded (if implemented).
+
 ## Install (CLI — planned)
 
 ```bash
@@ -68,4 +97,4 @@ nexora add moderation
 
 ## Community plugins
 
-Building and publishing plugins is how the ecosystem grows. See [Plugin ecosystem](ecosystem.md) and [Contributing](contributing.md).
+Building and publishing plugins is how the ecosystem grows. See [Plugin ecosystem](ecosystem.md) and [Contributing](contributing.md). More on classes: [Classes](classes.md).

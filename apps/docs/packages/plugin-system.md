@@ -1,12 +1,37 @@
 # @nexorajs/plugin-system
 
-Plugin manifests, dependency resolution, and loader lifecycle.
+Plugin manifests, class-based plugins, dependency resolution, and loader lifecycle.
 
 ```ts
-import { PluginLoader, plugin } from '@nexorajs/plugin-system';
+import { PluginLoader, plugin, NexoraPlugin } from '@nexorajs/plugin-system';
 
 const loader = new PluginLoader(bot, bot.logger);
 await loader.loadAll({ pluginsPath: './plugins' });
 ```
 
-See [Plugins](../guide/plugins.md).
+## Styles
+
+**Manifest helper** (unchanged):
+
+```ts
+export default plugin({
+  name: 'tickets',
+  version: '1.0.0',
+});
+```
+
+**Class** with lifecycle:
+
+```ts
+export default class TicketsPlugin extends NexoraPlugin {
+  manifest = { name: 'tickets', version: '1.0.0' };
+
+  async onLoad(ctx) {
+    ctx.logger.info('loaded');
+  }
+}
+```
+
+The loader accepts either default export. `onLoad` / `onUnload` run around enable/disable.
+
+See [Plugins](../guide/plugins.md) and [Classes](../guide/classes.md).

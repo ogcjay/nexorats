@@ -1,4 +1,10 @@
 import { z } from 'zod';
+import { loadEnv } from './load-env.js';
+
+// Load project .env before defineConfig consumers read process.env
+loadEnv();
+
+export { loadEnv } from './load-env.js';
 
 /** Supported database providers */
 export type DatabaseProvider = 'postgresql' | 'sqlite';
@@ -36,9 +42,16 @@ export interface AuthConfig {
   scopes?: string[];
 }
 
+/** Console output mode for @nexorajs/logger */
+export type LoggerConsoleMode = 'pretty' | 'compact' | 'json';
+
 /** Logger configuration */
 export interface LoggerConfig {
   level: LogLevel;
+  /** Console formatting — defaults to pretty in development */
+  console?: {
+    mode?: LoggerConsoleMode;
+  };
   file?: {
     enabled: boolean;
     path?: string;
@@ -105,6 +118,11 @@ export const nexoraConfigSchema = z.object({
   logger: z
     .object({
       level: z.enum(['debug', 'info', 'warn', 'error']),
+      console: z
+        .object({
+          mode: z.enum(['pretty', 'compact', 'json']).optional(),
+        })
+        .optional(),
       file: z
         .object({
           enabled: z.boolean(),

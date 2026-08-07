@@ -13,6 +13,7 @@
 
 * [Commands](guide/commands.md)
 * [Events](guide/events.md)
+* [Classes](guide/classes.md)
 * [Dependency injection](guide/dependency-injection.md)
 * [Logging](guide/logging.md)
 * [Cache & scheduler](guide/cache-scheduler.md)

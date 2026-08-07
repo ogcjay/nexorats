@@ -1,7 +1,7 @@
 {
   "name": "@nexorajs/logger",
-  "version": "0.1.1",
-  "description": "Structured logging with colors, file output, and live streaming",
+  "version": "0.1.2",
+  "description": "Modern terminal logging — pretty/compact/json, command traces, startup banner, live streaming",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -9,7 +9,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [

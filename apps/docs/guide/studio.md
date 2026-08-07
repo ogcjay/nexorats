@@ -6,10 +6,22 @@ It is **not** the public documentation website.
 
 | | Public docs | Nexora Studio |
 | --- | --- | --- |
-| Where | GitHub Pages | `localhost:3002` |
+| Where | [GitBook](https://cjays-organization.gitbook.io/nexorajs/) | `localhost:3002` |
 | Audience | Everyone | You, on your machine |
 | Content | Framework guides | **Your** commands, plugins, logs, config |
-| Start | Open the URL | Runs with `nexora dev` / monorepo `pnpm studio:dev` |
+| Start | Open the URL | Scaffold + `nexora dev` / `pnpm studio:dev` |
+
+## Scaffold includes Studio
+
+Projects from `create-nexorajs@latest` wire `@nexorajs/dev-server` so Studio’s API starts with the bot. After `cp .env.example .env` and `pnpm install`:
+
+```bash
+pnpm dev
+# or:
+nexora dev
+```
+
+That starts the bot process and the Studio UI. Open **http://localhost:3002**.
 
 ## Why Studio exists
 
@@ -42,11 +54,17 @@ await studioApi.start();
 studioApi.setPlugins(/* … */);
 ```
 
-Then start the UI:
+CLI helpers:
+
+```bash
+nexora dev      # bot + Studio UI
+nexora studio    # Studio UI only (expects API on :3920)
+```
+
+In the monorepo:
 
 ```bash
 pnpm --filter @nexorajs/studio dev
-# or: nexora studio
 ```
 
 ## Features (v0.1)
@@ -57,4 +75,4 @@ pnpm --filter @nexorajs/studio dev
 - Plugin list
 - Sanitized configuration (secrets redacted)
 - Log buffer
-- Link to public GitHub Pages docs
+- Link to public docs

@@ -19,7 +19,7 @@ features:
   - title: Plugin ecosystem
     details: Extend Nexora with commands, events, dashboard pages, and API routes without changing core. Build and share community plugins.
   - title: Type-safe DX
-    details: defineConfig(), typed command() / event() helpers, auto-discovery, and a clean architecture built for growth.
+    details: defineConfig(), typed command() / event() helpers or SlashCommand classes, auto-discovery, pretty console, and Studio for local development.
   - title: Free & open source
-    details: MIT licensed. Use it, extend it, improve it. Hosted docs for everyone via GitHub Pages.
+    details: MIT licensed. Use it, extend it, improve it. Docs on GitBook — Studio stays local for your project.
 ---

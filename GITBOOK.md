@@ -1,5 +1,7 @@
 # GitBook — Sidebar / alle Seiten anzeigen
 
+**Öffentliche Docs:** [https://cjays-organization.gitbook.io/nexorajs/](https://cjays-organization.gitbook.io/nexorajs/)
+
 GitBook zeigt **nur Seiten, die in `SUMMARY.md` stehen**. Die Datei ist das Inhaltsverzeichnis (linke Sidebar).
 
 ## Warum du nur die README siehst

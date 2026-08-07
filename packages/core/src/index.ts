@@ -7,6 +7,12 @@ export type { ServiceToken, ServiceFactory } from './container/index.js';
 export {
   command,
   messageCommand,
+  createCommandContext,
+  createMessageCommandContext,
+  SlashCommand,
+  BaseCommand,
+  isCommandClass,
+  resolveCommandExport,
   CommandRegistry,
   discoverCommands,
   deployCommands,
@@ -16,7 +22,11 @@ export type {
   CommandDefinition,
   CommandContext,
   CommandOption,
+  CommandModuleType,
   MessageCommandDefinition,
+  MessageCommandContext,
+  RegisteredCommand,
+  AttachCommandHandlersOptions,
 } from './commands/index.js';
 
 export { event, EventRegistry, discoverEvents, attachEventHandlers } from './events/index.js';
@@ -30,3 +40,6 @@ export type { CacheAdapter } from './cache/index.js';
 
 export { Scheduler } from './scheduler/index.js';
 export type { ScheduledJob } from './scheduler/index.js';
+
+export { Service, createService, registerService } from './services/index.js';
+export type { ServiceContext } from './services/index.js';

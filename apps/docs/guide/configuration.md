@@ -29,6 +29,7 @@ export default defineConfig({
   },
   logger: {
     level: 'info',
+    console: { mode: 'pretty' }, // 'pretty' | 'compact' | 'json'
     file: { enabled: true, path: './logs/nexora.log' },
     liveStream: true,
   },
@@ -39,6 +40,8 @@ export default defineConfig({
 ```
 
 ## Environment overrides
+
+Importing `@nexorajs/config` loads `.env` via `loadEnv()`. Scaffold scripts also pass `--env-file=.env`.
 
 `@nexorajs/config` can merge common `NEXORA_*` env vars (token, database URL, log level, dashboard secret). Prefer keeping secrets in `.env`, never in git.
 

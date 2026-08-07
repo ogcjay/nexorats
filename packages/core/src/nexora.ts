@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, Partials, type ClientOptions } from 'discord.js';
 import type { NexoraConfig } from '@nexorajs/config';
-import { createLiveLogger, type Logger } from '@nexorajs/logger';
+import { createLiveLogger, printStartupBanner, type Logger } from '@nexorajs/logger';
 import { Container, TOKENS } from './container/index.js';
 import {
   CommandRegistry,
@@ -52,6 +52,7 @@ export class Nexora {
     this.logger = createLiveLogger({
       level: options.config.logger?.level ?? 'info',
       context: 'nexora',
+      console: options.config.logger?.console,
       file: options.config.logger?.file,
     });
 
@@ -95,15 +96,34 @@ export class Nexora {
     this.phase = 'starting';
     this.logger.info('Starting Nexora...');
 
+    if (!this.config.bot.token?.trim()) {
+      throw new Error(
+        'DISCORD_TOKEN fehlt oder ist leer. Lege eine .env im Projektroot an und starte mit --env-file=.env (oder nutze @nexorajs/config loadEnv).',
+      );
+    }
+
     await discoverCommands(this.commandsPath, this.commandRegistry, this.logger);
     await discoverEvents(this.eventsPath, this.eventRegistry, this.logger);
 
-    attachCommandHandlers(this.client, this.commandRegistry, this.logger);
+    attachCommandHandlers(this.client, this.commandRegistry, this.logger, {
+      eventBus: this.eventBus,
+    });
     attachEventHandlers(this.client, this.eventRegistry);
 
     this.client.once('ready', (readyClient) => {
       this.phase = 'ready';
-      this.logger.info(`Logged in as ${readyClient.user.tag}`);
+      printStartupBanner({
+        name: 'Nexora',
+        version: '0.1.2',
+        userTag: readyClient.user.tag,
+        commands: this.commandRegistry.size,
+        events: this.eventRegistry.size,
+        studioUrl:
+          process.env.NEXORA_STUDIO_URL ??
+          (this.config.dashboard?.enabled
+            ? (this.config.dashboard.url ?? 'http://localhost:3002')
+            : 'http://localhost:3002'),
+      });
       void this.eventBus.emit(FrameworkEvents.BOT_READY, { client: readyClient });
     });
 

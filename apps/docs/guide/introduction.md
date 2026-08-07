@@ -12,13 +12,15 @@ Nexora aims to be the shared platform:
 
 | Building block | What you get |
 | --- | --- |
-| **CLI** | `create-nexorajs` scaffolds a production-ready project |
-| **Commands & events** | Typed helpers + auto-discovery |
-| **Plugins** | Extend without forking core |
+| **CLI** | `create-nexorajs@latest` scaffolds a project with Studio + `.env` |
+| **Commands & events** | Typed helpers or classes + auto-discovery + guards |
+| **Plugins** | Manifest or `NexoraPlugin` class — extend without forking core |
+| **Studio** | Local Developer Center (`localhost:3002`) |
 | **Dashboard** | Guild settings, modules, logs |
 | **Auth** | Discord OAuth, sessions, permissions |
 | **Database** | Drizzle + repositories |
 | **API + WebSocket** | Internal API and live updates |
+| **Logging** | Pretty / compact / json console, banner, command traces |
 
 ## Open source & community
 
