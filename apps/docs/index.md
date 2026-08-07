@@ -13,6 +13,9 @@ hero:
       text: Classes
       link: /classes/
     - theme: alt
+      text: Packages
+      link: /packages/
+    - theme: alt
       text: View on GitHub
       link: https://github.com/ogcjay/nexorajs
 

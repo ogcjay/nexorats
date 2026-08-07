@@ -14,7 +14,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
-const DOCS_PLUGINS = 'https://cjays-organization.gitbook.io/nexorajs/guide/plugins';
+const DOCS_PLUGINS = 'https://cjays-organization.gitbook.io/nexora.ts/guide/plugins';
 const STUDIO_URL = 'http://localhost:3002';
 const STUDIO_API = 'http://127.0.0.1:3920';
 
@@ -131,7 +131,7 @@ function printHelp(): void {
 
   Studio = local Developer Center for THIS project (commands, plugins, logs…).
   Dashboard = upcoming public admin UI (not published yet).
-  Public docs: https://cjays-organization.gitbook.io/nexorajs
+  Public docs: https://cjays-organization.gitbook.io/nexora.ts
 `);
 }
 

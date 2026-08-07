@@ -8,6 +8,116 @@ import { defineConfig } from 'vitepress';
  */
 const base = process.env.DOCS_BASE ?? '/nexora.ts/';
 
+/** Shared sidebar — discord.js-style: top categories + nested collapsible groups */
+const sidebar = [
+  {
+    text: 'Getting Started',
+    collapsed: false,
+    items: [
+      { text: 'Introduction', link: '/guide/introduction' },
+      { text: 'Quick start', link: '/guide/quick-start' },
+      { text: 'Project structure', link: '/guide/project-structure' },
+      { text: 'Configuration', link: '/guide/configuration' },
+    ],
+  },
+  {
+    text: 'Commands & Interactions',
+    collapsed: false,
+    items: [
+      { text: 'Commands', link: '/guide/commands' },
+      { text: 'Events', link: '/guide/events' },
+    ],
+  },
+  {
+    text: 'Builders & UI',
+    collapsed: false,
+    items: [
+      { text: 'Builders', link: '/guide/builders' },
+      { text: 'Components V2', link: '/guide/components-v2' },
+    ],
+  },
+  {
+    text: 'Classes',
+    collapsed: false,
+    items: [
+      { text: 'Overview', link: '/classes/' },
+      {
+        text: 'Framework',
+        collapsed: false,
+        items: [
+          { text: 'Nexora', link: '/classes/nexora' },
+          { text: 'SlashCommand', link: '/classes/slash-command' },
+          { text: 'SlashCommandGroup', link: '/classes/slash-command-group' },
+          { text: 'EventHandler', link: '/classes/event-handler' },
+          { text: 'ButtonHandler', link: '/classes/button-handler' },
+          { text: 'Service', link: '/classes/service' },
+          { text: 'NexoraPlugin', link: '/classes/nexora-plugin' },
+          { text: 'Logger', link: '/classes/logger' },
+        ],
+      },
+      {
+        text: 'Message UI',
+        collapsed: false,
+        items: [
+          { text: 'EmbedBuilder', link: '/classes/embed-builder' },
+          { text: 'ButtonBuilder', link: '/classes/button-builder' },
+          { text: 'ModalBuilder', link: '/classes/modal-builder' },
+          { text: 'LayoutContainerBuilder', link: '/classes/layout-container' },
+          { text: 'Paginator', link: '/classes/paginator' },
+        ],
+      },
+    ],
+  },
+  {
+    text: 'Advanced',
+    collapsed: false,
+    items: [
+      { text: 'Dependency injection', link: '/guide/dependency-injection' },
+      { text: 'Logging', link: '/guide/logging' },
+      { text: 'Cache & scheduler', link: '/guide/cache-scheduler' },
+      { text: 'Plugins', link: '/guide/plugins' },
+    ],
+  },
+  {
+    text: 'Platform',
+    collapsed: false,
+    items: [
+      { text: 'Nexora Studio', link: '/guide/studio' },
+      { text: 'Database', link: '/guide/database' },
+      { text: 'Auth', link: '/guide/auth' },
+      { text: 'API', link: '/guide/api' },
+      { text: 'WebSocket', link: '/guide/websocket' },
+      { text: 'Dashboard (coming soon)', link: '/guide/dashboard' },
+    ],
+  },
+  {
+    text: 'Packages',
+    collapsed: false,
+    items: [
+      { text: 'Overview', link: '/packages/' },
+      { text: '@nexora.ts/core', link: '/packages/core' },
+      { text: '@nexora.ts/config', link: '/packages/config' },
+      { text: '@nexora.ts/logger', link: '/packages/logger' },
+      { text: '@nexora.ts/database', link: '/packages/database' },
+      { text: '@nexora.ts/auth', link: '/packages/auth' },
+      { text: '@nexora.ts/api', link: '/packages/api' },
+      { text: '@nexora.ts/plugin-system', link: '/packages/plugin-system' },
+      { text: '@nexora.ts/websocket', link: '/packages/websocket' },
+      { text: '@nexora.ts/ui (unreleased)', link: '/packages/ui' },
+      { text: 'create-nexora-ts', link: '/packages/cli' },
+    ],
+  },
+  {
+    text: 'Community',
+    collapsed: true,
+    items: [
+      { text: 'Contributing', link: '/guide/contributing' },
+      { text: 'Plugin ecosystem', link: '/guide/ecosystem' },
+      { text: 'Changelog', link: '/changelog' },
+    ],
+  },
+];
+
 export default defineConfig({
   title: 'Nexora',
   description:
@@ -26,8 +136,7 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
       { text: 'Classes', link: '/classes/' },
-      { text: 'Packages', link: '/packages/core' },
-      { text: 'Plugins', link: '/guide/plugins' },
+      { text: 'Packages', link: '/packages/' },
       {
         text: 'v0.1',
         items: [{ text: 'Changelog', link: '/changelog' }],
@@ -38,112 +147,7 @@ export default defineConfig({
       },
     ],
 
-    sidebar: {
-      '/classes/': [
-        {
-          text: 'Classes',
-          items: [
-            { text: 'Overview', link: '/classes/' },
-            { text: 'Nexora', link: '/classes/nexora' },
-            { text: 'SlashCommand', link: '/classes/slash-command' },
-            { text: 'SlashCommandGroup', link: '/classes/slash-command-group' },
-            { text: 'EventHandler', link: '/classes/event-handler' },
-            { text: 'ButtonHandler', link: '/classes/button-handler' },
-            { text: 'Service', link: '/classes/service' },
-            { text: 'NexoraPlugin', link: '/classes/nexora-plugin' },
-            { text: 'Logger', link: '/classes/logger' },
-          ],
-        },
-        {
-          text: 'Message UI',
-          items: [
-            { text: 'EmbedBuilder', link: '/classes/embed-builder' },
-            { text: 'ButtonBuilder', link: '/classes/button-builder' },
-            { text: 'ModalBuilder', link: '/classes/modal-builder' },
-            { text: 'LayoutContainerBuilder', link: '/classes/layout-container' },
-            { text: 'Paginator', link: '/classes/paginator' },
-          ],
-        },
-      ],
-      '/guide/': [
-        {
-          text: 'Getting started',
-          items: [
-            { text: 'Introduction', link: '/guide/introduction' },
-            { text: 'Quick start', link: '/guide/quick-start' },
-            { text: 'Project structure', link: '/guide/project-structure' },
-            { text: 'Configuration', link: '/guide/configuration' },
-          ],
-        },
-        {
-          text: 'Core concepts',
-          items: [
-            { text: 'Commands', link: '/guide/commands' },
-            { text: 'Builders', link: '/guide/builders' },
-            { text: 'Components V2', link: '/guide/components-v2' },
-            { text: 'Events', link: '/guide/events' },
-            { text: 'Dependency injection', link: '/guide/dependency-injection' },
-            { text: 'Logging', link: '/guide/logging' },
-            { text: 'Cache & scheduler', link: '/guide/cache-scheduler' },
-          ],
-        },
-        {
-          text: 'Classes',
-          items: [
-            { text: 'Overview', link: '/classes/' },
-            { text: 'Nexora', link: '/classes/nexora' },
-            { text: 'SlashCommand', link: '/classes/slash-command' },
-            { text: 'SlashCommandGroup', link: '/classes/slash-command-group' },
-            { text: 'EventHandler', link: '/classes/event-handler' },
-            { text: 'ButtonHandler', link: '/classes/button-handler' },
-            { text: 'Service', link: '/classes/service' },
-            { text: 'NexoraPlugin', link: '/classes/nexora-plugin' },
-            { text: 'Logger', link: '/classes/logger' },
-            { text: 'EmbedBuilder', link: '/classes/embed-builder' },
-            { text: 'ButtonBuilder', link: '/classes/button-builder' },
-            { text: 'ModalBuilder', link: '/classes/modal-builder' },
-            { text: 'LayoutContainerBuilder', link: '/classes/layout-container' },
-            { text: 'Paginator', link: '/classes/paginator' },
-          ],
-        },
-        {
-          text: 'Platform',
-          items: [
-            { text: 'Plugins', link: '/guide/plugins' },
-            { text: 'Nexora Studio', link: '/guide/studio' },
-            { text: 'Database', link: '/guide/database' },
-            { text: 'Auth', link: '/guide/auth' },
-            { text: 'API', link: '/guide/api' },
-            { text: 'Dashboard', link: '/guide/dashboard' },
-            { text: 'WebSocket', link: '/guide/websocket' },
-          ],
-        },
-        {
-          text: 'Community',
-          items: [
-            { text: 'Contributing', link: '/guide/contributing' },
-            { text: 'Plugin ecosystem', link: '/guide/ecosystem' },
-          ],
-        },
-      ],
-      '/packages/': [
-        {
-          text: 'Packages',
-          items: [
-            { text: '@nexora.ts/core', link: '/packages/core' },
-            { text: '@nexora.ts/config', link: '/packages/config' },
-            { text: '@nexora.ts/logger', link: '/packages/logger' },
-            { text: '@nexora.ts/database', link: '/packages/database' },
-            { text: '@nexora.ts/auth', link: '/packages/auth' },
-            { text: '@nexora.ts/api', link: '/packages/api' },
-            { text: '@nexora.ts/plugin-system', link: '/packages/plugin-system' },
-            { text: '@nexora.ts/websocket', link: '/packages/websocket' },
-            { text: '@nexora.ts/ui', link: '/packages/ui' },
-            { text: 'create-nexora-ts', link: '/packages/cli' },
-          ],
-        },
-      ],
-    },
+    sidebar,
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/ogcjay/nexorajs' }],
 

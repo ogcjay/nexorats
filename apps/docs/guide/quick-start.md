@@ -48,7 +48,7 @@ nexora dev
 
 > Open **:3002** for the Developer Center. A public OAuth **Dashboard** is planned but unreleased — see [Dashboard](dashboard.md).
 
-Public docs (this site): [https://cjays-organization.gitbook.io/nexorajs](https://cjays-organization.gitbook.io/nexorajs)
+Public docs (this site): [https://cjays-organization.gitbook.io/nexora.ts](https://cjays-organization.gitbook.io/nexora.ts)
 
 ## Your first command
 

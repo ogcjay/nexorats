@@ -6,7 +6,7 @@ It is **not** the public documentation website.
 
 | | Public docs | Nexora Studio |
 | --- | --- | --- |
-| Where | [GitBook](https://cjays-organization.gitbook.io/nexorajs) | `localhost:3002` |
+| Where | [GitBook](https://cjays-organization.gitbook.io/nexora.ts) | `localhost:3002` |
 | Audience | Everyone | You, on your machine |
 | Content | Framework guides | **Your** commands, plugins, logs, config |
 | Start | Open the URL | `pnpm dev` (embedded UI via `@nexora.ts/dev-server`) |

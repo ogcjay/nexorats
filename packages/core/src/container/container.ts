@@ -73,15 +73,19 @@ export class Container {
   }
 }
 
-/** Well-known service tokens */
+/**
+ * Well-known service tokens.
+ * Uses Symbol.for so identity is shared across duplicate @nexora.ts/core copies
+ * (common with pnpm nested deps / mismatched patch versions).
+ */
 export const TOKENS = {
-  Logger: Symbol('Logger'),
-  Config: Symbol('Config'),
-  Client: Symbol('Client'),
-  CommandRegistry: Symbol('CommandRegistry'),
-  EventRegistry: Symbol('EventRegistry'),
-  InteractionRegistry: Symbol('InteractionRegistry'),
-  EventBus: Symbol('EventBus'),
-  Cache: Symbol('Cache'),
-  Scheduler: Symbol('Scheduler'),
+  Logger: Symbol.for('nexora.Logger'),
+  Config: Symbol.for('nexora.Config'),
+  Client: Symbol.for('nexora.Client'),
+  CommandRegistry: Symbol.for('nexora.CommandRegistry'),
+  EventRegistry: Symbol.for('nexora.EventRegistry'),
+  InteractionRegistry: Symbol.for('nexora.InteractionRegistry'),
+  EventBus: Symbol.for('nexora.EventBus'),
+  Cache: Symbol.for('nexora.Cache'),
+  Scheduler: Symbol.for('nexora.Scheduler'),
 } as const;

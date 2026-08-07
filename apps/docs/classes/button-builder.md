@@ -41,7 +41,7 @@ export async function confirmDelete(ctx: CommandContext) {
       .label('Delete')
       .danger(),
     new ButtonBuilder().customId('delete:cancel').label('Cancel').secondary(),
-    new ButtonBuilder().label('Docs').link('https://cjays-organization.gitbook.io/nexorajs'),
+    new ButtonBuilder().label('Docs').link('https://cjays-organization.gitbook.io/nexora.ts'),
   );
 
   await ctx.reply({

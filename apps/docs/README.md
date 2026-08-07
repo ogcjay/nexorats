@@ -20,7 +20,7 @@ cp .env.example .env   # add your Discord token
 pnpm dev
 ```
 
-Continue with **[Quick start](guide/quick-start.md)**, **[Classes](classes/index.md)** (API reference with examples), or **[Introduction](guide/introduction.md)**.
+Continue with **[Quick start](guide/quick-start.md)**, **[Classes](classes/index.md)**, **[Packages](packages/index.md)**, or **[Introduction](guide/introduction.md)**.
 
 ## What you get
 

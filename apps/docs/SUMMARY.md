@@ -2,16 +2,29 @@
 
 * [Home](README.md)
 
-## Getting started
+## Getting Started
 
 * [Introduction](guide/introduction.md)
 * [Quick start](guide/quick-start.md)
 * [Project structure](guide/project-structure.md)
 * [Configuration](guide/configuration.md)
 
+## Commands & Interactions
+
+* [Commands](guide/commands.md)
+* [Events](guide/events.md)
+
+## Builders & UI
+
+* [Builders](guide/builders.md)
+* [Components V2](guide/components-v2.md)
+
 ## Classes
 
 * [Overview](classes/index.md)
+
+### Framework
+
 * [Nexora](classes/nexora.md)
 * [SlashCommand](classes/slash-command.md)
 * [SlashCommandGroup](classes/slash-command-group.md)
@@ -20,34 +33,34 @@
 * [Service](classes/service.md)
 * [NexoraPlugin](classes/nexora-plugin.md)
 * [Logger](classes/logger.md)
+
+### Message UI
+
 * [EmbedBuilder](classes/embed-builder.md)
 * [ButtonBuilder](classes/button-builder.md)
 * [ModalBuilder](classes/modal-builder.md)
 * [LayoutContainerBuilder](classes/layout-container.md)
 * [Paginator](classes/paginator.md)
 
-## Core concepts
+## Advanced
 
-* [Commands](guide/commands.md)
-* [Builders](guide/builders.md)
-* [Components V2](guide/components-v2.md)
-* [Events](guide/events.md)
 * [Dependency injection](guide/dependency-injection.md)
 * [Logging](guide/logging.md)
 * [Cache & scheduler](guide/cache-scheduler.md)
+* [Plugins](guide/plugins.md)
 
 ## Platform
 
-* [Plugins](guide/plugins.md)
 * [Nexora Studio](guide/studio.md)
 * [Database](guide/database.md)
 * [Auth](guide/auth.md)
 * [API](guide/api.md)
-* [Dashboard (coming soon)](guide/dashboard.md)
 * [WebSocket](guide/websocket.md)
+* [Dashboard (coming soon)](guide/dashboard.md)
 
 ## Packages
 
+* [Overview](packages/index.md)
 * [@nexora.ts/core](packages/core.md)
 * [@nexora.ts/config](packages/config.md)
 * [@nexora.ts/logger](packages/logger.md)

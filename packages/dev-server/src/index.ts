@@ -145,6 +145,46 @@ function redact(value: unknown): unknown {
   return value;
 }
 
+/**
+ * Read config without relying on DI Symbol identity.
+ * Duplicate @nexora.ts/core copies (pnpm nested) break Symbol('Config') Map keys;
+ * `bot.config` is always the construction-time source of truth.
+ */
+function readBotConfig(bot: Nexora): NexoraConfig | undefined {
+  const direct = (bot as Nexora & { config?: NexoraConfig }).config;
+  if (direct && typeof direct === 'object') return direct;
+  return undefined;
+}
+
+/** Ensure TOKENS.Config is registered under *this* package's Symbol (or Symbol.for). */
+function ensureConfigRegistered(bot: Nexora): void {
+  if (bot.container.has(TOKENS.Config)) return;
+  const config = readBotConfig(bot);
+  if (config) {
+    bot.container.registerInstance(TOKENS.Config, config);
+  }
+}
+
+/** Resolve config for Studio; never throws — soft-fails to null. */
+function resolveStudioConfig(bot: Nexora): { config: NexoraConfig | null; error?: string } {
+  try {
+    ensureConfigRegistered(bot);
+    if (bot.container.has(TOKENS.Config)) {
+      return { config: bot.container.resolve(TOKENS.Config) as NexoraConfig };
+    }
+  } catch {
+    // fall through to bot.config
+  }
+
+  const fallback = readBotConfig(bot);
+  if (fallback) return { config: fallback };
+
+  return {
+    config: null,
+    error: 'Config unavailable (not registered and bot.config missing)',
+  };
+}
+
 function mapStudioOptions(
   options: { name: string; description: string; type: string; required?: boolean; autocomplete?: boolean; choices?: unknown[] }[] | undefined,
 ): StudioCommandOption[] {
@@ -282,6 +322,9 @@ export class DevServer {
     this.logBufferSize = options.logBufferSize ?? 200;
     this.plugins = [...(options.plugins ?? [])];
     this.databaseStatus = options.databaseStatus;
+    // Align DI Config token with this package's @nexora.ts/core copy
+    // (avoids Symbol identity mismatch across nested installs).
+    ensureConfigRegistered(this.bot);
     // CLI `nexora dev` sets NEXORA_STUDIO=1 and starts the Vite UI separately.
     const cliOwnsUi =
       process.env.NEXORA_STUDIO === '1' || process.env.NEXORA_STUDIO === 'true';
@@ -453,14 +496,10 @@ export class DevServer {
     const client = this.bot.client;
     const ready = this.bot.lifecycle === 'ready' && Boolean(client.user);
 
-    let config: NexoraConfig;
-    try {
-      config = this.bot.container.resolve(TOKENS.Config) as NexoraConfig;
-    } catch (error) {
-      throw new Error(
-        `Studio could not resolve config: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+    const { config, error: configError } = resolveStudioConfig(this.bot);
+    const sanitizedConfig = config
+      ? sanitizeConfig(config)
+      : { error: configError ?? 'Config unavailable' };
 
     let database: StudioSnapshot['database'];
     try {
@@ -468,13 +507,13 @@ export class DevServer {
         ? await this.databaseStatus()
         : {
             connected: false,
-            provider: config.database?.provider,
+            provider: config?.database?.provider,
             message: 'No database probe configured',
           };
     } catch (error) {
       database = {
         connected: false,
-        provider: config.database?.provider,
+        provider: config?.database?.provider,
         message: error instanceof Error ? error.message : String(error),
       };
     }
@@ -507,7 +546,7 @@ export class DevServer {
       commands,
       events,
       plugins,
-      config: sanitizeConfig(config),
+      config: sanitizedConfig,
       database,
       meta: {
         studio: true,

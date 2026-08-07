@@ -47,8 +47,9 @@ export class Nexora {
   readonly eventBus: EventBus;
   readonly cache: Cache;
   readonly scheduler: Scheduler;
+  /** Bot config passed at construction (also registered as TOKENS.Config). */
+  readonly config: NexoraConfig;
 
-  private readonly config: NexoraConfig;
   private readonly commandsPath: string[];
   private readonly eventsPath: string[];
   private readonly interactionsPath: string[];

@@ -143,20 +143,10 @@ export function App() {
     <div className="app">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark">
-            <div className="logo">NX</div>
-            <div>
-              <strong>Nexora Studio</strong>
-              <span>Local Developer Center</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="sidebar-live">
-          <div className="live-badge" data-state={live} title="Studio WebSocket">
-            <span className="live-dot" />
-            <span>{liveLabel(live)}</span>
-          </div>
+          <strong>
+            Nexora <em>Studio</em>
+          </strong>
+          <span>Local Developer Center</span>
         </div>
 
         <nav className="nav">
@@ -187,23 +177,32 @@ export function App() {
         </nav>
 
         <div className="sidebar-foot">
+          <div className="sidebar-live">
+            <div className="live-badge" data-state={live} title="Studio WebSocket">
+              <span className="live-dot" />
+              <span>{liveLabel(live)}</span>
+            </div>
+          </div>
           {snapshot?.meta.ports ? (
             <>
               <div className="foot-row">
-                <span>API</span>
+                <span>api</span>
                 <span>:{snapshot.meta.ports.api}</span>
               </div>
               <div className="foot-row">
-                <span>UI</span>
+                <span>ui</span>
                 <span>:{snapshot.meta.ports.studio}</span>
               </div>
               <div className="foot-row">
-                <span>API ver</span>
+                <span>version</span>
                 <span>v{snapshot.meta.apiVersion}</span>
               </div>
             </>
           ) : (
-            'Waiting for API…'
+            <div className="foot-row">
+              <span>api</span>
+              <span>waiting…</span>
+            </div>
           )}
         </div>
       </aside>
@@ -215,29 +214,23 @@ export function App() {
             <p>{SUBTITLES[tab]}</p>
           </div>
           <div className="header-actions">
-            <div className="live-badge compact" data-state={live} title="Studio WebSocket">
+            <div className="badge">
+              <span className={`dot ${snapshot?.bot.online ? 'ok' : ''}`} />
+              {snapshot?.bot.online ? (
+                <span className="tag">{snapshot.bot.tag ?? 'bot'}</span>
+              ) : snapshot ? (
+                <span className="phase">{snapshot.bot.phase}</span>
+              ) : (
+                <span className="phase">connecting…</span>
+              )}
+            </div>
+            <div className="live-badge" data-state={live} title="Studio WebSocket">
               <span className="live-dot" />
               <span>{liveLabel(live)}</span>
             </div>
             <button type="button" className="btn" disabled={refreshing} onClick={() => void refresh()}>
-              ↻ Refresh
+              Refresh
             </button>
-            <div className="badge">
-              <span className={`dot ${snapshot?.bot.online ? 'ok' : ''}`} />
-              {snapshot?.bot.online ? (
-                <>
-                  <span className="ok" style={{ fontSize: '0.72rem', fontWeight: 650 }}>
-                    Online
-                  </span>
-                  <span className="muted">·</span>
-                  <span className="tag">{snapshot.bot.tag ?? 'bot'}</span>
-                </>
-              ) : snapshot ? (
-                <span className="phase">Phase: {snapshot.bot.phase}</span>
-              ) : (
-                'Connecting…'
-              )}
-            </div>
           </div>
         </div>
 
@@ -245,23 +238,23 @@ export function App() {
           {error && (
             <div className="error-banner">
               {error}
-              <div className="muted" style={{ marginTop: '0.35rem' }}>
+              <div className="muted" style={{ marginTop: '6px' }}>
                 Start your bot with <code>createDevServer(bot)</code> (API on :3920). Studio UI: :3002.
               </div>
             </div>
           )}
 
           {snapshot && tab !== 'docs' && (
-            <div className="stats">
-              <StatCard
+            <div className="metrics">
+              <Metric
                 label="Commands"
                 value={String(counts?.commands ?? snapshot.commands.length)}
                 sub={counts?.slash != null ? `${counts.slash} slash` : undefined}
               />
-              <StatCard label="Events" value={String(counts?.events ?? snapshot.events.length)} />
-              <StatCard label="Plugins" value={String(counts?.plugins ?? snapshot.plugins.length)} />
-              <StatCard label="Guilds" value={String(snapshot.bot.guilds)} />
-              <StatCard label="Uptime" value={formatUptime(snapshot.bot.uptimeMs)} />
+              <Metric label="Events" value={String(counts?.events ?? snapshot.events.length)} />
+              <Metric label="Plugins" value={String(counts?.plugins ?? snapshot.plugins.length)} />
+              <Metric label="Guilds" value={String(snapshot.bot.guilds)} />
+              <Metric label="Uptime" value={formatUptime(snapshot.bot.uptimeMs)} />
             </div>
           )}
 
@@ -280,9 +273,9 @@ export function App() {
   );
 }
 
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function Metric({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="stat">
+    <div className="metric">
       <h3>{label}</h3>
       <div className="value">{value}</div>
       {sub && <div className="sub">{sub}</div>}
@@ -417,7 +410,7 @@ function Overview({ snapshot }: { snapshot: StudioSnapshot }) {
 }
 
 function TypePill({ type }: { type: StudioCommandInfo['type'] }) {
-  const cls = type === 'slash' ? 'cyan' : type === 'group' ? 'blurple' : '';
+  const cls = type === 'slash' ? 'strong' : type === 'group' ? 'accent' : '';
   return <span className={`pill ${cls}`}>{typeLabel(type)}</span>;
 }
 
@@ -516,10 +509,8 @@ function CommandDetail({ cmd }: { cmd: StudioCommandInfo }) {
   return (
     <>
       <div className="detail-title">/{cmd.name}</div>
-      <div className="muted" style={{ fontSize: '0.8rem' }}>
-        {cmd.description}
-      </div>
-      <div style={{ marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.28rem' }}>
+      <div className="detail-sub">{cmd.description}</div>
+      <div className="tag-row">
         <TypePill type={cmd.type} />
         {cmd.guildOnly && <span className="pill warn">guildOnly</span>}
         {cmd.adminOnly && <span className="pill warn">adminOnly</span>}
@@ -553,9 +544,7 @@ function CommandDetail({ cmd }: { cmd: StudioCommandInfo }) {
       </div>
       <div className="section-label">Options</div>
       {cmd.options.length === 0 ? (
-        <p className="muted" style={{ margin: '0.45rem 0 0', fontSize: '0.78rem' }}>
-          No options.
-        </p>
+        <p className="empty-note inline">No options.</p>
       ) : (
         <table className="opt-table">
           <thead>
@@ -593,22 +582,16 @@ function Events({ snapshot }: { snapshot: StudioSnapshot }) {
       </div>
       <div className="panel-body tight">
         {snapshot.events.length === 0 ? (
-          <p className="muted" style={{ padding: '0.85rem' }}>
-            No events registered.
-          </p>
+          <p className="empty-note">No events registered.</p>
         ) : (
           snapshot.events.map((evt, index) => (
             <div className="evt-row" key={`${evt.name}-${index}`}>
               <div>
                 <div className="evt-name">{evt.name}</div>
-                {evt.source && (
-                  <div className="muted" style={{ fontSize: '0.72rem', marginTop: '0.12rem' }}>
-                    {evt.source}
-                  </div>
-                )}
+                {evt.source && <div className="row-sub">{evt.source}</div>}
               </div>
               <div className="cmd-meta">
-                <span className={`pill ${evt.once ? 'warn' : 'cyan'}`}>
+                <span className={`pill ${evt.once ? 'warn' : 'strong'}`}>
                   {evt.once ? 'once' : 'on'}
                 </span>
               </div>
@@ -629,7 +612,7 @@ function Plugins({ snapshot }: { snapshot: StudioSnapshot }) {
       </div>
       <div className="panel-body tight">
         {snapshot.plugins.length === 0 ? (
-          <p className="muted" style={{ padding: '0.85rem' }}>
+          <p className="empty-note">
             No plugins loaded. Drop packages into ./plugins or use nexora add.
           </p>
         ) : (
@@ -637,16 +620,11 @@ function Plugins({ snapshot }: { snapshot: StudioSnapshot }) {
             <div className="plug-row" key={plugin.name}>
               <div>
                 <div className="plug-name">
-                  <span className={plugin.enabled ? 'ok' : 'warn'}>
-                    {plugin.enabled ? '●' : '○'}
-                  </span>{' '}
-                  {plugin.name} <span className="muted">v{plugin.version}</span>
+                  <span className={`dot ${plugin.enabled ? 'ok' : ''}`} />
+                  <span>{plugin.name}</span>
+                  <span className="muted">v{plugin.version}</span>
                 </div>
-                {plugin.description && (
-                  <div className="muted" style={{ fontSize: '0.74rem', marginTop: '0.15rem' }}>
-                    {plugin.description}
-                  </div>
-                )}
+                {plugin.description && <div className="row-sub">{plugin.description}</div>}
               </div>
               <div className="cmd-meta">
                 <span className="pill">{plugin.commands} cmds</span>
@@ -677,6 +655,11 @@ function ConfigView({ snapshot }: { snapshot: StudioSnapshot }) {
   );
 }
 
+function logTime(timestamp: string): string {
+  const match = /(\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?)/.exec(timestamp);
+  return match ? match[1] : timestamp;
+}
+
 function LogsView({ logs }: { logs: LogEntry[] }) {
   return (
     <div className="panel logs-panel">
@@ -686,19 +669,22 @@ function LogsView({ logs }: { logs: LogEntry[] }) {
       </div>
       <div className="panel-body logs">
         {logs.length === 0 ? (
-          <p className="muted" style={{ padding: '0.85rem' }}>
-            Waiting for log events…
-          </p>
+          <p className="empty-note">Waiting for log events…</p>
         ) : (
           [...logs].reverse().map((line, index) => (
-            <div className="log-line" key={`${line.timestamp}-${index}`}>
-              <span className="muted">{line.timestamp}</span>
+            <div
+              className={`log-line ${line.level === 'error' ? 'is-err' : line.level === 'warn' ? 'is-warn' : ''}`}
+              key={`${line.timestamp}-${index}`}
+            >
+              <span className="ts" title={line.timestamp}>
+                {logTime(line.timestamp)}
+              </span>
               <span
                 className={`lvl ${line.level === 'error' ? 'err' : line.level === 'warn' ? 'warn' : ''}`}
               >
                 {line.level}
               </span>
-              <span>
+              <span className="msg">
                 {line.context ? `[${line.context}] ` : ''}
                 {line.message}
               </span>
@@ -714,20 +700,20 @@ function DocsView() {
   return (
     <>
       <div className="panel">
-        <div className="panel-body docs-hero">
+        <div className="docs-hero">
           <h3>Nexora.js documentation</h3>
-          <p className="muted" style={{ margin: '0 0 0.7rem', maxWidth: '36rem' }}>
+          <p className="muted" style={{ margin: '0 0 16px', maxWidth: '46ch', fontSize: '13px' }}>
             Studio is your local control panel. Framework guides, recipes, and API references live on
             GitBook.
           </p>
           <p>
             <a
               className="docs-link"
-              href="https://cjays-organization.gitbook.io/nexorajs"
+              href="https://cjays-organization.gitbook.io/nexora.ts"
               target="_blank"
               rel="noreferrer"
             >
-              cjays-organization.gitbook.io/nexorajs →
+              cjays-organization.gitbook.io/nexora.ts →
             </a>
           </p>
         </div>
