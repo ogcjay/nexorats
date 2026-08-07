@@ -1,21 +1,17 @@
-# Dashboard
+# Dashboard (internal)
 
-> **Coming soon / Unreleased** — the public admin Dashboard is not part of the published `0.1.x` surface yet.
+This page is for monorepo contributors. The **public** Developer Center is **[Nexora Studio](studio.md)** (`localhost:3002`).
 
-Nexora’s planned Dashboard is a Next.js admin UI for guild settings, modules, and logs. It is separate from **Nexora Studio** (the local Developer Center on `:3002`).
+`apps/dashboard` holds experimental admin UI work. It is **not** part of the published `0.1.x` docs surface and should not be promised in quick starts.
 
-| | Nexora Studio (shipped) | Dashboard (unreleased) |
+| | Nexora Studio (shipped) | `apps/dashboard` (internal) |
 | --- | --- | --- |
-| Role | Local Developer Center | Public admin UI |
-| Typical URL | `http://localhost:3002` | TBD |
-| With bot start? | Yes (`createDevServer` / scaffold) | Not yet |
+| Role | Local Developer Center | Experimental admin UI |
+| Typical URL | `http://localhost:3002` | Local only when developing the monorepo |
+| With bot start? | Yes (`createDevServer` / scaffold) | No |
 
-Scaffolding with “Include experimental dashboard config?” only reserves `dashboard` / `auth` config and related backend packages. It does **not** ship a ready-to-open UI.
+Scaffolding may still reserve `dashboard` / `auth` config keys for future work. That does **not** ship a ready-to-open public UI.
 
-When `dashboard.enabled` is set, the startup banner shows a soft teaser (`experimental / unreleased — coming soon`) — not a promise that something is listening on `:3000`.
+**All data flows through the internal API.** The browser never opens a database connection.
 
-## Architecture (preview)
-
-**All data will flow through the internal API.** The browser never opens a database connection. That rule already guides `@nexora.ts/api`, auth, and plugins.
-
-Monorepo contributors: local UI work lives under `apps/dashboard` — see [CONTRIBUTING](https://github.com/ogcjay/nexorajs/blob/main/CONTRIBUTING.md). Public quick-starts should not treat Dashboard as production-ready.
+See [CONTRIBUTING](https://github.com/ogcjay/nexorajs/blob/main/CONTRIBUTING.md).

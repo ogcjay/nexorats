@@ -9,6 +9,10 @@
 * [Project structure](guide/project-structure.md)
 * [Configuration](guide/configuration.md)
 
+## Nexora Studio
+
+* [Developer Center](guide/studio.md)
+
 ## Commands & Interactions
 
 * [Commands](guide/commands.md)
@@ -51,12 +55,10 @@
 
 ## Platform
 
-* [Nexora Studio](guide/studio.md)
 * [Database](guide/database.md)
 * [Auth](guide/auth.md)
 * [API](guide/api.md)
 * [WebSocket](guide/websocket.md)
-* [Dashboard (coming soon)](guide/dashboard.md)
 
 ## Packages
 
@@ -69,7 +71,6 @@
 * [@nexora.ts/api](packages/api.md)
 * [@nexora.ts/plugin-system](packages/plugin-system.md)
 * [@nexora.ts/websocket](packages/websocket.md)
-* [@nexora.ts/ui (unreleased)](packages/ui.md)
 * [create-nexora-ts](packages/cli.md)
 
 ## Community

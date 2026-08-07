@@ -21,6 +21,11 @@ const sidebar = [
     ],
   },
   {
+    text: 'Nexora Studio',
+    collapsed: false,
+    items: [{ text: 'Developer Center', link: '/guide/studio' }],
+  },
+  {
     text: 'Commands & Interactions',
     collapsed: false,
     items: [
@@ -82,12 +87,10 @@ const sidebar = [
     text: 'Platform',
     collapsed: false,
     items: [
-      { text: 'Nexora Studio', link: '/guide/studio' },
       { text: 'Database', link: '/guide/database' },
       { text: 'Auth', link: '/guide/auth' },
       { text: 'API', link: '/guide/api' },
       { text: 'WebSocket', link: '/guide/websocket' },
-      { text: 'Dashboard (coming soon)', link: '/guide/dashboard' },
     ],
   },
   {
@@ -103,7 +106,6 @@ const sidebar = [
       { text: '@nexora.ts/api', link: '/packages/api' },
       { text: '@nexora.ts/plugin-system', link: '/packages/plugin-system' },
       { text: '@nexora.ts/websocket', link: '/packages/websocket' },
-      { text: '@nexora.ts/ui (unreleased)', link: '/packages/ui' },
       { text: 'create-nexora-ts', link: '/packages/cli' },
     ],
   },
@@ -121,7 +123,7 @@ const sidebar = [
 export default defineConfig({
   title: 'Nexora',
   description:
-    'Open-source TypeScript framework for Discord bots — CLI, commands, plugins, dashboard, and auth',
+    'Open-source TypeScript application framework for Discord bots — CLI, Studio, plugins, and auto-discovery on top of Discord.js',
   base,
   cleanUrls: true,
   lastUpdated: false,
@@ -135,6 +137,7 @@ export default defineConfig({
     siteTitle: 'Nexora',
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
+      { text: 'Studio', link: '/guide/studio' },
       { text: 'Classes', link: '/classes/' },
       { text: 'Packages', link: '/packages/' },
       {

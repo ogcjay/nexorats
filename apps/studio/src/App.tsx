@@ -737,12 +737,6 @@ function DocsView() {
                   <code>http://127.0.0.1:3920</code>
                 </span>
               </li>
-              <li>
-                <span>Dashboard</span>
-                <span className="muted">
-                  <code>http://localhost:3000</code> · unreleased
-                </span>
-              </li>
             </ul>
           </div>
         </div>

@@ -1,7 +1,5 @@
 # @nexora.ts/ui
 
-> **Unreleased** — this package is private and is **not** published to npm with `pnpm release`. It backs the upcoming Dashboard.
+Internal React primitives used by monorepo apps. This package is **private** and is not published with `pnpm release`.
 
-Reusable React components for the Nexora dashboard (planned): `SettingsCard`, `StatCard`, `Switch`, `ServerSelector`, `GuildSidebar`, `Modal`, `DataTable`, and pickers.
-
-See [Dashboard (coming soon)](../guide/dashboard.md).
+For the shipped local Developer Center, see [Nexora Studio](../guide/studio.md).

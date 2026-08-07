@@ -40,7 +40,7 @@ async function main(): Promise<void> {
     {
       type: 'confirm',
       name: 'dashboard',
-      message: 'Include experimental dashboard config? (unreleased — coming soon)',
+      message: 'Include optional dashboard config keys? (advanced)',
       initial: false,
     },
     {
@@ -95,14 +95,7 @@ async function main(): Promise<void> {
   console.log('    pnpm install');
   console.log('    # Edit .env with your Discord bot token');
   console.log('    pnpm dev');
-  console.log('    # Studio (Developer Center): http://localhost:3002 (API :3920)');
-  if (options.dashboard) {
-    console.log(
-      '    # Dashboard: experimental / unreleased — coming soon (config scaffolded only).\n',
-    );
-  } else {
-    console.log('');
-  }
+  console.log(`    # Studio (Developer Center): http://localhost:3002 (API :3920)\n`);
 }
 
 function ensureDir(filePath: string): void {

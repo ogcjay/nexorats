@@ -1,6 +1,10 @@
 # Nexora Studio
 
-**Nexora Studio** is the local **Developer Center** for your bot project.
+**Nexora isn’t just a framework — it ships with its own local Developer Center.**
+
+**Nexora Studio** runs on `localhost:3002` next to your bot. It is the strongest day-one differentiator: live insight into *your* process — not a generic docs page.
+
+![Nexora Studio — Overview](../images/studio-overview.png)
 
 It is **not** the public documentation website.
 
@@ -34,14 +38,18 @@ A public docs site can never know:
 
 Studio shows exactly that.
 
+![Commands inspector](../images/studio-commands.png)
+
+![Live logs](../images/studio-logs.png)
+
+![Plugin list](../images/studio-plugins.png)
+
 ## Ports
 
 | Service | URL |
 | --- | --- |
 | **Nexora Studio** | http://localhost:3002 |
 | Studio API | http://127.0.0.1:3920 |
-
-> Studio (`:3002`) is the shipped Developer Center. The public **Dashboard** is unreleased (coming soon) — do not confuse it with Studio.
 
 ## Wire it in your bot
 

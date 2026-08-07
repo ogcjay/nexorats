@@ -920,7 +920,6 @@ export function getStudioHtml(): string {
           '<ul class="list">' +
           row('Nexora Studio', '<code>http://localhost:3002</code>') +
           row('Studio API', '<code>http://127.0.0.1:3920</code>') +
-          row('Dashboard', '<span class="muted"><code>http://localhost:3000</code> · unreleased</span>') +
           '</ul>') +
         '</div>';
     }

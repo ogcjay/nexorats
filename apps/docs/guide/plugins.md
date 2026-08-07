@@ -3,13 +3,14 @@
 Plugins are the heart of the Nexora ecosystem. A plugin can add:
 
 - Commands & events
-- Dashboard pages
 - API routes
 - Migrations
 - Config extensions
 - Custom services
 
 …without modifying `@nexora.ts/core`.
+
+![Plugins in Studio](../images/studio-plugins.png)
 
 ## Plugin layout
 
@@ -18,7 +19,6 @@ my-plugin/
 ├── plugin.json
 ├── commands/
 ├── events/
-├── dashboard/
 ├── api/
 ├── migrations/
 └── config/

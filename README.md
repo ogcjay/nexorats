@@ -1,8 +1,8 @@
 # Nexora
 
-**Modern open-source TypeScript framework for Discord bots.**
+**Modern open-source TypeScript application framework for Discord bots — built on Discord.js.**
 
-Nexora is a complete foundation — CLI, command system, plugin system, authentication, Studio, and more — so you can focus on your bot’s features instead of wiring libraries together. A public **Dashboard** is planned (unreleased).
+Nexora isn’t just a framework — **it ships with its own local Developer Center.** CLI, Studio, plugins, and auto-discovery so you never scaffold a Discord bot from scratch again.
 
 [![CI](https://github.com/ogcjay/nexorajs/actions/workflows/ci.yml/badge.svg)](https://github.com/ogcjay/nexorajs/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-GitBook-blue)](https://cjays-organization.gitbook.io/nexora.ts)
@@ -13,30 +13,45 @@ Nexora is a complete foundation — CLI, command system, plugin system, authenti
 > **Status:** early preview (`0.1.1`). APIs may change before `1.0.0`.
 >
 > **Documentation:** [https://cjays-organization.gitbook.io/nexora.ts](https://cjays-organization.gitbook.io/nexora.ts)  
-> **Nexora Studio (local):** `http://localhost:3002` — Developer Center for *your* running project (commands, plugins, logs, status)
+> **Nexora Studio (local):** `http://localhost:3002` — Developer Center for *your* running project
+
+<p align="center">
+  <img src="apps/docs/images/studio-overview.png" alt="Nexora Studio — Overview" width="900" />
+</p>
 
 ---
 
 ## Vision
 
-Nexora is not “another Discord.js wrapper”. It is an **open-source developer ecosystem** for Discord applications:
+Discord.js is the foundation. Nexora is the **application layer** on top — similar to how Next.js builds on React.
+
+You get a production-ready bot stack in minutes: scaffold, auto-discovery, plugins, Studio, logging, and optional auth/database/API. The community grows it into a platform.
 
 - **Free to use** under MIT
-- **Free to extend** — build plugins, API routes, and (soon) dashboard pages
+- **Free to extend** — build plugins, API routes, and services
 - **Free to improve** — PRs and issues welcome
 - **Community-driven** — a growing plugin ecosystem around one shared foundation
 
-You get a production-ready bot stack in minutes. The community grows it into a platform.
+## Nexora vs Discord.js
+
+| Feature | Discord.js | Nexora |
+| --- | :---: | :---: |
+| Discord API client | ✅ | ✅ (via Discord.js) |
+| Project CLI / scaffold | ❌ | ✅ |
+| Local Developer Center (Studio) | ❌ | ✅ |
+| Plugin system | ❌ | ✅ |
+| Auto-discovery (commands / events) | ❌ | ✅ |
+| Typed `defineConfig()` | ❌ | ✅ |
+| Structured logging + startup banner | ❌ | ✅ |
 
 ## Why Nexora?
 
 | Building block        | What you get                                     |
 | --------------------- | ------------------------------------------------ |
-| **CLI**               | `@nexora.ts/create` scaffolds a full project         |
+| **CLI**               | `@nexora.ts/create` scaffolds a full project     |
+| **Studio**            | Local Developer Center (`localhost:3002`)        |
 | **Commands & events** | `command()` / `event()` with auto-discovery      |
 | **Plugin system**     | Commands, events, API, migrations                |
-| **Studio**            | Local Developer Center (`localhost:3002`)        |
-| **Dashboard**         | *Coming soon* — guild settings, modules, logs    |
 | **Auth**              | Discord OAuth, sessions, permissions             |
 | **Database**          | Drizzle + repository layer (PostgreSQL / SQLite) |
 | **API + WebSocket**   | Internal REST API and live events                |
@@ -51,6 +66,12 @@ pnpm install
 cp .env.example .env   # add your Discord token
 pnpm dev
 ```
+
+Open **http://localhost:3002** for Nexora Studio.
+
+<p align="center">
+  <img src="apps/docs/images/cli-scaffold.png" alt="Nexora CLI scaffold" width="720" />
+</p>
 
 ### Minimal bot
 
@@ -93,7 +114,6 @@ When you develop a bot, **Nexora Studio** starts with `createDevServer` / `pnpm 
 ```text
 Nexora Studio     http://localhost:3002   (embedded UI via @nexora.ts/dev-server)
 Studio API        http://127.0.0.1:3920
-Dashboard         experimental / unreleased — coming soon
 ```
 
 Studio shows **project-specific** data: registered commands, events, plugins, sanitized config, database status, and live logs.
@@ -108,7 +128,7 @@ See the docs guide: [Nexora Studio](https://cjays-organization.gitbook.io/nexora
 
 ## Build plugins, grow the ecosystem
 
-Plugins are first-class. A plugin can register commands, events, API endpoints, migrations, and services — without changing core. Dashboard page hooks are planned (unreleased).
+Plugins are first-class. A plugin can register commands, events, API endpoints, migrations, and services — without changing core.
 
 ```bash
 nexora add tickets      # planned
@@ -121,10 +141,10 @@ Want to contribute a plugin or improve the framework? See [CONTRIBUTING.md](./CO
 
 ```
 apps/
-  dashboard/      Next.js dashboard (unreleased / private)
-  docs/           Public VitePress docs → GitHub Pages
+  docs/           Public VitePress / GitBook docs
   studio/         Nexora Studio (local Developer Center)
   playground/     Demo bot + Studio API
+  dashboard/      Internal / experimental admin UI (not part of public docs)
 packages/
   core/           Client, commands, events, DI, cache, scheduler
   config/         defineConfig() + validation
@@ -134,7 +154,7 @@ packages/
   api/            Internal REST API
   plugin-system/  Plugin API & lifecycle
   websocket/      Live events
-  ui/             Shared dashboard components (private / unreleased)
+  ui/             Shared UI primitives (internal)
   dev-server/     Introspection API for Studio
   cli/            create-nexora-ts + nexora
 examples/
@@ -156,7 +176,7 @@ pnpm dev
 | Command                             | Description                                      |
 | ----------------------------------- | ------------------------------------------------ |
 | `pnpm build`                        | Build all packages and apps                      |
-| `pnpm dev`                          | Start apps (docs / studio / playground; dashboard optional) |
+| `pnpm dev`                          | Start apps (docs / studio / playground)          |
 | `pnpm studio:dev`                   | Nexora Studio UI (`localhost:3002`)              |
 | `pnpm docs:dev`                     | Preview public docs locally (optional)           |
 | `pnpm docs:build`                   | Static docs build (same as CI → GitHub Pages)    |
@@ -172,7 +192,7 @@ Publishing checklist: [PUBLISHING.md](./PUBLISHING.md) (GitHub) · [NPM_PUBLISH.
 - SOLID + Clean Architecture
 - Dependency Injection via per-instance `Container` (no global singletons)
 - Repository pattern for all DB access
-- Planned Dashboard talks **only** through the internal API
+- Studio and APIs talk through the internal API surface
 - Plugins extend the platform without modifying core
 
 ## Community & Contributing
@@ -191,7 +211,6 @@ Nexora thrives when developers:
 
 ## Roadmap (high level)
 
-- [ ] Discord OAuth login in dashboard (when Dashboard ships)
 - [ ] Plugin install CLI (`nexora add <plugin>`)
 - [ ] Redis cache adapter
 - [ ] Official example plugins (tickets, moderation)

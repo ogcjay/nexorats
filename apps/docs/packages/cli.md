@@ -14,10 +14,12 @@ pnpm dev
 
 - `dev` / `start` scripts with `--env-file=.env`
 - `@nexora.ts/config` (auto `loadEnv`), core, logger, and **dev-server** for Studio
-- Optional experimental dashboard config (unreleased), Docker, linting, examples
+- Optional Docker, linting, examples
 - Example commands/events when selected
 
-Prompts for bot name, database, experimental dashboard config, Docker, linting, GitHub Actions, and examples.
+![CLI scaffold](../images/cli-scaffold.png)
+
+Prompts for bot name, database, Docker, linting, GitHub Actions, and examples.
 
 ## `nexora` CLI
 

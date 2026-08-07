@@ -11,8 +11,7 @@ Monorepo packages that make up Nexora. Start with **`@nexora.ts/core`** for bots
 | [@nexora.ts/auth](auth.md) | Discord OAuth, sessions, permissions |
 | [@nexora.ts/api](api.md) | Internal REST API |
 | [@nexora.ts/plugin-system](plugin-system.md) | Plugin lifecycle & discovery |
-| [@nexora.ts/websocket](websocket.md) | Live updates |
-| [@nexora.ts/ui](ui.md) | Dashboard React components (**unreleased**) |
+| [@nexora.ts/websocket](websocket.md) | Live updates for Studio |
 | [create-nexora-ts](cli.md) | Project scaffold CLI |
 
 Guides: [Configuration](../guide/configuration.md) · [Plugins](../guide/plugins.md) · [Classes](../classes/index.md)

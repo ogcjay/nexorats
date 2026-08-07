@@ -6,8 +6,12 @@
 - Colored level badges and short timestamps (`HH:mm:ss`)
 - Error stacks when you pass an `Error` or `meta.error`
 - Optional file logging + rotation
-- Live stream hooks for the dashboard WebSocket
+- Live stream hooks for Studio
 - Startup banner and command traces
+
+![Pretty console logger](../images/logger-console.png)
+
+![Startup banner](../images/startup-banner.png)
 
 ```ts
 import { createLogger, printStartupBanner } from '@nexora.ts/logger';

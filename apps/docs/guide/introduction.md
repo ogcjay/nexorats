@@ -1,26 +1,52 @@
 # Introduction
 
-**Nexora** is a modern open-source TypeScript framework for Discord bots.
+**Nexora** is a modern open-source TypeScript **application framework** for Discord bots — built on [Discord.js](https://discord.js.org).
 
-It gives you a **complete foundation** — CLI, command system, plugin system, authentication, database, API, logging, and Studio — so you can focus on your bot’s actual features instead of wiring libraries together. A public **Dashboard** is planned (unreleased).
+Nexora isn’t just a framework — **it ships with its own local Developer Center**. After `pnpm dev`, open **Nexora Studio** at `http://localhost:3002` and inspect *your* commands, plugins, logs, and config.
+
+Think of the relationship like **Next.js → React**: Discord.js is the library; Nexora is the opinionated platform on top so you never wire the same stack from scratch again.
+
+![Nexora Studio — Overview](../images/studio-overview.png)
 
 ## Why Nexora exists
 
-Most Discord projects stitch together Discord.js, an ORM, an OAuth flow, a dashboard, and custom glue. That works — until every bot reinvents the same stack.
+Most Discord projects stitch together Discord.js, an ORM, an OAuth flow, and custom glue. That works — until every bot reinvents the same stack.
 
-Nexora aims to be the shared platform:
+Nexora aims to be the shared platform: scaffold once, ship features.
+
+## Nexora vs Discord.js
+
+Discord.js is the foundation. Nexora does **not** replace it — it packages the application layer developers rebuild on every project.
+
+| Feature | Discord.js | Nexora |
+| --- | :---: | :---: |
+| Discord API client | ✅ | ✅ (via Discord.js) |
+| Project CLI / scaffold | ❌ | ✅ |
+| Local Developer Center (Studio) | ❌ | ✅ |
+| Plugin system | ❌ | ✅ |
+| Auto-discovery (commands / events) | ❌ | ✅ |
+| Typed `defineConfig()` | ❌ | ✅ |
+| Structured logging + startup banner | ❌ | ✅ |
+| Auth / database / internal API | DIY | ✅ (optional packages) |
+
+The memorable outcome after install:
+
+> *I never have to set up a Discord bot project from scratch again.*
+
+## What you get today
 
 | Building block | What you get |
 | --- | --- |
 | **CLI** | `create-nexora-ts@latest` scaffolds a project with Studio + `.env` |
+| **Studio** | Local Developer Center (`localhost:3002`) — commands, plugins, logs, status |
 | **Commands & events** | Typed helpers or classes + auto-discovery + guards |
 | **Plugins** | Manifest or `NexoraPlugin` class — extend without forking core |
-| **Studio** | Local Developer Center (`localhost:3002`) |
-| **Dashboard** | *Coming soon* — guild settings, modules, logs (unreleased) |
 | **Auth** | Discord OAuth, sessions, permissions |
 | **Database** | Drizzle + repositories |
 | **API + WebSocket** | Internal API and live updates |
 | **Logging** | Pretty / compact / json console, banner, command traces |
+
+![CLI scaffold](../images/cli-scaffold.png)
 
 ## Open source & community
 

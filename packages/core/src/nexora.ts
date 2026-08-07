@@ -142,7 +142,7 @@ export class Nexora {
 
     this.client.once('ready', (readyClient) => {
       this.phase = 'ready';
-      const dashboardEnabled = this.config.dashboard?.enabled === true;
+      const studioUrl = process.env.NEXORA_STUDIO_URL || undefined;
 
       printStartupBanner({
         name: 'Nexora',
@@ -151,12 +151,7 @@ export class Nexora {
         commands: this.commandRegistry.size,
         events: this.eventRegistry.size,
         // Only show Studio when createDevServer (or CLI) advertised a live URL.
-        // Never reuse dashboard.url for Studio — different app on :3000.
-        studioUrl: process.env.NEXORA_STUDIO_URL || undefined,
-        // Dashboard UI is unreleased — soft teaser only, no localhost URL promise.
-        dashboardUrl: dashboardEnabled
-          ? 'experimental / unreleased — coming soon'
-          : undefined,
+        studioUrl,
       });
 
       void this.eventBus.emit(FrameworkEvents.BOT_READY, { client: readyClient });

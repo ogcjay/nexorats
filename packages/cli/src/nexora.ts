@@ -120,17 +120,15 @@ function printHelp(): void {
   Usage:
     nexora dev              Start bot + Nexora Studio (Developer Center)
     nexora studio           Start only Nexora Studio UI (expects API on :3920)
-    nexora add <plugin>     Install a plugin (coming soon — see docs)
-    nexora remove <plugin>  Remove a plugin (coming soon)
+    nexora add <plugin>     Install a plugin (WIP)
+    nexora remove <plugin>  Remove a plugin (WIP)
     nexora list             List local ./plugins folders
 
   Local ports (typical):
     Nexora Studio    ${STUDIO_URL}   (auto with nexora dev / createDevServer)
     Studio API       ${STUDIO_API}
-    Dashboard        experimental / unreleased — coming soon
 
   Studio = local Developer Center for THIS project (commands, plugins, logs…).
-  Dashboard = upcoming public admin UI (not published yet).
   Public docs: https://cjays-organization.gitbook.io/nexora.ts
 `);
 }

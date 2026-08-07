@@ -14,7 +14,7 @@ By participating, you agree to follow our [Code of Conduct](./CODE_OF_CONDUCT.md
 | ------------------- | --------------------------------------------- |
 | **Core / packages** | Bug fixes, APIs, DX improvements              |
 | **Plugins**         | Tickets, moderation, leveling, custom modules |
-| **Dashboard / UI**  | Pages, components, accessibility              |
+| **Dashboard / UI**  | Internal admin experiments (`apps/dashboard`) |
 | **Docs & examples** | Guides, recipes, playground demos             |
 | **CLI / tooling**   | Scaffolding, `nexora add`, templates          |
 
@@ -40,18 +40,18 @@ pnpm dev
 
 | App       | URL                   |
 | --------- | --------------------- |
-| Dashboard | http://localhost:3000 (monorepo only — unreleased / not published) |
-| Docs      | http://localhost:3001 |
 | Studio    | http://localhost:3002 |
+| Docs      | http://localhost:3001 |
+| Dashboard | http://localhost:3000 (monorepo / internal only) |
 
-> Public docs should treat Dashboard as **coming soon**. Local dashboard work: `pnpm --filter @nexora.ts/dashboard dev` (contributors only).
+> Public docs highlight **Nexora Studio**. Internal dashboard work: `pnpm --filter @nexora.ts/dashboard dev` (contributors only).
 
 ## Project Structure
 
 | Path         | Purpose                                                 |
 | ------------ | ------------------------------------------------------- |
 | `packages/`  | Framework packages (`core`, `plugin-system`, `auth`, …) |
-| `apps/`      | Dashboard, docs, playground                             |
+| `apps/`      | Studio, docs, playground (+ internal dashboard)         |
 | `examples/`  | Example projects                                        |
 | `templates/` | CLI templates                                           |
 

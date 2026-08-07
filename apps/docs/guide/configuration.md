@@ -17,9 +17,9 @@ export default defineConfig({
     provider: 'postgresql', // or 'sqlite'
     url: process.env.DATABASE_URL!,
   },
-  // Experimental / unreleased — reserved for the upcoming Dashboard (no shipped UI yet)
+  // Optional — reserved for future public admin UI (not part of the shipped Studio)
   dashboard: {
-    enabled: true,
+    enabled: false,
     port: 3000,
     secret: process.env.DASHBOARD_SECRET,
   },

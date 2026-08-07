@@ -5,7 +5,6 @@ See the repository [CHANGELOG.md](https://github.com/ogcjay/nexorajs/blob/main/C
 ## Unreleased
 
 - Open-source readiness notes (see repo CHANGELOG)
-- **Dashboard** (Next.js admin UI + `@nexora.ts/ui`) — coming soon; not published with `pnpm release`
 
 ## 0.1.3 — Studio UI + create
 

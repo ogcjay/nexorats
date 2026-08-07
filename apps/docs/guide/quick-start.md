@@ -46,7 +46,9 @@ nexora dev
 | **Nexora Studio** | http://localhost:3002 |
 | Studio API | http://127.0.0.1:3920 |
 
-> Open **:3002** for the Developer Center. A public OAuth **Dashboard** is planned but unreleased — see [Dashboard](dashboard.md).
+Open **:3002** for the [Developer Center](studio.md) — live commands, plugins, logs, and bot status for your project.
+
+![Nexora Studio](../images/studio-overview.png)
 
 Public docs (this site): [https://cjays-organization.gitbook.io/nexora.ts](https://cjays-organization.gitbook.io/nexora.ts)
 
