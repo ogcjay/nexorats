@@ -16,6 +16,6 @@ bot.container.registerSingleton('MyService', () => new MyService());
 bot.container.registerInstance('ConfigFlag', true);
 ```
 
-Prefer extending `Service` from `@nexorajs/core` for a child logger and a consistent base — see [Classes](classes.md).
+Prefer extending `Service` from `@nexorajs/core` for a child logger and a consistent base — see [Service](../classes/service.md).
 
 Plugins can register their own services during `onLoad`. Prefer tokens / symbols over stringly-typed globals.

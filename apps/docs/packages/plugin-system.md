@@ -34,4 +34,4 @@ export default class TicketsPlugin extends NexoraPlugin {
 
 The loader accepts either default export. `onLoad` / `onUnload` run around enable/disable.
 
-See [Plugins](../guide/plugins.md) and [Classes](../guide/classes.md).
+See [Plugins](../guide/plugins.md) and [NexoraPlugin](../classes/nexora-plugin.md).

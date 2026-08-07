@@ -52,4 +52,4 @@ Guides: [Builders](../guide/builders.md), [Components V2](../guide/components-v2
 
 Definition options: `guildOnly`, `adminOnly`, `permissions`, `cooldown` (ms).
 
-See: [Commands](../guide/commands.md), [Classes](../guide/classes.md), [Events](../guide/events.md), [DI](../guide/dependency-injection.md).
+See: [Commands](../guide/commands.md), [Classes](../classes/index.md), [Events](../guide/events.md), [DI](../guide/dependency-injection.md).

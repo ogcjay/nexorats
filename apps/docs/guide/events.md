@@ -36,7 +36,7 @@ export default class ReadyHandler extends EventHandler {
 }
 ```
 
-Discovery accepts both `event()` definitions and class exports. See [Classes](classes.md).
+Discovery accepts both `event()` definitions and class exports. See [Classes](../classes/index.md).
 
 ## Framework event bus
 

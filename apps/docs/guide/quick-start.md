@@ -73,7 +73,7 @@ export default event('ready', (client) => {
 });
 ```
 
-Commands and events are **auto-discovered** — no manual registration. Prefer classes? See [Classes](classes.md).
+Commands and events are **auto-discovered** — no manual registration. Prefer classes? See [Classes](../classes/index.md).
 
 ## Next steps
 

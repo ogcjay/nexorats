@@ -9,13 +9,26 @@
 * [Project structure](guide/project-structure.md)
 * [Configuration](guide/configuration.md)
 
+## Classes
+
+* [Overview](classes/index.md)
+* [Nexora](classes/nexora.md)
+* [SlashCommand](classes/slash-command.md)
+* [Service](classes/service.md)
+* [NexoraPlugin](classes/nexora-plugin.md)
+* [Logger](classes/logger.md)
+* [EmbedBuilder](classes/embed-builder.md)
+* [ButtonBuilder](classes/button-builder.md)
+* [ModalBuilder](classes/modal-builder.md)
+* [LayoutContainerBuilder](classes/layout-container.md)
+
 ## Core concepts
 
 * [Commands](guide/commands.md)
 * [Builders](guide/builders.md)
 * [Components V2](guide/components-v2.md)
 * [Events](guide/events.md)
-* [Classes](guide/classes.md)
+* [Classes (overview)](guide/classes.md)
 * [Dependency injection](guide/dependency-injection.md)
 * [Logging](guide/logging.md)
 * [Cache & scheduler](guide/cache-scheduler.md)

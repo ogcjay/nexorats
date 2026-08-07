@@ -25,6 +25,7 @@ export default defineConfig({
     siteTitle: 'Nexora',
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
+      { text: 'Classes', link: '/classes/' },
       { text: 'Packages', link: '/packages/core' },
       { text: 'Plugins', link: '/guide/plugins' },
       {
@@ -38,6 +39,28 @@ export default defineConfig({
     ],
 
     sidebar: {
+      '/classes/': [
+        {
+          text: 'Classes',
+          items: [
+            { text: 'Overview', link: '/classes/' },
+            { text: 'Nexora', link: '/classes/nexora' },
+            { text: 'SlashCommand', link: '/classes/slash-command' },
+            { text: 'Service', link: '/classes/service' },
+            { text: 'NexoraPlugin', link: '/classes/nexora-plugin' },
+            { text: 'Logger', link: '/classes/logger' },
+          ],
+        },
+        {
+          text: 'Message UI',
+          items: [
+            { text: 'EmbedBuilder', link: '/classes/embed-builder' },
+            { text: 'ButtonBuilder', link: '/classes/button-builder' },
+            { text: 'ModalBuilder', link: '/classes/modal-builder' },
+            { text: 'LayoutContainerBuilder', link: '/classes/layout-container' },
+          ],
+        },
+      ],
       '/guide/': [
         {
           text: 'Getting started',
@@ -55,7 +78,7 @@ export default defineConfig({
             { text: 'Builders', link: '/guide/builders' },
             { text: 'Components V2', link: '/guide/components-v2' },
             { text: 'Events', link: '/guide/events' },
-            { text: 'Classes', link: '/guide/classes' },
+            { text: 'Classes', link: '/classes/' },
             { text: 'Dependency injection', link: '/guide/dependency-injection' },
             { text: 'Logging', link: '/guide/logging' },
             { text: 'Cache & scheduler', link: '/guide/cache-scheduler' },

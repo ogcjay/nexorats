@@ -10,6 +10,9 @@ hero:
       text: Get started
       link: /guide/quick-start
     - theme: alt
+      text: Classes
+      link: /classes/
+    - theme: alt
       text: View on GitHub
       link: https://github.com/ogcjay/nexorajs
 

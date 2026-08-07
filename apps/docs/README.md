@@ -20,14 +20,15 @@ cp .env.example .env   # add your Discord token
 pnpm dev
 ```
 
-Continue with **[Quick start](guide/quick-start.md)** or **[Introduction](guide/introduction.md)**.
+Continue with **[Quick start](guide/quick-start.md)**, **[Classes](classes/index.md)** (API reference with examples), or **[Introduction](guide/introduction.md)**.
 
 ## What you get
 
 | Building block | What you get |
 | --- | --- |
 | **CLI** | `create-nexorajs` scaffolds a full project |
-| **Commands & events** | `command()` / `event()` with auto-discovery |
+| **Classes** | `Nexora`, `SlashCommand`, `EmbedBuilder`, Components V2 — see [Classes](classes/index.md) |
+| **Commands & events** | `command()` / `event()` or class-based commands |
 | **Plugin system** | Commands, events, dashboard, API, migrations |
 | **Dashboard** | Next.js UI for guild settings, modules, logs |
 | **Auth** | Discord OAuth, sessions, permissions |

@@ -128,7 +128,7 @@ export default class PingCommand extends SlashCommand {
 }
 ```
 
-See [Classes](classes.md) for `SlashCommand`, `Service`, and plugins.
+See [Classes](../classes/index.md) for `SlashCommand`, `Service`, builders, and plugins with full examples.
 
 ## Options
 

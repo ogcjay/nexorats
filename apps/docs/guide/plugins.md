@@ -97,4 +97,4 @@ nexora add moderation
 
 ## Community plugins
 
-Building and publishing plugins is how the ecosystem grows. See [Plugin ecosystem](ecosystem.md) and [Contributing](contributing.md). More on classes: [Classes](classes.md).
+Building and publishing plugins is how the ecosystem grows. See [Plugin ecosystem](ecosystem.md) and [Contributing](contributing.md). More on classes: [Classes](../classes/index.md).
