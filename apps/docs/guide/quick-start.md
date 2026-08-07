@@ -33,13 +33,9 @@ Scripts use Node’s `--env-file=.env`, and `@nexora.ts/config` also loads `.env
 
 ```bash
 pnpm dev
-# or from the project root:
-nexora dev
 ```
 
-`pnpm dev` starts your bot, the Studio API (`:3920`), and an **embedded Studio UI** on **http://localhost:3002** — no second terminal needed.
-
-`nexora dev` does the same and, when `@nexora.ts/studio` is available, prefers the Vite UI.
+`pnpm dev` starts your bot, the Studio API (`:3920`), and an **embedded Studio UI** on **http://localhost:3002** — no second terminal needed. This is the default after scaffolding.
 
 | Service | URL |
 | --- | --- |
@@ -49,6 +45,27 @@ nexora dev
 Open **:3002** for the [Developer Center](studio.md) — live commands, plugins, logs, and bot status for your project.
 
 ![Nexora Studio](../images/studio-overview.png)
+
+### Optional: `nexora` CLI
+
+The scaffold does **not** put `nexora` on your PATH by itself. `@nexora.ts/create` only creates the project; the `nexora` binary lives in that same npm package.
+
+If you want `nexora dev` (wrapper around `pnpm run dev`, plus Vite Studio UI when `@nexora.ts/studio` is available), install the CLI first:
+
+```bash
+# One-off (no global install)
+npx -p @nexora.ts/create nexora dev
+
+# Or install globally once
+npm install -g @nexora.ts/create
+nexora dev
+
+# Or keep it in this project
+pnpm add -D @nexora.ts/create
+pnpm exec nexora dev
+```
+
+Run these from the **bot project root** (where `package.json` is). Details: [create-nexora-ts / `nexora` CLI](../packages/cli.md).
 
 Public docs (this site): [https://cjays-organization.gitbook.io/nexora.ts](https://cjays-organization.gitbook.io/nexora.ts)
 

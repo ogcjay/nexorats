@@ -25,7 +25,7 @@ pnpm dev
 
 Open **http://localhost:3002** — no second terminal required.
 
-Optional: `nexora dev` starts the bot and, when `@nexora.ts/studio` is available (monorepo), the Vite UI instead of the embedded page.
+Optional: `nexora dev` does the same as `pnpm run dev` and, when `@nexora.ts/studio` is available, prefers the Vite UI. The scaffold does not put `nexora` on PATH by itself — see [how to enable the `nexora` CLI](../packages/cli.md#nexora-cli-optional).
 
 ## Why Studio exists
 
@@ -63,12 +63,14 @@ await studioApi.start();
 studioApi.setPlugins(/* … */);
 ```
 
-CLI helpers:
+CLI helpers (after installing `@nexora.ts/create` globally, as a devDependency, or via `npx -p @nexora.ts/create …`):
 
 ```bash
 nexora dev      # bot + Studio (Vite UI if available, else embedded)
 nexora studio    # Vite Studio UI only (expects API on :3920)
 ```
+
+Most users can stay on `pnpm dev` — Studio is already embedded.
 
 In the monorepo:
 
