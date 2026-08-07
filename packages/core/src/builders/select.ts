@@ -116,7 +116,9 @@ export class StringSelectBuilder
    *   .option('Admin', 'admin')
    *   .option({ label: 'Mod', value: 'mod', emoji: '🛡️' })
    */
-  constructor() {}
+  constructor() {
+    super();
+  }
 
   /**
    * Clone from an existing string select builder or plain API object.
@@ -226,7 +228,9 @@ export class UserSelectBuilder
    *   .placeholder('Select a user')
    *   .values(1)
    */
-  constructor() {}
+  constructor() {
+    super();
+  }
 
   /**
    * Clone from an existing user select builder or plain API object.
@@ -281,7 +285,9 @@ export class RoleSelectBuilder
    *   .minValues(1)
    *   .maxValues(3)
    */
-  constructor() {}
+  constructor() {
+    super();
+  }
 
   /**
    * Clone from an existing role select builder or plain API object.
@@ -334,7 +340,9 @@ export class MentionableSelectBuilder
    *   .customId('mention', { prefix: true })
    *   .placeholder('Select a user or role')
    */
-  constructor() {}
+  constructor() {
+    super();
+  }
 
   /**
    * Clone from an existing mentionable select builder or plain API object.
@@ -385,7 +393,9 @@ export class ChannelSelectBuilder
    *   .placeholder('Select a channel')
    *   .channelTypes(0, 5) // guild text + announcement
    */
-  constructor() {}
+  constructor() {
+    super();
+  }
 
   /**
    * Clone from an existing channel select builder or plain API object.
