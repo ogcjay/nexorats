@@ -52,6 +52,8 @@ export default defineConfig({
           text: 'Core concepts',
           items: [
             { text: 'Commands', link: '/guide/commands' },
+            { text: 'Builders', link: '/guide/builders' },
+            { text: 'Components V2', link: '/guide/components-v2' },
             { text: 'Events', link: '/guide/events' },
             { text: 'Classes', link: '/guide/classes' },
             { text: 'Dependency injection', link: '/guide/dependency-injection' },

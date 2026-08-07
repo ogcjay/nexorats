@@ -1,6 +1,8 @@
 # Classes
 
-Nexora’s builders (`command()`, `event()`, `plugin()`) stay fully supported. Classes are an **additive** style for larger bots — same discovery, clearer structure.
+Nexora’s helpers (`command()`, `event()`, `plugin()`) stay fully supported. Classes are an **additive** style for larger bots — same discovery, clearer structure.
+
+For message UI builders (`EmbedBuilder`, buttons, Components V2), see [Builders](builders.md) and [Components V2](components-v2.md) — they work the same from class `execute` methods.
 
 ## Slash commands
 

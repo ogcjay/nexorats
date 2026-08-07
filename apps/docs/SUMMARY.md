@@ -12,6 +12,8 @@
 ## Core concepts
 
 * [Commands](guide/commands.md)
+* [Builders](guide/builders.md)
+* [Components V2](guide/components-v2.md)
 * [Events](guide/events.md)
 * [Classes](guide/classes.md)
 * [Dependency injection](guide/dependency-injection.md)

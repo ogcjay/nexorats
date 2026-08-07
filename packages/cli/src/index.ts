@@ -138,8 +138,8 @@ OAUTH_REDIRECT_URI=http://localhost:3000/api/auth/callback
         },
         dependencies: {
           '@nexorajs/config': '^0.1.2',
-          '@nexorajs/core': '^0.1.1',
-          '@nexorajs/logger': '^0.1.1',
+          '@nexorajs/core': '^0.1.3',
+          '@nexorajs/logger': '^0.1.2',
           '@nexorajs/dev-server': '^0.1.1',
           ...(options.dashboard
             ? {

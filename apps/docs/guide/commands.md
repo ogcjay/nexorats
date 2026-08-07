@@ -36,7 +36,9 @@ export default command({
 | `member` | Guild member or `null` |
 | `channel` | Channel where the command ran |
 | `guildId` | Guild id or `null` |
-| `reply(…)` | Reply to the interaction |
+| `reply(…)` | Reply to the interaction (strings, discord.js options, or builders) |
+| `embed(…)` | Reply with a single embed builder / `APIEmbed` |
+| `componentsV2(…)` | Reply with Components V2 (sets `IS_COMPONENTS_V2` automatically) |
 | `defer(…)` | Defer the reply (for longer work) |
 | `editReply(…)` | Edit a deferred / previous reply |
 | `followUp(…)` | Send a follow-up message |
@@ -50,6 +52,37 @@ async execute(ctx) {
 ```
 
 You can still use `ctx.interaction.reply(…)` when you need the full Discord.js API.
+
+### Embeds & Components V2
+
+`reply` accepts builder-friendly options: `embed` / `embeds`, `components`, and `v2` (auto flag). See [Builders](builders.md) and [Components V2](components-v2.md).
+
+```ts
+import { command, EmbedBuilder } from '@nexorajs/core';
+
+export default command({
+  name: 'status',
+  description: 'Show status',
+  async execute(ctx) {
+    await ctx.embed(EmbedBuilder.success('Online', 'Bot is ready.'));
+  },
+});
+```
+
+```ts
+import { command, text, container } from '@nexorajs/core';
+
+export default command({
+  name: 'panel',
+  description: 'V2 status panel',
+  async execute(ctx) {
+    await ctx.componentsV2(
+      container(text('# Online'), text('Bot is ready.')).accent(0x57f287),
+    );
+  },
+});
+```
+
 
 ## Guards
 

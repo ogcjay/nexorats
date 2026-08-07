@@ -3,12 +3,15 @@ export {
   messageCommand,
   createCommandContext,
   createMessageCommandContext,
+  resolveReplyOptions,
   type CommandDefinition,
   type CommandContext,
   type CommandOption,
   type CommandModuleType,
   type MessageCommandDefinition,
   type MessageCommandContext,
+  type CommandReplyOptions,
+  type BuilderReplyOptions,
 } from './define.js';
 
 export {
