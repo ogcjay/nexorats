@@ -276,9 +276,9 @@ export function getStudioHtml(): string {
       } else if (tab === 'docs') {
         el.innerHTML = panel(
           'Documentation',
-          '<p><strong>Nexora Studio</strong> is your local control panel for <em>this</em> project.</p>' +
+          '<p><strong>Nexora Studio</strong> is your local control panel for this project.</p>' +
           '<p class="muted">Framework docs:</p>' +
-          '<p><a class="docs-link" href="https://ogcjay.github.io/nexora.ts/" target="_blank" rel="noreferrer">https://ogcjay.github.io/nexora.ts/</a></p>',
+          '<p><a class="docs-link" href="https://cjays-organization.gitbook.io/nexorajs" target="_blank" rel="noreferrer">https://cjays-organization.gitbook.io/nexorajs</a></p>',
         );
       }
     }

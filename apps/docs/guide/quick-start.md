@@ -49,7 +49,7 @@ nexora dev
 
 > `:3000` is the optional OAuth dashboard, not Studio. Open **:3002** for the Developer Center.
 
-Public docs (this site): [https://cjays-organization.gitbook.io/nexora.ts/](https://cjays-organization.gitbook.io/nexora.ts/)
+Public docs (this site): [https://cjays-organization.gitbook.io/nexorajs](https://cjays-organization.gitbook.io/nexorajs)
 
 ## Your first command
 

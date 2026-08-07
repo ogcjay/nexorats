@@ -6,7 +6,7 @@ It is **not** the public documentation website.
 
 | | Public docs | Nexora Studio |
 | --- | --- | --- |
-| Where | [GitBook](https://cjays-organization.gitbook.io/nexora.ts/) | `localhost:3002` |
+| Where | [GitBook](https://cjays-organization.gitbook.io/nexorajs) | `localhost:3002` |
 | Audience | Everyone | You, on your machine |
 | Content | Framework guides | **Your** commands, plugins, logs, config |
 | Start | Open the URL | `pnpm dev` (embedded UI via `@nexora.ts/dev-server`) |
@@ -42,7 +42,7 @@ Studio shows exactly that.
 | **Nexora Studio** | http://localhost:3002 |
 | Studio API | http://127.0.0.1:3920 |
 
-> Dashboard (`:3000`) and Studio (`:3002`) are different apps. The startup banner only shows Studio when the UI is actually listening.
+> Dashboard (`:3000`) and Studio (`:3002`) are different apps. The startup banner shows Studio only when the UI is actually listening. If `dashboard.enabled` is set, it also shows the Dashboard URL with **(start separately)** — run `pnpm --filter @nexora.ts/dashboard dev` from the monorepo; the bot never auto-starts Dashboard.
 
 ## Wire it in your bot
 

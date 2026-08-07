@@ -46,5 +46,11 @@ export interface StartupBannerOptions {
   userTag?: string;
   commands?: number;
   events?: number;
+  /** Local Studio (Developer Center) — shown when actually listening */
   studioUrl?: string;
+  /**
+   * Public Dashboard URL from config when `dashboard.enabled`.
+   * The Next.js app is separate and is not started by the bot.
+   */
+  dashboardUrl?: string;
 }

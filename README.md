@@ -5,14 +5,14 @@
 Nexora is a complete foundation — CLI, command system, plugin system, dashboard, authentication, and more — so you can focus on your bot’s features instead of wiring libraries together.
 
 [![CI](https://github.com/ogcjay/nexorajs/actions/workflows/ci.yml/badge.svg)](https://github.com/ogcjay/nexorajs/actions/workflows/ci.yml)
-[![Docs](https://img.shields.io/badge/docs-GitBook-blue)](https://cjays-organization.gitbook.io/nexora.ts/)
+[![Docs](https://img.shields.io/badge/docs-GitBook-blue)](https://cjays-organization.gitbook.io/nexorajs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
 [![pnpm](https://img.shields.io/badge/pnpm-9.x-orange)](https://pnpm.io)
 
 > **Status:** early preview (`0.1.1`). APIs may change before `1.0.0`.
 >
-> **Documentation:** [https://cjays-organization.gitbook.io/nexora.ts/](https://cjays-organization.gitbook.io/nexora.ts/)  
+> **Documentation:** [https://cjays-organization.gitbook.io/nexorajs](https://cjays-organization.gitbook.io/nexorajs)  
 > **Nexora Studio (local):** `http://localhost:3002` — Developer Center for *your* running project (commands, plugins, logs, status)
 
 ---
@@ -103,7 +103,7 @@ pnpm dev                               # bot + Studio API + embedded Studio UI
 pnpm studio:dev
 ```
 
-See the docs guide: [Nexora Studio](https://cjays-organization.gitbook.io/nexora.ts/platform/nexora-studio).
+See the docs guide: [Nexora Studio](https://cjays-organization.gitbook.io/nexorajs/platform/nexora-studio).
 
 ## Build plugins, grow the ecosystem
 

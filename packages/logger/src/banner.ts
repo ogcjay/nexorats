@@ -12,9 +12,7 @@ const GREEN = '\x1b[32m';
  * Optional for Core — call after login / discovery when ready.
  */
 export function printStartupBanner(options: StartupBannerOptions): void {
-  const { name, version, userTag, commands, events, studioUrl } = options;
-  const width = 42;
-  const line = '─'.repeat(width);
+  const { name, version, userTag, commands, events, studioUrl, dashboardUrl } = options;
 
   const rows: Array<[string, string]> = [];
   rows.push(['name', name]);
@@ -23,13 +21,19 @@ export function printStartupBanner(options: StartupBannerOptions): void {
   if (commands !== undefined) rows.push(['commands', String(commands)]);
   if (events !== undefined) rows.push(['events', String(events)]);
   if (studioUrl) rows.push(['studio', studioUrl]);
+  // Dashboard is a separate Next.js app — never imply the bot started it.
+  if (dashboardUrl) rows.push(['dashboard', `${dashboardUrl} (start separately)`]);
 
   const labelWidth = Math.max(...rows.map(([k]) => k.length));
+  const contentWidths = rows.map(([k, v]) => 2 + labelWidth + 2 + v.length);
+  const headerVisible = 2 + 'Nexora'.length + 2 + 'discord framework'.length;
+  const width = Math.max(42, headerVisible, ...contentWidths);
+  const line = '─'.repeat(width);
 
   console.log('');
   console.log(`${CYAN}${BOLD}  ┌${line}┐${RESET}`);
   console.log(
-    `${CYAN}${BOLD}  │${RESET}  ${MAGENTA}${BOLD}Nexora${RESET}  ${DIM}discord framework${RESET}${' '.repeat(Math.max(0, width - 24))}${CYAN}${BOLD}│${RESET}`,
+    `${CYAN}${BOLD}  │${RESET}  ${MAGENTA}${BOLD}Nexora${RESET}  ${DIM}discord framework${RESET}${' '.repeat(Math.max(0, width - headerVisible))}${CYAN}${BOLD}│${RESET}`,
   );
   console.log(`${CYAN}${BOLD}  ├${line}┤${RESET}`);
 

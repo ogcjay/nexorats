@@ -55,7 +55,7 @@ new Nexora({
 });
 ```
 
-On ready, Nexora prints a **startup banner** (commands/events count, Studio URL) when using the modern logger.
+On ready, Nexora prints a **startup banner** (commands/events count, Studio URL when live, and Dashboard URL when `dashboard.enabled` — marked as start separately).
 
 ## Related
 

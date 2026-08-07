@@ -9,7 +9,9 @@ Public docs live in `apps/docs/**/*.md` and can be published two ways from the *
 
 ## GitHub Pages
 
-Live URL (after Pages is enabled): https://ogcjay.github.io/nexora.ts/
+Primary public docs: https://cjays-organization.gitbook.io/nexorajs
+
+Optional Pages URL (if enabled): `https://<user-or-org>.github.io/<repo>/`
 
 1. Repo → **Settings** → **Pages**
 2. **Source:** GitHub Actions

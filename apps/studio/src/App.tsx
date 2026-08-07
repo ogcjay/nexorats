@@ -328,19 +328,17 @@ function DocsView() {
       </div>
       <div className="panel-body">
         <p>
-          <strong>Nexora Studio</strong> is your local control panel for <em>this</em> project.
+          <strong>Nexora Studio</strong> is your local control panel for this project.
         </p>
-        <p className="muted">
-          Public framework documentation is hosted separately on GitHub Pages for everyone:
-        </p>
+        <p className="muted">Framework docs:</p>
         <p>
           <a
             className="docs-link"
-            href="https://ogcjay.github.io/nexora.ts/"
+            href="https://cjays-organization.gitbook.io/nexorajs"
             target="_blank"
             rel="noreferrer"
           >
-            https://ogcjay.github.io/nexora.ts/
+            https://cjays-organization.gitbook.io/nexorajs
           </a>
         </p>
         <p className="muted" style={{ marginTop: '1rem' }}>

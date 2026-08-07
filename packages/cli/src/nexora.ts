@@ -14,7 +14,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
-const DOCS_PLUGINS = 'https://ogcjay.github.io/nexora.ts/guide/plugins.html';
+const DOCS_PLUGINS = 'https://cjays-organization.gitbook.io/nexorajs/guide/plugins';
 const STUDIO_URL = 'http://localhost:3002';
 const STUDIO_API = 'http://127.0.0.1:3920';
 
@@ -125,12 +125,13 @@ function printHelp(): void {
     nexora list             List local ./plugins folders
 
   Local ports (typical):
-    Dashboard        http://localhost:3000
-    Nexora Studio    ${STUDIO_URL}
+    Nexora Studio    ${STUDIO_URL}   (auto with nexora dev / createDevServer)
     Studio API       ${STUDIO_API}
+    Dashboard        http://localhost:3000  (optional Next.js app — start separately)
 
-  Studio is a local Developer Center for THIS project (commands, plugins, logs…).
-  Public docs: https://ogcjay.github.io/nexora.ts/
+  Studio = local Developer Center for THIS project (commands, plugins, logs…).
+  Dashboard = public admin UI — not started by the bot; monorepo: pnpm --filter @nexora.ts/dashboard dev
+  Public docs: https://cjays-organization.gitbook.io/nexorajs
 `);
 }
 

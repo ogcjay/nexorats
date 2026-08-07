@@ -114,7 +114,7 @@ new ButtonBuilder()
   .emoji('✅')
   .success();
 
-new ButtonBuilder().label('Docs').link('https://cjays-organization.gitbook.io/nexora.ts/');
+new ButtonBuilder().label('Docs').link('https://cjays-organization.gitbook.io/nexorajs');
 ```
 
 Style shortcuts: `.primary()`, `.secondary()`, `.success()`, `.danger()`, `.link(url)` / `.url(url)`.

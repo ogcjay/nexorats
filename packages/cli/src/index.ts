@@ -95,7 +95,17 @@ async function main(): Promise<void> {
   console.log('    pnpm install');
   console.log('    # Edit .env with your Discord bot token');
   console.log('    pnpm dev');
-  console.log('    # Studio UI opens at http://localhost:3002 (API :3920)\n');
+  console.log('    # Studio (Developer Center): http://localhost:3002 (API :3920)');
+  if (options.dashboard) {
+    console.log(
+      '    # Dashboard (public admin UI) is NOT auto-started — separate Next.js app.',
+    );
+    console.log(
+      '    # Config: dashboard.url — monorepo: pnpm --filter @nexora.ts/dashboard dev\n',
+    );
+  } else {
+    console.log('');
+  }
 }
 
 function ensureDir(filePath: string): void {
