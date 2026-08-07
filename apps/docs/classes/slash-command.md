@@ -1,11 +1,39 @@
 # SlashCommand
 
-Abstract base class for slash commands. Same discovery as `command({…})` — export `default class` from a file under `commands/`.
+Abstract base class for slash commands. Same discovery as `command({…})` / `slash(…)` — export `default` from a file under `commands/`.
 
 **Package:** `@nexora.ts/core`  
 **Alias:** `BaseCommand` (extends `SlashCommand`)
 
-## Minimal example
+## Beginner (shortest path)
+
+```ts
+import { slash } from '@nexora.ts/core';
+
+export default slash('ping', 'Check latency', async (ctx) => {
+  await ctx.reply('Pong!');
+});
+```
+
+Private admin reply in one line:
+
+```ts
+import { slash } from '@nexora.ts/core';
+
+export default slash('ban', 'Ban a member', async (ctx) => {
+  const user = ctx.interaction.options.getUser('user', true);
+  await ctx.success(`${user.tag} was banned.`);
+}, {
+  guildOnly: true,
+  adminOnly: true,
+  ephemeral: true, // all ctx.reply / embed default to ephemeral
+  options: [
+    { name: 'user', description: 'Member', type: 'user', required: true },
+  ],
+});
+```
+
+## Class style
 
 ```ts
 import { SlashCommand, type CommandContext } from '@nexora.ts/core';
@@ -20,7 +48,7 @@ export default class PingCommand extends SlashCommand {
 }
 ```
 
-## With options & guards
+## Full example (options & embeds)
 
 ```ts
 import { SlashCommand, EmbedBuilder, type CommandContext } from '@nexora.ts/core';
@@ -59,6 +87,7 @@ Inside `execute(ctx)`:
 | Helper | Description |
 | --- | --- |
 | `ctx.reply(…)` | string, embed builder, or options (`v2`, `ephemeral`, …) |
+| `ctx.success` / `error` / `warn` / `info` | colored embeds, **ephemeral by default** |
 | `ctx.defer()` / `ctx.editReply()` / `ctx.followUp()` | deferred flows |
 | `ctx.embed(builder)` | reply with one embed |
 | `ctx.componentsV2(…)` | Components V2 + `IsComponentsV2` flag |
@@ -67,12 +96,12 @@ Inside `execute(ctx)`:
 
 ## Fields you can set
 
-`name`, `description`, `options`, `guildOnly`, `adminOnly`, `permissions`, `cooldown`, `autocomplete?`, `execute`
+`name`, `description`, `options`, `guildOnly`, `adminOnly`, `permissions`, `cooldown`, `ephemeral`, `guards`, `autocomplete?`, `execute`
 
-## vs `command()`
+## vs `command()` / `slash()`
 
 ```ts
-// Still valid — same runtime
+// Object form — still valid
 export default command({
   name: 'ping',
   description: 'Check latency',
@@ -82,7 +111,7 @@ export default command({
 });
 ```
 
-Prefer `SlashCommand` when you want inheritance, shared base classes, or clearer structure in large codebases.
+Prefer `slash()` for the shortest beginner path, `SlashCommand` when you want inheritance or shared base classes.
 
 ## Related
 

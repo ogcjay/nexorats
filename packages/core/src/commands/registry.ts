@@ -261,6 +261,7 @@ function mapSubCommand(cmd: SlashCommand, group: SlashCommandGroup): CommandDefi
     adminOnly: cmd.adminOnly ?? group.adminOnly,
     permissions: cmd.permissions ?? group.permissions,
     cooldown: cmd.cooldown ?? group.cooldown,
+    ephemeral: cmd.ephemeral,
     type: 'slash' as const,
     execute: (ctx) => cmd.execute(ctx),
     autocomplete: cmd.autocomplete
@@ -464,7 +465,9 @@ export function attachCommandHandlers(
       if (!resolved) return;
 
       const { sub, label: commandLabel, cooldownKey } = resolved;
-      const ctx = createCommandContext(interaction, client);
+      const ctx = createCommandContext(interaction, client, {
+        ephemeral: sub.ephemeral,
+      });
       const blocked = await enforceGuards(interaction, sub, cooldowns, ctx, cooldownKey);
       if (blocked) return;
 
@@ -510,7 +513,9 @@ export function attachCommandHandlers(
     const cmd = registry.get(interaction.commandName);
     if (!cmd) return;
 
-    const ctx = createCommandContext(interaction, client);
+    const ctx = createCommandContext(interaction, client, {
+      ephemeral: cmd.ephemeral,
+    });
     const blocked = await enforceGuards(interaction, cmd, cooldowns, ctx);
     if (blocked) return;
 

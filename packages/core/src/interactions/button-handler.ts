@@ -20,6 +20,21 @@ export abstract class ButtonHandler {
   abstract execute(ctx: ComponentContext): Promise<void> | void;
 }
 
+/**
+ * Functional button handler — same discovery as `extends ButtonHandler`.
+ *
+ * @example
+ * export default button('delete:confirm', async (ctx) => {
+ *   await ctx.update('Deleted.');
+ * });
+ */
+export function button(
+  customId: string | RegExp,
+  execute: (ctx: ComponentContext) => Promise<void> | void,
+): ButtonHandler {
+  return { kind: 'button', customId, execute };
+}
+
 /** True when `value` is a constructable ButtonHandler class */
 export function isButtonHandlerClass(
   value: unknown,

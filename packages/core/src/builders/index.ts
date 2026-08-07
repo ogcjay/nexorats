@@ -37,9 +37,11 @@ export type {
 
 export { EmbedBuilder, EmbedColor, resolveColor } from './embed.js';
 export type { EmbedData } from './embed.js';
+/** Alias beginners often expect — same as {@link EmbedBuilder} */
+export { EmbedBuilder as Embed } from './embed.js';
 
-export { ButtonBuilder } from './button.js';
-export { ActionRowBuilder } from './action-row.js';
+export { ButtonBuilder, btn } from './button.js';
+export { ActionRowBuilder, row } from './action-row.js';
 export {
   StringSelectBuilder,
   UserSelectBuilder,

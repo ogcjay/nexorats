@@ -47,6 +47,31 @@ export class ButtonBuilder implements JSONEncodable<APIButtonComponent> {
     return builder;
   }
 
+  /** One-liner: primary (blurple) button */
+  static primary(customId: string, label: string, options?: CustomIdOptions): ButtonBuilder {
+    return new ButtonBuilder().customId(customId, options).label(label).primary();
+  }
+
+  /** One-liner: secondary (grey) button */
+  static secondary(customId: string, label: string, options?: CustomIdOptions): ButtonBuilder {
+    return new ButtonBuilder().customId(customId, options).label(label).secondary();
+  }
+
+  /** One-liner: success (green) button */
+  static success(customId: string, label: string, options?: CustomIdOptions): ButtonBuilder {
+    return new ButtonBuilder().customId(customId, options).label(label).success();
+  }
+
+  /** One-liner: danger (red) button */
+  static danger(customId: string, label: string, options?: CustomIdOptions): ButtonBuilder {
+    return new ButtonBuilder().customId(customId, options).label(label).danger();
+  }
+
+  /** One-liner: link button (no customId) */
+  static link(url: string, label: string): ButtonBuilder {
+    return new ButtonBuilder().label(label).link(url);
+  }
+
   /**
    * Set custom_id. Use `{ prefix: true }` for `nexora:<id>`.
    * Not allowed together with Link style / url.
@@ -149,3 +174,17 @@ export class ButtonBuilder implements JSONEncodable<APIButtonComponent> {
     return json;
   }
 }
+
+/**
+ * Beginner-friendly button shortcuts — same as {@link ButtonBuilder} statics.
+ *
+ * @example
+ * row(btn.primary('yes', 'Yes'), btn.danger('no', 'No'))
+ */
+export const btn = {
+  primary: ButtonBuilder.primary.bind(ButtonBuilder) as typeof ButtonBuilder.primary,
+  secondary: ButtonBuilder.secondary.bind(ButtonBuilder) as typeof ButtonBuilder.secondary,
+  success: ButtonBuilder.success.bind(ButtonBuilder) as typeof ButtonBuilder.success,
+  danger: ButtonBuilder.danger.bind(ButtonBuilder) as typeof ButtonBuilder.danger,
+  link: ButtonBuilder.link.bind(ButtonBuilder) as typeof ButtonBuilder.link,
+} as const;

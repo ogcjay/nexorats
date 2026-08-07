@@ -10,10 +10,10 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="rounded-md p-2 hover:bg-accent"
+      className="rounded-lg border border-border/60 p-2 text-muted-foreground transition-colors duration-200 hover:border-primary/30 hover:bg-accent hover:text-foreground"
       aria-label="Toggle theme"
     >
-      {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </button>
   );
 }

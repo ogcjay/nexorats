@@ -1,10 +1,28 @@
 # EventHandler
 
-Abstract base class for Discord.js client events. Same discovery as `event()` — export `default class` from a file under `events/`.
+Abstract base class for Discord.js client events. Same discovery as `event()` / `on()` / `onReady()` — export `default` from a file under `events/`.
 
 **Package:** `@nexora.ts/core`
 
-## Minimal example
+## Beginner (shortest path)
+
+```ts
+import { onReady } from '@nexora.ts/core';
+
+export default onReady((client) => {
+  console.log(`Logged in as ${client.user.tag}`);
+});
+```
+
+```ts
+import { on } from '@nexora.ts/core';
+
+export default on('messageCreate', async (message) => {
+  if (message.content === 'ping') await message.reply('pong');
+});
+```
+
+## Class style
 
 ```ts
 import { EventHandler } from '@nexora.ts/core';
@@ -47,7 +65,7 @@ export default class WelcomeHandler extends EventHandler<'guildMemberAdd'> {
 | `once` | If `true`, listen with `client.once` (default: `false`) |
 | `execute(…)` | Handler — args match `ClientEvents[name]` |
 
-## vs `event()`
+## vs `event()` / `on()` / `onReady()`
 
 ```ts
 // Still valid — same runtime
@@ -56,7 +74,7 @@ export default event('ready', (client) => {
 }, true);
 ```
 
-Prefer `EventHandler` when you want typed args, shared base classes, or clearer structure in large codebases.
+Prefer `onReady` / `on` for the shortest beginner path, `EventHandler` when you want typed args or shared base classes.
 
 ## Related
 

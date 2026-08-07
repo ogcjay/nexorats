@@ -4,9 +4,36 @@ Group slash subcommands under one top-level command, and define user/message con
 
 **Package:** `@nexora.ts/core`
 
-## SlashCommandGroup
+## Beginner — `group()` factory
 
-Export a group from `commands/`. Each entry in `commands` is a `SlashCommand` whose `name` becomes the **subcommand** name.
+```ts
+import { SlashCommand, group, type CommandContext } from '@nexora.ts/core';
+
+class CreateSub extends SlashCommand {
+  name = 'create';
+  description = 'Open a ticket';
+  async execute(ctx: CommandContext) {
+    await ctx.success('Ticket created.');
+  }
+}
+
+class CloseSub extends SlashCommand {
+  name = 'close';
+  description = 'Close your ticket';
+  async execute(ctx: CommandContext) {
+    await ctx.reply('Ticket closed.');
+  }
+}
+
+// Pass class constructors — group() instantiates them
+export default group('ticket', 'Ticket system', [CreateSub, CloseSub], {
+  guildOnly: true,
+});
+```
+
+Users run `/ticket create` and `/ticket close`.
+
+## Class style
 
 ```ts
 import { SlashCommand, SlashCommandGroup, type CommandContext } from '@nexora.ts/core';
@@ -37,8 +64,6 @@ export default class TicketGroup extends SlashCommandGroup {
 }
 ```
 
-Users run `/ticket create` and `/ticket close`. Guards (`guildOnly`, `cooldown`, …) on each subcommand still apply.
-
 ### Fields
 
 | Field | Description |
@@ -46,6 +71,8 @@ Users run `/ticket create` and `/ticket close`. Guards (`guildOnly`, `cooldown`,
 | `name` | Top-level slash command name |
 | `description` | Top-level description |
 | `commands` | Array of `SlashCommand` instances (subcommand name = `command.name`) |
+
+Also: `subcommands(CreateCmd, CloseCmd)` to instantiate class constructors.
 
 Discovery registers the group as one chat-input command with subcommand options. Runtime routing calls the matching child’s `execute`.
 
@@ -62,10 +89,7 @@ export default class UserInfoMenu extends ContextMenuCommand {
 
   async execute(ctx: ContextMenuContext) {
     const user = ctx.targetUser;
-    await ctx.reply({
-      content: `${user.tag} · \`${user.id}\``,
-      ephemeral: true,
-    });
+    await ctx.success(`${user?.tag} · \`${user?.id}\``);
   }
 }
 ```
@@ -94,7 +118,7 @@ export default class ReportMessage extends ContextMenuCommand {
 | `execute(ctx)` | Handler |
 | `ctx.targetUser` | Target user (`type: 'user'`) |
 | `ctx.targetMessage` | Target message (`type: 'message'`) |
-| `ctx.reply` / `defer` / … | Same style as slash `CommandContext` |
+| `ctx.reply` / `success` / `defer` / … | Same style as slash `CommandContext` |
 
 Deployed as Application Command type User / Message alongside slash commands.
 

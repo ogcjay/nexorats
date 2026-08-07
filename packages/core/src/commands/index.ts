@@ -1,9 +1,11 @@
 export {
   command,
+  slash,
   messageCommand,
   createCommandContext,
   createMessageCommandContext,
   resolveReplyOptions,
+  withDefaultEphemeral,
   type CommandDefinition,
   type CommandContext,
   type CommandOption,
@@ -12,7 +14,11 @@ export {
   type MessageCommandContext,
   type CommandReplyOptions,
   type BuilderReplyOptions,
+  type CreateCommandContextOptions,
+  type StatusReplyOptions,
 } from './define.js';
+
+export { buildStatusReply } from './reply-presets.js';
 
 export {
   Guards,
@@ -44,9 +50,11 @@ export {
   SlashCommandGroup,
   SlashCommandSubGroup,
   subcommands,
+  group,
   isCommandGroupClass,
   resolveCommandGroupExport,
   type SlashCommandConstructor,
+  type GroupOptions,
 } from './command-group.js';
 
 export {

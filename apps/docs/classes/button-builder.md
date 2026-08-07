@@ -4,7 +4,27 @@ Interactive buttons and action rows as plain API objects (`toJSON()`).
 
 **Package:** `@nexora.ts/core`
 
-## Buttons in a row
+## Beginner (shortest path)
+
+```ts
+import { btn, row, EmbedBuilder, type CommandContext } from '@nexora.ts/core';
+
+export async function confirmDelete(ctx: CommandContext) {
+  await ctx.reply({
+    embed: EmbedBuilder.warn('Confirm', 'This cannot be undone.'),
+    components: [
+      row(
+        btn.danger('delete:confirm', 'Delete'),
+        btn.secondary('delete:cancel', 'Cancel'),
+      ),
+    ],
+  });
+}
+```
+
+Same with class statics: `ButtonBuilder.primary('id', 'Label')`, `row(...)`.
+
+## Full fluent API
 
 ```ts
 import {
@@ -35,11 +55,11 @@ export async function confirmDelete(ctx: CommandContext) {
 
 | Helper | Style |
 | --- | --- |
-| `.primary()` | Blurple |
-| `.secondary()` | Grey |
-| `.success()` | Green |
-| `.danger()` | Red |
-| `.link(url)` | URL button (no customId) |
+| `btn.primary(id, label)` / `.primary()` | Blurple |
+| `btn.secondary(id, label)` / `.secondary()` | Grey |
+| `btn.success(id, label)` / `.success()` | Green |
+| `btn.danger(id, label)` / `.danger()` | Red |
+| `btn.link(url, label)` / `.link(url)` | URL button (no customId) |
 
 Also: `.label()`, `.emoji()`, `.disabled()`, `.customId(id, { prefix?: true })`.
 

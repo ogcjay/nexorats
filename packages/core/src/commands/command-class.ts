@@ -32,6 +32,11 @@ export abstract class SlashCommand implements CommandDefinition {
   permissions?: PermissionResolvable[];
   /** Per-user cooldown in milliseconds */
   cooldown?: number;
+  /**
+   * When `true`, `ctx.reply` / `ctx.embed` / `ctx.componentsV2` default to ephemeral.
+   * @see CommandDefinition.ephemeral
+   */
+  ephemeral?: boolean;
   /** Composable guards — after built-in flags */
   guards?: Guard[];
   readonly type: CommandModuleType = 'slash';

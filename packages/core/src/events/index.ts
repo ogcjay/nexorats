@@ -35,6 +35,37 @@ export function event<K extends keyof ClientEvents>(
   return { name, execute, once };
 }
 
+/**
+ * Alias for {@link event} — same discovery, shorter name for beginners.
+ *
+ * @example
+ * export default on('messageCreate', async (message) => {
+ *   if (message.content === 'ping') await message.reply('pong');
+ * });
+ */
+export function on<K extends keyof ClientEvents>(
+  name: K,
+  execute: EventExecuteFn<K>,
+  once = false,
+): EventDefinition<K> {
+  return event(name, execute, once);
+}
+
+/**
+ * Ready-event shortcut (`once: true` by default).
+ *
+ * @example
+ * export default onReady((client) => {
+ *   console.log(`Logged in as ${client.user.tag}`);
+ * });
+ */
+export function onReady(
+  execute: EventExecuteFn<'ready'>,
+  once = true,
+): EventDefinition<'ready'> {
+  return event('ready', execute, once);
+}
+
 /** Registered event with metadata */
 export interface RegisteredEvent<
   K extends keyof ClientEvents = keyof ClientEvents,

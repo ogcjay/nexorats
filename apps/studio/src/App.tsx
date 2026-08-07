@@ -42,6 +42,12 @@ const SUBTITLES: Record<Tab, string> = {
   docs: 'Framework documentation and local ports.',
 };
 
+function liveLabel(state: LiveConnectionState): string {
+  if (state === 'live') return 'Live';
+  if (state === 'reconnecting') return 'Reconnecting';
+  return 'Offline';
+}
+
 export function App() {
   const [tab, setTab] = useState<Tab>('overview');
   const [snapshot, setSnapshot] = useState<StudioSnapshot | null>(null);
@@ -49,6 +55,12 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [live, setLive] = useState<LiveConnectionState>('offline');
+  const [pageKey, setPageKey] = useState(0);
+
+  const selectTab = (id: Tab) => {
+    setTab(id);
+    setPageKey((k) => k + 1);
+  };
 
   const refresh = async () => {
     if (refreshing) return;
@@ -139,7 +151,16 @@ export function App() {
             </div>
           </div>
         </div>
+
+        <div className="sidebar-live">
+          <div className="live-badge" data-state={live} title="Studio WebSocket">
+            <span className="live-dot" />
+            <span>{liveLabel(live)}</span>
+          </div>
+        </div>
+
         <nav className="nav">
+          <div className="nav-label">Inspect</div>
           {TABS.map((item) => {
             const count =
               item.id === 'commands'
@@ -156,7 +177,7 @@ export function App() {
                 key={item.id}
                 type="button"
                 className={tab === item.id ? 'active' : undefined}
-                onClick={() => setTab(item.id)}
+                onClick={() => selectTab(item.id)}
               >
                 <span>{item.label}</span>
                 {count != null && <span className="count">{count}</span>}
@@ -164,25 +185,39 @@ export function App() {
             );
           })}
         </nav>
+
         <div className="sidebar-foot">
-          {snapshot?.meta.ports
-            ? `API :${snapshot.meta.ports.api} · UI :${snapshot.meta.ports.studio} · v${snapshot.meta.apiVersion}`
-            : 'API · —'}
+          {snapshot?.meta.ports ? (
+            <>
+              <div className="foot-row">
+                <span>API</span>
+                <span>:{snapshot.meta.ports.api}</span>
+              </div>
+              <div className="foot-row">
+                <span>UI</span>
+                <span>:{snapshot.meta.ports.studio}</span>
+              </div>
+              <div className="foot-row">
+                <span>API ver</span>
+                <span>v{snapshot.meta.apiVersion}</span>
+              </div>
+            </>
+          ) : (
+            'Waiting for API…'
+          )}
         </div>
       </aside>
 
       <main className="main">
-        <div className="header">
-          <div>
+        <div className="chrome">
+          <div className="chrome-title">
             <h1>{title}</h1>
             <p>{SUBTITLES[tab]}</p>
           </div>
           <div className="header-actions">
-            <div className="live-badge" data-state={live} title="Studio WebSocket">
+            <div className="live-badge compact" data-state={live} title="Studio WebSocket">
               <span className="live-dot" />
-              <span>
-                {live === 'live' ? 'Live' : live === 'reconnecting' ? 'Reconnecting' : 'Offline'}
-              </span>
+              <span>{liveLabel(live)}</span>
             </div>
             <button type="button" className="btn" disabled={refreshing} onClick={() => void refresh()}>
               ↻ Refresh
@@ -191,10 +226,10 @@ export function App() {
               <span className={`dot ${snapshot?.bot.online ? 'ok' : ''}`} />
               {snapshot?.bot.online ? (
                 <>
-                  <span className="ok" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                  <span className="ok" style={{ fontSize: '0.72rem', fontWeight: 650 }}>
                     Online
                   </span>
-                  <span>·</span>
+                  <span className="muted">·</span>
                   <span className="tag">{snapshot.bot.tag ?? 'bot'}</span>
                 </>
               ) : snapshot ? (
@@ -206,36 +241,40 @@ export function App() {
           </div>
         </div>
 
-        {error && (
-          <div className="error-banner">
-            {error}
-            <div className="muted" style={{ marginTop: '0.4rem' }}>
-              Start your bot with <code>createDevServer(bot)</code> (API on :3920). Studio UI: :3002.
+        <div className="main-body">
+          {error && (
+            <div className="error-banner">
+              {error}
+              <div className="muted" style={{ marginTop: '0.35rem' }}>
+                Start your bot with <code>createDevServer(bot)</code> (API on :3920). Studio UI: :3002.
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {snapshot && tab !== 'docs' && (
-          <div className="stats">
-            <StatCard
-              label="Commands"
-              value={String(counts?.commands ?? snapshot.commands.length)}
-              sub={counts?.slash != null ? `${counts.slash} slash` : undefined}
-            />
-            <StatCard label="Events" value={String(counts?.events ?? snapshot.events.length)} />
-            <StatCard label="Plugins" value={String(counts?.plugins ?? snapshot.plugins.length)} />
-            <StatCard label="Guilds" value={String(snapshot.bot.guilds)} />
-            <StatCard label="Uptime" value={formatUptime(snapshot.bot.uptimeMs)} />
-          </div>
-        )}
+          {snapshot && tab !== 'docs' && (
+            <div className="stats">
+              <StatCard
+                label="Commands"
+                value={String(counts?.commands ?? snapshot.commands.length)}
+                sub={counts?.slash != null ? `${counts.slash} slash` : undefined}
+              />
+              <StatCard label="Events" value={String(counts?.events ?? snapshot.events.length)} />
+              <StatCard label="Plugins" value={String(counts?.plugins ?? snapshot.plugins.length)} />
+              <StatCard label="Guilds" value={String(snapshot.bot.guilds)} />
+              <StatCard label="Uptime" value={formatUptime(snapshot.bot.uptimeMs)} />
+            </div>
+          )}
 
-        {tab === 'overview' && snapshot && <Overview snapshot={snapshot} />}
-        {tab === 'commands' && snapshot && <Commands snapshot={snapshot} />}
-        {tab === 'events' && snapshot && <Events snapshot={snapshot} />}
-        {tab === 'plugins' && snapshot && <Plugins snapshot={snapshot} />}
-        {tab === 'config' && snapshot && <ConfigView snapshot={snapshot} />}
-        {tab === 'logs' && <LogsView logs={logs} />}
-        {tab === 'docs' && <DocsView />}
+          <div className="page-enter" key={pageKey}>
+            {tab === 'overview' && snapshot && <Overview snapshot={snapshot} />}
+            {tab === 'commands' && snapshot && <Commands snapshot={snapshot} />}
+            {tab === 'events' && snapshot && <Events snapshot={snapshot} />}
+            {tab === 'plugins' && snapshot && <Plugins snapshot={snapshot} />}
+            {tab === 'config' && snapshot && <ConfigView snapshot={snapshot} />}
+            {tab === 'logs' && <LogsView logs={logs} />}
+            {tab === 'docs' && <DocsView />}
+          </div>
+        </div>
       </main>
     </div>
   );
@@ -259,15 +298,12 @@ function Overview({ snapshot }: { snapshot: StudioSnapshot }) {
         <div className="panel">
           <div className="panel-head">
             <h2>Bot status</h2>
+            <span className={`pill ${snapshot.bot.online ? 'ok' : 'warn'}`}>
+              {snapshot.bot.online ? 'online' : 'offline'}
+            </span>
           </div>
           <div className="panel-body">
             <ul className="list">
-              <li>
-                <span>Status</span>
-                <span className={`pill ${snapshot.bot.online ? 'ok' : 'warn'}`}>
-                  {snapshot.bot.online ? 'online' : 'offline'}
-                </span>
-              </li>
               <li>
                 <span>Tag</span>
                 <span>{snapshot.bot.tag ?? '—'}</span>
@@ -346,10 +382,13 @@ function Overview({ snapshot }: { snapshot: StudioSnapshot }) {
         </div>
       </div>
 
-      <div style={{ marginTop: '0.75rem' }}>
+      <div className="stack-gap">
         <div className="panel">
           <div className="panel-head">
             <h2>Database</h2>
+            <span className={`pill ${snapshot.database.connected ? 'ok' : 'warn'}`}>
+              {snapshot.database.connected ? 'connected' : 'offline'}
+            </span>
           </div>
           <div className="panel-body">
             <ul className="list">
@@ -378,8 +417,7 @@ function Overview({ snapshot }: { snapshot: StudioSnapshot }) {
 }
 
 function TypePill({ type }: { type: StudioCommandInfo['type'] }) {
-  const cls =
-    type === 'slash' ? 'cyan' : type === 'group' ? 'blurple' : '';
+  const cls = type === 'slash' ? 'cyan' : type === 'group' ? 'blurple' : '';
   return <span className={`pill ${cls}`}>{typeLabel(type)}</span>;
 }
 
@@ -395,8 +433,7 @@ function Commands({ snapshot }: { snapshot: StudioSnapshot }) {
       c.type.toLowerCase().includes(q)
     );
   });
-  const sel =
-    snapshot.commands.find((c) => commandKey(c) === selected) ?? null;
+  const sel = snapshot.commands.find((c) => commandKey(c) === selected) ?? null;
 
   return (
     <div className="split">
@@ -465,9 +502,7 @@ function Commands({ snapshot }: { snapshot: StudioSnapshot }) {
         </div>
         <div className="panel-body">
           {!sel ? (
-            <div className="detail-empty">
-              Select a command to inspect options, cooldown, and flags.
-            </div>
+            <div className="detail-empty">Select a command to inspect options, cooldown, and flags.</div>
           ) : (
             <CommandDetail cmd={sel} />
           )}
@@ -481,10 +516,10 @@ function CommandDetail({ cmd }: { cmd: StudioCommandInfo }) {
   return (
     <>
       <div className="detail-title">/{cmd.name}</div>
-      <div className="muted" style={{ fontSize: '0.82rem' }}>
+      <div className="muted" style={{ fontSize: '0.8rem' }}>
         {cmd.description}
       </div>
-      <div style={{ marginTop: '0.55rem', display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+      <div style={{ marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.28rem' }}>
         <TypePill type={cmd.type} />
         {cmd.guildOnly && <span className="pill warn">guildOnly</span>}
         {cmd.adminOnly && <span className="pill warn">adminOnly</span>}
@@ -516,9 +551,9 @@ function CommandDetail({ cmd }: { cmd: StudioCommandInfo }) {
           </div>
         ) : null}
       </div>
-      <div style={{ fontSize: '0.78rem', fontWeight: 600, marginTop: '0.35rem' }}>Options</div>
+      <div className="section-label">Options</div>
       {cmd.options.length === 0 ? (
-        <p className="muted" style={{ margin: '0.5rem 0 0', fontSize: '0.8rem' }}>
+        <p className="muted" style={{ margin: '0.45rem 0 0', fontSize: '0.78rem' }}>
           No options.
         </p>
       ) : (
@@ -567,7 +602,7 @@ function Events({ snapshot }: { snapshot: StudioSnapshot }) {
               <div>
                 <div className="evt-name">{evt.name}</div>
                 {evt.source && (
-                  <div className="muted" style={{ fontSize: '0.75rem', marginTop: '0.15rem' }}>
+                  <div className="muted" style={{ fontSize: '0.72rem', marginTop: '0.12rem' }}>
                     {evt.source}
                   </div>
                 )}
@@ -608,7 +643,7 @@ function Plugins({ snapshot }: { snapshot: StudioSnapshot }) {
                   {plugin.name} <span className="muted">v{plugin.version}</span>
                 </div>
                 {plugin.description && (
-                  <div className="muted" style={{ fontSize: '0.78rem', marginTop: '0.2rem' }}>
+                  <div className="muted" style={{ fontSize: '0.74rem', marginTop: '0.15rem' }}>
                     {plugin.description}
                   </div>
                 )}
@@ -644,19 +679,23 @@ function ConfigView({ snapshot }: { snapshot: StudioSnapshot }) {
 
 function LogsView({ logs }: { logs: LogEntry[] }) {
   return (
-    <div className="panel">
+    <div className="panel logs-panel">
       <div className="panel-head">
         <h2>Live logs</h2>
         <span className="muted">{logs.length} buffered</span>
       </div>
       <div className="panel-body logs">
         {logs.length === 0 ? (
-          <p className="muted">Waiting for log events…</p>
+          <p className="muted" style={{ padding: '0.85rem' }}>
+            Waiting for log events…
+          </p>
         ) : (
           [...logs].reverse().map((line, index) => (
             <div className="log-line" key={`${line.timestamp}-${index}`}>
               <span className="muted">{line.timestamp}</span>
-              <span className={line.level === 'error' ? 'err' : line.level === 'warn' ? 'warn' : ''}>
+              <span
+                className={`lvl ${line.level === 'error' ? 'err' : line.level === 'warn' ? 'warn' : ''}`}
+              >
                 {line.level}
               </span>
               <span>
@@ -677,8 +716,9 @@ function DocsView() {
       <div className="panel">
         <div className="panel-body docs-hero">
           <h3>Nexora.js documentation</h3>
-          <p className="muted" style={{ margin: '0 0 0.75rem' }}>
-            Studio is your local control panel. Framework guides live on GitBook.
+          <p className="muted" style={{ margin: '0 0 0.7rem', maxWidth: '36rem' }}>
+            Studio is your local control panel. Framework guides, recipes, and API references live on
+            GitBook.
           </p>
           <p>
             <a
@@ -687,12 +727,12 @@ function DocsView() {
               target="_blank"
               rel="noreferrer"
             >
-              https://cjays-organization.gitbook.io/nexorajs
+              cjays-organization.gitbook.io/nexorajs →
             </a>
           </p>
         </div>
       </div>
-      <div style={{ marginTop: '0.75rem' }}>
+      <div className="stack-gap">
         <div className="panel">
           <div className="panel-head">
             <h2>Local ports</h2>
@@ -701,15 +741,21 @@ function DocsView() {
             <ul className="list">
               <li>
                 <span>Nexora Studio</span>
-                <span>http://localhost:3002</span>
+                <span>
+                  <code>http://localhost:3002</code>
+                </span>
               </li>
               <li>
                 <span>Studio API</span>
-                <span>http://127.0.0.1:3920</span>
+                <span>
+                  <code>http://127.0.0.1:3920</code>
+                </span>
               </li>
               <li>
                 <span>Dashboard</span>
-                <span>http://localhost:3000</span>
+                <span className="muted">
+                  <code>http://localhost:3000</code> · unreleased
+                </span>
               </li>
             </ul>
           </div>

@@ -28,6 +28,10 @@ import {
   type BuilderReplyOptions,
   type CommandReplyOptions,
 } from '../commands/define.js';
+import {
+  buildStatusReply,
+  type StatusReplyOptions,
+} from '../commands/reply-presets.js';
 
 /** Inputs accepted by component/modal reply helpers */
 export type InteractionReplyInput = CommandReplyOptions;
@@ -100,6 +104,14 @@ export interface ComponentContext extends BaseInteractionContext {
   followUp(
     options: InteractionReplyOptions | MessagePayload | string,
   ): Promise<Message<boolean>>;
+  /** Green success embed (ephemeral by default) */
+  success(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
+  /** Red error embed (ephemeral by default) */
+  error(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
+  /** Yellow warning embed (ephemeral by default) */
+  warn(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
+  /** Blurple info embed (ephemeral by default) */
+  info(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
 }
 
 /** Context for modal submit interactions */
@@ -123,6 +135,10 @@ export interface ModalContext extends BaseInteractionContext {
   followUp(
     options: InteractionReplyOptions | MessagePayload | string,
   ): Promise<Message<boolean>>;
+  success(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
+  error(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
+  warn(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
+  info(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
 }
 
 function readSelectValues(interaction: ComponentInteraction): string[] {
@@ -137,6 +153,9 @@ export function createComponentContext(
   interaction: ComponentInteraction,
   client: Client,
 ): ComponentContext {
+  const reply = (options: InteractionReplyInput) =>
+    interaction.reply(resolveReplyOptions(options));
+
   return {
     interaction,
     client,
@@ -147,7 +166,7 @@ export function createComponentContext(
     guildId: interaction.guildId,
     customId: interaction.customId,
     values: readSelectValues(interaction),
-    reply: (options) => interaction.reply(resolveReplyOptions(options)),
+    reply,
     update: (options) => interaction.update(resolveUpdateOptions(options)),
     embed: (embed) => interaction.reply(resolveReplyOptions({ embed })),
     componentsV2: (...components) =>
@@ -156,6 +175,14 @@ export function createComponentContext(
     deferUpdate: (options) => interaction.deferUpdate(options),
     editReply: (options) => interaction.editReply(options),
     followUp: (options) => interaction.followUp(options),
+    success: (description, options) =>
+      reply(buildStatusReply('success', description, options)),
+    error: (description, options) =>
+      reply(buildStatusReply('error', description, options)),
+    warn: (description, options) =>
+      reply(buildStatusReply('warn', description, options)),
+    info: (description, options) =>
+      reply(buildStatusReply('info', description, options)),
   };
 }
 
@@ -164,6 +191,9 @@ export function createModalContext(
   interaction: ModalSubmitInteraction,
   client: Client,
 ): ModalContext {
+  const reply = (options: InteractionReplyInput) =>
+    interaction.reply(resolveReplyOptions(options));
+
   return {
     interaction,
     client,
@@ -175,12 +205,20 @@ export function createModalContext(
     customId: interaction.customId,
     fields: interaction.fields,
     getField: (fieldCustomId) => interaction.fields.getTextInputValue(fieldCustomId),
-    reply: (options) => interaction.reply(resolveReplyOptions(options)),
+    reply,
     embed: (embed) => interaction.reply(resolveReplyOptions({ embed })),
     componentsV2: (...components) =>
       interaction.reply(resolveReplyOptions({ v2: components })),
     defer: (options) => interaction.deferReply(options),
     editReply: (options) => interaction.editReply(options),
     followUp: (options) => interaction.followUp(options),
+    success: (description, options) =>
+      reply(buildStatusReply('success', description, options)),
+    error: (description, options) =>
+      reply(buildStatusReply('error', description, options)),
+    warn: (description, options) =>
+      reply(buildStatusReply('warn', description, options)),
+    info: (description, options) =>
+      reply(buildStatusReply('info', description, options)),
   };
 }

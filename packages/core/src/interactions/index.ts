@@ -11,6 +11,7 @@ export {
 
 export {
   ButtonHandler,
+  button,
   isButtonHandlerClass,
   resolveButtonHandlerExport,
 } from './button-handler.js';
@@ -18,12 +19,14 @@ export {
 export {
   SelectHandler,
   StringSelectHandler,
+  select,
   isSelectHandlerClass,
   resolveSelectHandlerExport,
 } from './select-handler.js';
 
 export {
   ModalHandler,
+  modal,
   isModalHandlerClass,
   resolveModalHandlerExport,
 } from './modal-handler.js';

@@ -20,6 +20,12 @@ import type {
 import { MessageFlags, MessageFlagsBitField, MessagePayload } from 'discord.js';
 import type { ComponentLike, EmbedLike } from '../builders/index.js';
 import type { Guard } from './guards.js';
+import {
+  buildStatusReply,
+  type StatusReplyOptions,
+} from './reply-presets.js';
+
+export type { StatusReplyOptions } from './reply-presets.js';
 
 /** Builder-first reply options (resolved before discord.js) */
 export interface BuilderReplyOptions {
@@ -203,6 +209,17 @@ export interface CommandContext {
   editReply(options: CommandReplyOptions): Promise<Message<boolean>>;
   /** Shortcut for `interaction.followUp()` — accepts the same inputs as {@link reply} */
   followUp(options: CommandReplyOptions): Promise<Message<boolean>>;
+  /**
+   * Reply with a green success embed (ephemeral by default).
+   * @example await ctx.success('User banned.');
+   */
+  success(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
+  /** Reply with a red error embed (ephemeral by default) */
+  error(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
+  /** Reply with a yellow warning embed (ephemeral by default) */
+  warn(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
+  /** Reply with a blurple info embed (ephemeral by default) */
+  info(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
 }
 
 /** Slash command option definition */
@@ -251,6 +268,12 @@ export interface CommandDefinition {
   /** Per-user cooldown in milliseconds */
   cooldown?: number;
   /**
+   * When `true`, `ctx.reply` / `ctx.embed` / `ctx.componentsV2` default to
+   * ephemeral unless the call sets `ephemeral` explicitly.
+   * Does not affect `ctx.success` / `ctx.error` (already ephemeral by default).
+   */
+  ephemeral?: boolean;
+  /**
    * Composable guards — run after built-in `guildOnly` / `adminOnly` /
    * `permissions` / `cooldown` flags.
    */
@@ -298,6 +321,28 @@ export interface MessageCommandDefinition {
  */
 export function command(definition: CommandDefinition): CommandDefinition {
   return { ...definition, type: 'slash' };
+}
+
+/**
+ * Shortest slash-command factory for beginners.
+ *
+ * @example
+ * export default slash('ping', 'Check latency', async (ctx) => {
+ *   await ctx.reply('Pong!');
+ * });
+ *
+ * @example
+ * export default slash('secret', 'Private info', async (ctx) => {
+ *   await ctx.reply('Shh');
+ * }, { ephemeral: true, guildOnly: true });
+ */
+export function slash(
+  name: string,
+  description: string,
+  execute: (ctx: CommandContext) => Promise<void> | void,
+  options?: Omit<CommandDefinition, 'name' | 'description' | 'execute' | 'type'>,
+): CommandDefinition {
+  return command({ name, description, execute, ...options });
 }
 
 /** Type-safe message command builder (content-match, no prefix) */
@@ -357,11 +402,57 @@ async function deferThenHelper(
   }
 }
 
+/** Options for {@link createCommandContext} */
+export interface CreateCommandContextOptions {
+  /** Default ephemeral for reply / embed / componentsV2 when not set per-call */
+  ephemeral?: boolean;
+}
+
+/** Apply command-level default ephemeral unless the payload already sets it */
+export function withDefaultEphemeral(
+  options: CommandReplyOptions,
+  defaultEphemeral?: boolean,
+): CommandReplyOptions {
+  if (!defaultEphemeral) return options;
+
+  if (typeof options === 'string') {
+    return { content: options, ephemeral: true };
+  }
+
+  if (options instanceof MessagePayload) {
+    return options;
+  }
+
+  // Bare builder (EmbedBuilder / etc.) — wrap so we can set ephemeral
+  if (
+    hasToJSON(options) &&
+    !('content' in options) &&
+    !('embeds' in options) &&
+    !('embed' in options) &&
+    !('components' in options) &&
+    !('v2' in options) &&
+    !('flags' in options) &&
+    !('ephemeral' in options)
+  ) {
+    return { embeds: [options.toJSON() as APIEmbed], ephemeral: true };
+  }
+
+  const obj = options as BuilderReplyOptions & InteractionReplyOptions;
+  if (obj.ephemeral !== undefined) return options;
+  return { ...obj, ephemeral: true };
+}
+
 /** Build a CommandContext from a chat-input interaction */
 export function createCommandContext(
   interaction: ChatInputCommandInteraction,
   client: Client,
+  contextOptions?: CreateCommandContextOptions,
 ): CommandContext {
+  const defaultEphemeral = contextOptions?.ephemeral;
+
+  const reply = (options: CommandReplyOptions) =>
+    interaction.reply(resolveReplyOptions(withDefaultEphemeral(options, defaultEphemeral)));
+
   return {
     interaction,
     client,
@@ -370,14 +461,42 @@ export function createCommandContext(
     member: interaction.member,
     channel: interaction.channel,
     guildId: interaction.guildId,
-    reply: (options) => interaction.reply(resolveReplyOptions(options)),
-    embed: (embed) => interaction.reply(resolveReplyOptions({ embed })),
+    reply,
+    embed: (embed) =>
+      interaction.reply(
+        resolveReplyOptions(withDefaultEphemeral({ embed }, defaultEphemeral)),
+      ),
     componentsV2: (...components) =>
-      interaction.reply(resolveReplyOptions({ v2: components })),
-    defer: (options) => interaction.deferReply(options),
-    deferThen: (work, options) => deferThenHelper(interaction, work, options),
+      interaction.reply(
+        resolveReplyOptions(withDefaultEphemeral({ v2: components }, defaultEphemeral)),
+      ),
+    defer: (options) =>
+      interaction.deferReply(
+        defaultEphemeral && options?.ephemeral === undefined
+          ? { ...options, ephemeral: true }
+          : options,
+      ),
+    deferThen: (work, options) =>
+      deferThenHelper(
+        interaction,
+        work,
+        defaultEphemeral && options?.ephemeral === undefined
+          ? { ...options, ephemeral: true }
+          : options,
+      ),
     editReply: (options) => interaction.editReply(resolveEditReply(options)),
-    followUp: (options) => interaction.followUp(resolveFollowUp(options)),
+    followUp: (options) =>
+      interaction.followUp(
+        resolveFollowUp(withDefaultEphemeral(options, defaultEphemeral)),
+      ),
+    success: (description, options) =>
+      reply(buildStatusReply('success', description, options)),
+    error: (description, options) =>
+      reply(buildStatusReply('error', description, options)),
+    warn: (description, options) =>
+      reply(buildStatusReply('warn', description, options)),
+    info: (description, options) =>
+      reply(buildStatusReply('info', description, options)),
   };
 }
 

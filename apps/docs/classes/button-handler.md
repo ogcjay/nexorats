@@ -4,7 +4,33 @@ First-class handlers for buttons, selects, and modals — no giant `interactionC
 
 **Package:** `@nexora.ts/core`
 
-## ButtonHandler
+## Beginner — functional factories
+
+```ts
+import { button } from '@nexora.ts/core';
+
+export default button('delete:confirm', async (ctx) => {
+  await ctx.update('Deleted.');
+});
+```
+
+```ts
+import { select } from '@nexora.ts/core';
+
+export default select('roles:pick', async (ctx) => {
+  await ctx.update(`Selected: ${ctx.values.join(', ')}`);
+});
+```
+
+```ts
+import { modal } from '@nexora.ts/core';
+
+export default modal('feedback:submit', async (ctx) => {
+  await ctx.success(`Thanks! (${ctx.getField('body').length} chars)`);
+});
+```
+
+## ButtonHandler (class)
 
 ```ts
 import { ButtonHandler, type ComponentContext } from '@nexora.ts/core';
@@ -60,6 +86,7 @@ export default class FeedbackModal extends ModalHandler {
 | Helper | Description |
 | --- | --- |
 | `ctx.reply(…)` | Reply to the interaction |
+| `ctx.success` / `error` / `warn` / `info` | Colored embeds (ephemeral by default) |
 | `ctx.update(…)` | Update the message (components) |
 | `ctx.defer()` / `ctx.deferUpdate()` | Defer reply or update |
 | `ctx.editReply()` / `ctx.followUp()` | Deferred / follow-up flows |
@@ -89,7 +116,7 @@ const bot = new Nexora({
 });
 ```
 
-Export `default class` from each file. Nexora discovers handlers, registers them, and attaches a single interaction listener.
+Export `default class` or `default button(…)` from each file. Nexora discovers handlers, registers them, and attaches a single interaction listener.
 
 ## Project layout
 

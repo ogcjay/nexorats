@@ -4,52 +4,205 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Nexora charcoal / navy — dark-first product shell */
+    --background: 220 37% 6%;
+    --foreground: 215 40% 94%;
+    --card: 217 33% 11%;
+    --card-foreground: 215 40% 94%;
+    --popover: 217 33% 11%;
+    --popover-foreground: 215 40% 94%;
+    --primary: 186 100% 50%;
+    --primary-foreground: 200 60% 6%;
+    --secondary: 217 35% 13%;
+    --secondary-foreground: 215 40% 94%;
+    --muted: 217 30% 14%;
+    --muted-foreground: 215 18% 58%;
+    --accent: 217 35% 15%;
+    --accent-foreground: 215 40% 94%;
+    --destructive: 0 72% 58%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 215 30% 20%;
+    --input: 215 30% 18%;
+    --ring: 186 100% 50%;
+    --radius: 0.625rem;
+
+    --blurple: 235 86% 65%;
+    --ok: 158 64% 52%;
+    --warn: 43 96% 56%;
+    --cyan-glow: 186 100% 50%;
+    --surface-elevated: 217 33% 11%;
+    --surface-soft: 217 35% 13%;
+  }
+
+  /* Light remains available but secondary — still charcoal-tinted, not purple-white */
+  :root:not(.dark) {
+    --background: 220 25% 97%;
+    --foreground: 220 37% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 220 37% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 262 83% 58%;
+    --popover-foreground: 220 37% 10%;
+    --primary: 186 100% 36%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 262 83% 58%;
-    --radius: 0.5rem;
+    --secondary: 215 25% 93%;
+    --secondary-foreground: 220 37% 10%;
+    --muted: 215 20% 94%;
+    --muted-foreground: 215 14% 42%;
+    --accent: 215 25% 93%;
+    --accent-foreground: 220 37% 10%;
+    --border: 215 18% 86%;
+    --input: 215 18% 86%;
+    --ring: 186 100% 36%;
   }
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 262 83% 58%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 262 83% 58%;
-  }
-}
-
-@layer base {
   * {
     @apply border-border;
   }
+
+  html {
+    color-scheme: dark;
+  }
+
+  html:not(.dark) {
+    color-scheme: light;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'ss01' on, 'cv11' on;
+    background-image:
+      radial-gradient(900px 480px at 0% -8%, hsl(var(--cyan-glow) / 0.08), transparent 55%),
+      radial-gradient(700px 420px at 100% 0%, hsl(var(--blurple) / 0.07), transparent 50%),
+      radial-gradient(600px 360px at 50% 100%, hsl(var(--cyan-glow) / 0.04), transparent 55%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .nx-shell {
+    @apply flex h-screen overflow-hidden;
+  }
+
+  .nx-main {
+    @apply relative flex min-w-0 flex-1 flex-col overflow-hidden;
+  }
+
+  .nx-topbar {
+    @apply flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border/80 px-5
+      backdrop-blur-md;
+    background: hsl(var(--background) / 0.72);
+  }
+
+  .nx-content {
+    @apply flex-1 overflow-y-auto px-5 py-6 sm:px-8 sm:py-8;
+  }
+
+  .nx-page {
+    @apply mx-auto w-full max-w-5xl;
+    animation: nx-page-enter 0.35s ease-out both;
+  }
+
+  .nx-brand-mark {
+    @apply grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[0.7rem] font-semibold tracking-tight;
+    font-family: var(--font-ibm-plex-mono), ui-monospace, monospace;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--blurple)));
+    color: #041018;
+  }
+
+  .nx-metric {
+    @apply relative overflow-hidden rounded-[var(--radius)] border border-border/70 px-4 py-3.5
+      transition-[border-color,background-color,transform] duration-200;
+    background: linear-gradient(
+      160deg,
+      hsl(var(--card) / 0.9),
+      hsl(var(--background) / 0.4)
+    );
+  }
+
+  .nx-metric:hover {
+    @apply border-primary/30;
+    transform: translateY(-1px);
+  }
+
+  .nx-metric::after {
+    content: '';
+    position: absolute;
+    inset: auto -20% -60% auto;
+    width: 120px;
+    height: 120px;
+    border-radius: 999px;
+    background: hsl(var(--primary) / 0.06);
+    pointer-events: none;
+  }
+
+  .nx-panel {
+    @apply rounded-[var(--radius)] border border-border/70;
+    background: linear-gradient(
+      165deg,
+      hsl(var(--card) / 0.95),
+      hsl(var(--background) / 0.55)
+    );
+  }
+
+  .nx-placeholder {
+    @apply nx-panel flex flex-col items-start gap-4 p-8 sm:p-10;
+  }
+
+  .nx-placeholder-icon {
+    @apply grid h-12 w-12 place-items-center rounded-xl border border-primary/25
+      bg-primary/10 text-primary;
+  }
+
+  .nx-chip {
+    @apply inline-flex items-center gap-1.5 rounded-md border border-border/80 px-2.5 py-1
+      text-[0.7rem] font-medium tracking-wide text-muted-foreground;
+    background: hsl(var(--muted) / 0.55);
+  }
+
+  .nx-chip-dot {
+    @apply h-1.5 w-1.5 rounded-full bg-primary;
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.18);
+  }
+
+  .nx-btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm
+      font-semibold text-primary-foreground transition-[filter,transform,box-shadow] duration-200;
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35), 0 8px 24px -8px hsl(var(--primary) / 0.45);
+  }
+
+  .nx-btn-primary:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+  }
+
+  .nx-btn-ghost {
+    @apply inline-flex items-center justify-center rounded-lg border border-border/80 px-4 py-2.5
+      text-sm font-medium text-foreground transition-colors duration-200;
+    background: hsl(var(--card) / 0.5);
+  }
+
+  .nx-btn-ghost:hover {
+    @apply border-primary/35 bg-accent;
+  }
+}
+
+@keyframes nx-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nx-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

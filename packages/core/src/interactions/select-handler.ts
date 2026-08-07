@@ -26,6 +26,21 @@ export abstract class SelectHandler {
  */
 export abstract class StringSelectHandler extends SelectHandler {}
 
+/**
+ * Functional select handler — same discovery as `extends SelectHandler`.
+ *
+ * @example
+ * export default select('role-pick', async (ctx) => {
+ *   await ctx.update(`Chose: ${ctx.values.join(', ')}`);
+ * });
+ */
+export function select(
+  customId: string | RegExp,
+  execute: (ctx: ComponentContext) => Promise<void> | void,
+): SelectHandler {
+  return { kind: 'select', customId, execute };
+}
+
 /** True when `value` is a constructable SelectHandler class */
 export function isSelectHandlerClass(
   value: unknown,

@@ -2,18 +2,21 @@
 
 Fluent embed builder with presets — shorter than discord.js for common cases.
 
-**Package:** `@nexora.ts/core`
+**Package:** `@nexora.ts/core`  
+**Alias:** `Embed` (same class)
 
-## Presets
+## Beginner
 
 ```ts
 import { EmbedBuilder } from '@nexora.ts/core';
+// or: import { Embed } from '@nexora.ts/core';
 
-EmbedBuilder.success('Done', 'User was banned.');
-EmbedBuilder.error('Failed', 'Missing permissions.');
-EmbedBuilder.warn('Careful', 'This action is irreversible.');
-EmbedBuilder.info('Info', 'Queue position: 3');
+await ctx.reply(EmbedBuilder.success('Done', 'User was banned.'));
+// even shorter:
+await ctx.success('User was banned.');
 ```
+
+Presets: `EmbedBuilder.success` / `error` / `warn` / `info`.
 
 ## Full example
 
@@ -50,18 +53,11 @@ Colors: number (`0x5865f2`), `#5865f2`, or `EmbedColor.Success` etc.
 ## With classic components
 
 ```ts
-import { EmbedBuilder, ButtonBuilder, ActionRowBuilder } from '@nexora.ts/core';
+import { EmbedBuilder, btn, row } from '@nexora.ts/core';
 
 await ctx.reply({
-  embeds: [EmbedBuilder.success('Confirm', 'Delete this item?').toJSON()],
-  components: [
-    new ActionRowBuilder()
-      .add(
-        new ButtonBuilder().customId('yes', { prefix: true }).label('Yes').success(),
-        new ButtonBuilder().customId('no').label('No').danger(),
-      )
-      .toJSON(),
-  ],
+  embed: EmbedBuilder.success('Confirm', 'Delete this item?'),
+  components: [row(btn.success('yes', 'Yes'), btn.danger('no', 'No'))],
 });
 ```
 

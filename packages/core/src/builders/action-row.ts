@@ -28,6 +28,10 @@ function serializeChild<T>(child: RowChild<T>): T {
  * @example
  * new ActionRowBuilder()
  *   .add(new ButtonBuilder().customId('ok').label('OK').success())
+ *
+ * @example
+ * // Shorthand
+ * row(ButtonBuilder.primary('ok', 'OK'), ButtonBuilder.danger('cancel', 'Cancel'))
  */
 export class ActionRowBuilder<T extends RowComponent = RowComponent>
   implements JSONEncodable<APIActionRowComponent<T>>
@@ -39,6 +43,11 @@ export class ActionRowBuilder<T extends RowComponent = RowComponent>
   ): ActionRowBuilder<U> {
     const raw = data instanceof ActionRowBuilder ? data.toJSON() : data;
     return new ActionRowBuilder<U>().set(...(raw.components as U[]));
+  }
+
+  /** Shorthand for `new ActionRowBuilder().add(...)` */
+  static of<U extends RowComponent>(...components: RowChild<U>[]): ActionRowBuilder<U> {
+    return new ActionRowBuilder<U>().add(...components);
   }
 
   /** Append components (builders or plain API objects) */
@@ -76,4 +85,16 @@ export class ActionRowBuilder<T extends RowComponent = RowComponent>
       components: this.components.map((c) => ({ ...c })) as T[],
     };
   }
+}
+
+/**
+ * Shorthand for {@link ActionRowBuilder.of} — wrap buttons/selects in a row.
+ *
+ * @example
+ * row(ButtonBuilder.primary('yes', 'Yes'), ButtonBuilder.secondary('no', 'No'))
+ */
+export function row<T extends RowComponent = RowComponent>(
+  ...components: RowChild<T>[]
+): ActionRowBuilder<T> {
+  return ActionRowBuilder.of(...components);
 }

@@ -21,6 +21,10 @@ import {
   type CommandReplyOptions,
 } from './define.js';
 import type { Guard } from './guards.js';
+import {
+  buildStatusReply,
+  type StatusReplyOptions,
+} from './reply-presets.js';
 
 /** Context-menu target kind (Discord ApplicationCommand type) */
 export type ContextMenuType = 'user' | 'message';
@@ -51,6 +55,10 @@ export interface ContextMenuContext {
   ): Promise<Message<boolean> | undefined>;
   editReply(options: CommandReplyOptions): Promise<Message<boolean>>;
   followUp(options: CommandReplyOptions): Promise<Message<boolean>>;
+  success(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
+  error(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
+  warn(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
+  info(description: string, options?: StatusReplyOptions): Promise<InteractionResponse<boolean>>;
 }
 
 /**
@@ -205,6 +213,9 @@ export function createContextMenuContext(
     ? interaction.targetMessage
     : null;
 
+  const reply = (options: CommandReplyOptions) =>
+    interaction.reply(resolveReplyOptions(options));
+
   return {
     interaction,
     client,
@@ -215,7 +226,7 @@ export function createContextMenuContext(
     guildId: interaction.guildId,
     targetUser,
     targetMessage,
-    reply: (options) => interaction.reply(resolveReplyOptions(options)),
+    reply,
     embed: (embed) => interaction.reply(resolveReplyOptions({ embed })),
     componentsV2: (...components) =>
       interaction.reply(resolveReplyOptions({ v2: components })),
@@ -223,5 +234,13 @@ export function createContextMenuContext(
     deferThen: (work, options) => deferThenHelper(interaction, work, options),
     editReply: (options) => interaction.editReply(resolveEditReply(options)),
     followUp: (options) => interaction.followUp(resolveFollowUp(options)),
+    success: (description, options) =>
+      reply(buildStatusReply('success', description, options)),
+    error: (description, options) =>
+      reply(buildStatusReply('error', description, options)),
+    warn: (description, options) =>
+      reply(buildStatusReply('warn', description, options)),
+    info: (description, options) =>
+      reply(buildStatusReply('info', description, options)),
   };
 }

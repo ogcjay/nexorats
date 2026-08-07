@@ -20,16 +20,19 @@ export function SettingsCard({
   return (
     <div
       className={cn(
-        'rounded-lg border border-border bg-card text-card-foreground shadow-sm',
+        'overflow-hidden rounded-lg border border-border/70 text-card-foreground',
+        'bg-gradient-to-br from-[hsl(var(--card)_/_0.95)] to-[hsl(var(--background)_/_0.5)]',
         className,
       )}
     >
-      <div className="flex flex-col space-y-1.5 p-6">
-        <h3 className="text-lg font-semibold leading-none tracking-tight">{title}</h3>
+      <div className="flex flex-col gap-1 border-b border-border/50 px-6 py-5">
+        <h3 className="text-base font-semibold tracking-tight">{title}</h3>
         {description && <p className="text-sm text-muted-foreground">{description}</p>}
       </div>
-      <div className="p-6 pt-0">{children}</div>
-      {footer && <div className="flex items-center border-t p-6 pt-4">{footer}</div>}
+      <div className="px-6 py-5">{children}</div>
+      {footer && (
+        <div className="flex items-center border-t border-border/50 px-6 py-4">{footer}</div>
+      )}
     </div>
   );
 }

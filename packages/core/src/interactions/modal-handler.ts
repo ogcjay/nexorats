@@ -21,6 +21,21 @@ export abstract class ModalHandler {
   abstract execute(ctx: ModalContext): Promise<void> | void;
 }
 
+/**
+ * Functional modal handler — same discovery as `extends ModalHandler`.
+ *
+ * @example
+ * export default modal('report', async (ctx) => {
+ *   await ctx.reply(`Thanks — ${ctx.getField('details')}`);
+ * });
+ */
+export function modal(
+  customId: string | RegExp,
+  execute: (ctx: ModalContext) => Promise<void> | void,
+): ModalHandler {
+  return { kind: 'modal', customId, execute };
+}
+
 /** True when `value` is a constructable ModalHandler class */
 export function isModalHandlerClass(
   value: unknown,

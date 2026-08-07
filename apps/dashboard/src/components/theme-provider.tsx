@@ -19,7 +19,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem('nexora-theme') as Theme | null;
-    if (stored) setTheme(stored);
+    if (stored === 'light' || stored === 'dark') setTheme(stored);
   }, []);
 
   useEffect(() => {

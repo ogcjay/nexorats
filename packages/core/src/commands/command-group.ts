@@ -103,6 +103,69 @@ export abstract class SlashCommandGroup {
   cooldown?: number;
 }
 
+/** Optional flags for {@link group} */
+export interface GroupOptions {
+  guildOnly?: boolean;
+  adminOnly?: boolean;
+  permissions?: PermissionResolvable[];
+  cooldown?: number;
+  groups?: SlashCommandSubGroup[];
+}
+
+type GroupCommandInput = SlashCommand | SlashCommandConstructor;
+
+function resolveGroupCommands(commands: GroupCommandInput[]): SlashCommand[] {
+  return commands.map((entry) => (typeof entry === 'function' ? new entry() : entry));
+}
+
+/** Concrete group used by {@link group} */
+class FunctionalSlashCommandGroup extends SlashCommandGroup {
+  name: string;
+  description: string;
+
+  constructor(
+    name: string,
+    description: string,
+    commands: SlashCommand[],
+    options?: GroupOptions,
+  ) {
+    super();
+    this.name = name;
+    this.description = description;
+    this.commands = commands;
+    if (options?.guildOnly !== undefined) this.guildOnly = options.guildOnly;
+    if (options?.adminOnly !== undefined) this.adminOnly = options.adminOnly;
+    if (options?.permissions !== undefined) this.permissions = options.permissions;
+    if (options?.cooldown !== undefined) this.cooldown = options.cooldown;
+    if (options?.groups !== undefined) this.groups = options.groups;
+  }
+}
+
+/**
+ * Functional slash-command group — same discovery as `extends SlashCommandGroup`.
+ *
+ * @example
+ * export default group('ticket', 'Ticket system', [CreateCmd, CloseCmd]);
+ *
+ * @example
+ * export default group('ticket', 'Ticket system', subcommands(CreateCmd, CloseCmd), {
+ *   guildOnly: true,
+ * });
+ */
+export function group(
+  name: string,
+  description: string,
+  commands: GroupCommandInput[],
+  options?: GroupOptions,
+): SlashCommandGroup {
+  return new FunctionalSlashCommandGroup(
+    name,
+    description,
+    resolveGroupCommands(commands),
+    options,
+  );
+}
+
 /** True when `value` is a constructable SlashCommandGroup subclass */
 export function isCommandGroupClass(
   value: unknown,
@@ -110,9 +173,19 @@ export function isCommandGroupClass(
   return typeof value === 'function' && value.prototype instanceof SlashCommandGroup;
 }
 
+function isGroupLike(value: unknown): value is SlashCommandGroup {
+  if (typeof value !== 'object' || value === null) return false;
+  const obj = value as Record<string, unknown>;
+  return (
+    typeof obj.name === 'string' &&
+    typeof obj.description === 'string' &&
+    (Array.isArray(obj.commands) || Array.isArray(obj.groups))
+  );
+}
+
 /**
  * Normalize a module default export into a {@link SlashCommandGroup}.
- * Supports: class extending SlashCommandGroup, or a pre-built instance.
+ * Supports: class extending SlashCommandGroup, `group(...)`, or a pre-built instance.
  */
 export function resolveCommandGroupExport(exported: unknown): SlashCommandGroup | null {
   if (exported == null) return null;
@@ -122,6 +195,11 @@ export function resolveCommandGroupExport(exported: unknown): SlashCommandGroup 
   }
 
   if (exported instanceof SlashCommandGroup) {
+    return exported;
+  }
+
+  // Duck-typed group from plain objects
+  if (isGroupLike(exported)) {
     return exported;
   }
 
