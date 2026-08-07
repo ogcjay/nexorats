@@ -23,6 +23,9 @@ export abstract class ButtonHandler {
 /**
  * Functional button handler — same discovery as `extends ButtonHandler`.
  *
+ * @param customId - Exact id, prefix (e.g. `delete:`), or RegExp
+ * @param execute - Handler receiving {@link ComponentContext}
+ * @returns A discoverable button handler object
  * @example
  * export default button('delete:confirm', async (ctx) => {
  *   await ctx.update('Deleted.');

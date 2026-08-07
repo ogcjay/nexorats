@@ -25,6 +25,12 @@ export interface AutocompleteContext {
 
 /**
  * Build a typed autocomplete context from a Discord interaction.
+ *
+ * @param interaction - Discord autocomplete interaction
+ * @returns Focused option helpers (`respond`, `filter`)
+ * @example
+ * const ac = createAutocompleteContext(interaction);
+ * await ac.respond(ac.filter([{ name: 'Red', value: 'red' }]));
  */
 export function createAutocompleteContext(
   interaction: AutocompleteInteraction,
@@ -56,6 +62,8 @@ export function createAutocompleteContext(
  * Functional autocomplete handler — use with `command({ autocomplete: ... })`
  * or assign to `SlashCommand.autocomplete`.
  *
+ * @param run - Handler receiving {@link AutocompleteContext}
+ * @returns A discord.js-compatible autocomplete callback
  * @example
  * autocomplete: autocomplete(async (ac) => {
  *   await ac.respond(ac.filter([
@@ -96,6 +104,12 @@ export abstract class AutocompleteHandler {
 
 /**
  * Map strings to `{ name, value }` choices (value = name unless `values` map provided).
+ *
+ * @param labels - Display labels (also used as values by default)
+ * @param values - Optional map from label → choice value
+ * @returns Autocomplete choice objects
+ * @example
+ * choicesFrom(['Red', 'Blue'], { Red: 'red', Blue: 'blue' })
  */
 export function choicesFrom(
   labels: string[],

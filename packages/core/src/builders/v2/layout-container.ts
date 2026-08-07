@@ -19,6 +19,16 @@ export class LayoutContainerBuilder {
   private spoilerValue?: boolean;
   private idValue?: number;
 
+  /**
+   * Creates a new layout container builder.
+   *
+   * @example
+   * new LayoutContainerBuilder()
+   *   .accent(0x5865f2)
+   *   .add(text('# Welcome'), text('Thanks for joining.'))
+   */
+  constructor() {}
+
   add(...components: ComponentLike[]): this {
     for (const component of components) {
       this.children.push(component);
@@ -70,7 +80,15 @@ export class LayoutContainerBuilder {
 export type MessageContainerBuilder = LayoutContainerBuilder;
 export const MessageContainerBuilder = LayoutContainerBuilder;
 
-/** Short factory: `container().accent(0x5865f2).add(text("…"))`. */
+/**
+ * Short factory for {@link LayoutContainerBuilder}.
+ *
+ * @param components - Optional child components to add immediately
+ * @example
+ * container().accent(0x5865f2).add(text('# Hello'), text('World'))
+ * @example
+ * container(text('Already inside'))
+ */
 export function container(...components: ComponentLike[]): LayoutContainerBuilder {
   const builder = new LayoutContainerBuilder();
   if (components.length > 0) builder.add(...components);

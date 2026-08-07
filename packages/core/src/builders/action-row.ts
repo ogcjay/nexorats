@@ -24,20 +24,28 @@ function serializeChild<T>(child: RowChild<T>): T {
 /**
  * Fluent action row builder (component type 1).
  * Holds up to 5 message components, or a single text input for modals.
- *
- * @example
- * new ActionRowBuilder()
- *   .add(new ButtonBuilder().customId('ok').label('OK').success())
- *
- * @example
- * // Shorthand
- * row(ButtonBuilder.primary('ok', 'OK'), ButtonBuilder.danger('cancel', 'Cancel'))
  */
 export class ActionRowBuilder<T extends RowComponent = RowComponent>
   implements JSONEncodable<APIActionRowComponent<T>>
 {
   private components: T[] = [];
 
+  /**
+   * Creates a new action row builder.
+   *
+   * @example
+   * new ActionRowBuilder()
+   *   .add(new ButtonBuilder().customId('ok').label('OK').success())
+   */
+  constructor() {}
+
+  /**
+   * Clone from an existing action row builder or plain API object.
+   *
+   * @param data - API action row or another {@link ActionRowBuilder}
+   * @example
+   * ActionRowBuilder.from(existingRow).add(ButtonBuilder.danger('x', 'Remove'))
+   */
   static from<U extends RowComponent>(
     data: APIActionRowComponent<U> | ActionRowBuilder<U>,
   ): ActionRowBuilder<U> {
@@ -45,7 +53,16 @@ export class ActionRowBuilder<T extends RowComponent = RowComponent>
     return new ActionRowBuilder<U>().set(...(raw.components as U[]));
   }
 
-  /** Shorthand for `new ActionRowBuilder().add(...)` */
+  /**
+   * Shorthand for `new ActionRowBuilder().add(...)`.
+   *
+   * @param components - Builders or plain API components to place in the row
+   * @example
+   * ActionRowBuilder.of(
+   *   ButtonBuilder.primary('ok', 'OK'),
+   *   ButtonBuilder.danger('cancel', 'Cancel'),
+   * )
+   */
   static of<U extends RowComponent>(...components: RowChild<U>[]): ActionRowBuilder<U> {
     return new ActionRowBuilder<U>().add(...components);
   }
@@ -90,6 +107,7 @@ export class ActionRowBuilder<T extends RowComponent = RowComponent>
 /**
  * Shorthand for {@link ActionRowBuilder.of} — wrap buttons/selects in a row.
  *
+ * @param components - Builders or plain API components to place in the row
  * @example
  * row(ButtonBuilder.primary('yes', 'Yes'), ButtonBuilder.secondary('no', 'No'))
  */

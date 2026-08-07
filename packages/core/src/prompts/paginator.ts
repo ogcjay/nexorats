@@ -83,6 +83,17 @@ export class EmbedPaginator {
   private readonly stopLabel: string;
   private readonly userId?: string;
 
+  /**
+   * Creates an embed/string paginator.
+   *
+   * @param options - Pages and optional timeout, labels, ephemeral, user lock
+   * @example
+   * const paginator = new EmbedPaginator({
+   *   pages: ['Page 1', 'Page 2', 'Page 3'],
+   *   timeout: 60_000,
+   *   ephemeral: true,
+   * });
+   */
   constructor(options: PaginatorOptions) {
     this.pages = resolvePages(options.pages, options.pageFooter ?? true);
     this.timeout = options.timeout ?? 60_000;
@@ -101,6 +112,11 @@ export class EmbedPaginator {
   /**
    * Send the paginator and run a component collector until stop / timeout.
    * Returns the prompt message.
+   *
+   * @param ctx - Command or interaction context that can send a message
+   * @returns The prompt message (after collector ends)
+   * @example
+   * await new EmbedPaginator({ pages: embeds }).send(ctx);
    */
   async send(ctx: PromptContext): Promise<Message> {
     const suffix = uniqueSuffix();

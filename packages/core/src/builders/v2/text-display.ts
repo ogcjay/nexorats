@@ -4,11 +4,21 @@ import {
   type APITextDisplayComponent,
 } from './types.js';
 
-/** Type 10 — markdown text content (replaces message `content` under V2). */
+/**
+ * Type 10 — markdown text content (replaces message `content` under V2).
+ */
 export class TextDisplayBuilder {
   private contentValue = '';
   private idValue?: number;
 
+  /**
+   * Creates a new text display builder.
+   *
+   * @param content - Markdown content string
+   * @example
+   * new TextDisplayBuilder('# Hello')
+   *   .setId(1)
+   */
   constructor(content = '') {
     this.contentValue = content;
   }
@@ -38,7 +48,13 @@ export class TextDisplayBuilder {
   }
 }
 
-/** Short factory: `text("# Hello")`. */
+/**
+ * Short factory for {@link TextDisplayBuilder}.
+ *
+ * @param content - Markdown content string
+ * @example
+ * text('# Hello world')
+ */
 export function text(content: string): TextDisplayBuilder {
   return new TextDisplayBuilder(content);
 }

@@ -11,11 +11,23 @@ import {
 
 export type SectionAccessory = ThumbnailBuilder | ComponentLike;
 
-/** Type 9 — text (1–3 Text Displays) + accessory (Thumbnail or Button). */
+/**
+ * Type 9 — text (1–3 Text Displays) + accessory (Thumbnail or Button).
+ */
 export class SectionBuilder {
   private readonly children: TextDisplayBuilder[] = [];
   private accessoryValue?: SectionAccessory;
   private idValue?: number;
+
+  /**
+   * Creates a new section builder.
+   *
+   * @example
+   * new SectionBuilder()
+   *   .add(text('# Profile'), text('Member since 2024'))
+   *   .accessory(thumbnail('https://cdn.example.com/avatar.png'))
+   */
+  constructor() {}
 
   add(...components: Array<TextDisplayBuilder | string>): this {
     for (const component of components) {
@@ -65,7 +77,15 @@ export class SectionBuilder {
   }
 }
 
-/** Short factory: `section().add(text("…")).accessory(thumbnail("…"))`. */
+/**
+ * Short factory for {@link SectionBuilder}.
+ *
+ * @param components - Optional text displays or markdown strings to add immediately
+ * @example
+ * section().add(text('# Title')).accessory(thumbnail('https://…'))
+ * @example
+ * section('# Title', 'Body text').accessory(thumbnail('https://…'))
+ */
 export function section(...components: Array<TextDisplayBuilder | string>): SectionBuilder {
   const builder = new SectionBuilder();
   if (components.length > 0) builder.add(...components);

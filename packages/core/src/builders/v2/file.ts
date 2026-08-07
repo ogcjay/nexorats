@@ -6,12 +6,22 @@ import {
   type UnfurledMediaItem,
 } from './types.js';
 
-/** Type 13 — displays an uploaded attachment (`attachment://filename`). */
+/**
+ * Type 13 — displays an uploaded attachment (`attachment://filename`).
+ */
 export class FileBuilder {
   private fileValue: UnfurledMediaItem;
   private spoilerValue?: boolean;
   private idValue?: number;
 
+  /**
+   * Creates a new file component builder.
+   *
+   * @param file - Filename or `attachment://` URL
+   * @example
+   * new FileBuilder('report.pdf')
+   *   .setSpoiler(true)
+   */
   constructor(file: string) {
     this.fileValue = { url: attachmentUrl(file) };
   }
@@ -53,8 +63,14 @@ export class FileBuilder {
 }
 
 /**
- * Short factory: `file("game.zip")` or `file("attachment://game.zip")`.
+ * Short factory for {@link FileBuilder}.
  * Bare filenames are prefixed with `attachment://`.
+ *
+ * @param name - Filename or `attachment://` URL
+ * @example
+ * file('game.zip')
+ * @example
+ * file('attachment://game.zip')
  */
 export function file(name: string): FileBuilder {
   return new FileBuilder(name);

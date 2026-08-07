@@ -16,6 +16,13 @@ export type Middleware<T = unknown> = (
 /**
  * Internal event bus with hooks, middleware, and priorities.
  * Separate from Discord.js events — used for framework-level events.
+ *
+ * @example
+ * const bus = new EventBus();
+ * bus.on(FrameworkEvents.BOT_READY, ({ client }) => {
+ *   console.log(client.user.tag);
+ * });
+ * await bus.emit(FrameworkEvents.BOT_READY, { client });
  */
 export class EventBus {
   private readonly listeners = new Map<string, EventListener[]>();
@@ -23,7 +30,18 @@ export class EventBus {
   private readonly afterHooks = new Map<string, EventListener[]>();
   private readonly middleware = new Map<string, Middleware[]>();
 
-  /** Subscribe to an event */
+  /**
+   * Subscribe to an event.
+   *
+   * @param event - Event name (see {@link FrameworkEvents})
+   * @param handler - Listener callback
+   * @param priority - Higher runs first (default `0`)
+   * @returns Unsubscribe function
+   * @example
+   * const off = bus.on('command:executed', (payload) => {
+   *   console.log(payload);
+   * });
+   */
   on<T>(event: string, handler: (payload: T) => Promise<void> | void, priority = 0): () => void {
     const listeners = this.listeners.get(event) ?? [];
     listeners.push({ handler: handler as EventListener['handler'], priority });
@@ -36,7 +54,14 @@ export class EventBus {
     };
   }
 
-  /** Subscribe to before hook */
+  /**
+   * Subscribe to before hook.
+   *
+   * @param event - Event name
+   * @param handler - Hook callback
+   * @param priority - Higher runs first (default `0`)
+   * @returns Unsubscribe function
+   */
   before<T>(
     event: string,
     handler: (payload: T) => Promise<void> | void,
@@ -45,12 +70,31 @@ export class EventBus {
     return this.addHook(this.beforeHooks, event, handler, priority);
   }
 
-  /** Subscribe to after hook */
+  /**
+   * Subscribe to after hook.
+   *
+   * @param event - Event name
+   * @param handler - Hook callback
+   * @param priority - Higher runs first (default `0`)
+   * @returns Unsubscribe function
+   */
   after<T>(event: string, handler: (payload: T) => Promise<void> | void, priority = 0): () => void {
     return this.addHook(this.afterHooks, event, handler, priority);
   }
 
-  /** Add middleware for an event */
+  /**
+   * Add middleware for an event.
+   *
+   * @param event - Event name
+   * @param middleware - Onion-style middleware (`payload`, `next`)
+   * @returns Unsubscribe function
+   * @example
+   * bus.use('command:executed', async (payload, next) => {
+   *   console.time('cmd');
+   *   await next();
+   *   console.timeEnd('cmd');
+   * });
+   */
   use<T>(event: string, middleware: Middleware<T>): () => void {
     const stack = this.middleware.get(event) ?? [];
     stack.push(middleware as Middleware);
@@ -62,7 +106,14 @@ export class EventBus {
     };
   }
 
-  /** Emit an event through hooks, middleware, and listeners */
+  /**
+   * Emit an event through hooks, middleware, and listeners.
+   *
+   * @param event - Event name
+   * @param payload - Event payload
+   * @example
+   * await bus.emit(FrameworkEvents.BOT_READY, { client });
+   */
   async emit<T>(event: string, payload: T): Promise<void> {
     await this.runHooks(this.beforeHooks, event, payload);
 

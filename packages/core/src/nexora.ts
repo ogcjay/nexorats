@@ -20,13 +20,27 @@ import { Cache, MemoryCacheAdapter } from './cache/index.js';
 import { Scheduler } from './scheduler/index.js';
 import { checkForCoreUpdate, getInstalledCoreVersion } from './update-check.js';
 
-/** Nexora bootstrap options */
+/**
+ * Bootstrap options for {@link Nexora}.
+ *
+ * @example
+ * const options: NexoraOptions = {
+ *   config,
+ *   commandsPath: './commands',
+ *   eventsPath: './events',
+ *   interactionsPath: './interactions',
+ * };
+ */
 export interface NexoraOptions {
+  /** Loaded bot config (`@nexora.ts/config`) */
   config: NexoraConfig;
+  /** Glob(s) for slash/message/context commands — default `./commands` recursive `*.ts` */
   commandsPath?: string | string[];
+  /** Glob(s) for Discord event handlers — default `./events` recursive `*.ts` */
   eventsPath?: string | string[];
-  /** Glob(s) for button/select/modal handlers — default `./interactions/` + recursive `*.ts` */
+  /** Glob(s) for button/select/modal handlers — default `./interactions` recursive `*.ts` */
   interactionsPath?: string | string[];
+  /** Extra discord.js {@link ClientOptions} merged into the client */
   clientOptions?: Partial<ClientOptions>;
 }
 
@@ -56,6 +70,18 @@ export class Nexora {
   private readonly commandMiddlewares: CommandMiddleware[] = [];
   private phase: LifecyclePhase = 'idle';
 
+  /**
+   * Creates a Nexora bot instance.
+   *
+   * @param options - Bot config and optional discovery paths
+   * @example
+   * const bot = new Nexora({
+   *   config,
+   *   commandsPath: './commands',
+   *   eventsPath: './events',
+   * });
+   * await bot.start();
+   */
   constructor(options: NexoraOptions) {
     this.config = options.config;
     this.commandsPath = normalizePaths(options.commandsPath ?? './commands/**/*.ts');
@@ -96,6 +122,14 @@ export class Nexora {
   /**
    * Register onion-style command middleware (Express order: first = outermost).
    * Call before {@link start}. The same array reference is passed to handlers.
+   *
+   * @param mw - Middleware function
+   * @returns This bot instance for chaining
+   * @example
+   * bot.useCommand(async (ctx, next) => {
+   *   console.log(ctx.interaction.commandName);
+   *   await next();
+   * });
    */
   useCommand(mw: CommandMiddleware): this {
     this.commandMiddlewares.push(mw);
@@ -114,7 +148,12 @@ export class Nexora {
     this.container.registerInstance(TOKENS.Scheduler, this.scheduler);
   }
 
-  /** Start the bot — discover, register, login */
+  /**
+   * Start the bot — discover modules, attach handlers, login, and deploy commands.
+   *
+   * @example
+   * await bot.start();
+   */
   async start(): Promise<void> {
     if (this.phase !== 'idle' && this.phase !== 'stopped') {
       throw new Error(`Cannot start bot in phase: ${this.phase}`);
@@ -184,7 +223,12 @@ export class Nexora {
     await checkForCoreUpdate(this.logger);
   }
 
-  /** Gracefully stop the bot */
+  /**
+   * Gracefully stop the bot (scheduler, client, lifecycle phase).
+   *
+   * @example
+   * await bot.stop();
+   */
   async stop(): Promise<void> {
     if (this.phase === 'stopped' || this.phase === 'idle') return;
 

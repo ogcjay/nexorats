@@ -26,13 +26,7 @@ function parseEmoji(emoji: string | APIPartialEmoji): APIPartialEmoji {
 }
 
 /**
- * Fluent button builder producing Discord API button components (type 2).
- *
- * @example
- * new ButtonBuilder()
- *   .customId('confirm', { prefix: true }) // nexora:confirm
- *   .label('Confirm')
- *   .success()
+ * Fluent button builder for Discord API buttons (type 2).
  */
 export class ButtonBuilder implements JSONEncodable<APIButtonComponent> {
   private readonly data: Partial<APIButtonComponent> & { type: typeof ComponentType.Button } = {
@@ -40,6 +34,25 @@ export class ButtonBuilder implements JSONEncodable<APIButtonComponent> {
     style: ButtonStyle.Primary,
   };
 
+  /**
+   * Creates a new button builder.
+   *
+   * @example
+   * new ButtonBuilder()
+   *   .customId('confirm', { prefix: true }) // nexora:confirm
+   *   .label('Confirm')
+   *   .success()
+   */
+  constructor() {}
+
+  /**
+   * Clone from an existing button builder or plain API button object.
+   *
+   * @param data - API button component or another {@link ButtonBuilder}
+   * @example
+   * ButtonBuilder.from(existingButton)
+   *   .label('Updated')
+   */
   static from(data: APIButtonComponent | ButtonBuilder): ButtonBuilder {
     const raw = data instanceof ButtonBuilder ? data.toJSON() : data;
     const builder = new ButtonBuilder();
@@ -47,27 +60,66 @@ export class ButtonBuilder implements JSONEncodable<APIButtonComponent> {
     return builder;
   }
 
-  /** One-liner: primary (blurple) button */
+  /**
+   * One-liner: primary (blurple) button.
+   *
+   * @param customId - Button custom_id (optionally namespaced via `options`)
+   * @param label - Visible button label
+   * @param options - Optional customId prefix options
+   * @example
+   * ButtonBuilder.primary('confirm', 'Confirm', { prefix: true })
+   */
   static primary(customId: string, label: string, options?: CustomIdOptions): ButtonBuilder {
     return new ButtonBuilder().customId(customId, options).label(label).primary();
   }
 
-  /** One-liner: secondary (grey) button */
+  /**
+   * One-liner: secondary (grey) button.
+   *
+   * @param customId - Button custom_id (optionally namespaced via `options`)
+   * @param label - Visible button label
+   * @param options - Optional customId prefix options
+   * @example
+   * ButtonBuilder.secondary('cancel', 'Cancel')
+   */
   static secondary(customId: string, label: string, options?: CustomIdOptions): ButtonBuilder {
     return new ButtonBuilder().customId(customId, options).label(label).secondary();
   }
 
-  /** One-liner: success (green) button */
+  /**
+   * One-liner: success (green) button.
+   *
+   * @param customId - Button custom_id (optionally namespaced via `options`)
+   * @param label - Visible button label
+   * @param options - Optional customId prefix options
+   * @example
+   * ButtonBuilder.success('approve', 'Approve')
+   */
   static success(customId: string, label: string, options?: CustomIdOptions): ButtonBuilder {
     return new ButtonBuilder().customId(customId, options).label(label).success();
   }
 
-  /** One-liner: danger (red) button */
+  /**
+   * One-liner: danger (red) button.
+   *
+   * @param customId - Button custom_id (optionally namespaced via `options`)
+   * @param label - Visible button label
+   * @param options - Optional customId prefix options
+   * @example
+   * ButtonBuilder.danger('delete', 'Delete')
+   */
   static danger(customId: string, label: string, options?: CustomIdOptions): ButtonBuilder {
     return new ButtonBuilder().customId(customId, options).label(label).danger();
   }
 
-  /** One-liner: link button (no customId) */
+  /**
+   * One-liner: link button (no customId).
+   *
+   * @param url - Destination URL
+   * @param label - Visible button label
+   * @example
+   * ButtonBuilder.link('https://discord.com', 'Open Discord')
+   */
   static link(url: string, label: string): ButtonBuilder {
     return new ButtonBuilder().label(label).link(url);
   }
@@ -180,6 +232,8 @@ export class ButtonBuilder implements JSONEncodable<APIButtonComponent> {
  *
  * @example
  * row(btn.primary('yes', 'Yes'), btn.danger('no', 'No'))
+ * @example
+ * btn.link('https://example.com', 'Docs')
  */
 export const btn = {
   primary: ButtonBuilder.primary.bind(ButtonBuilder) as typeof ButtonBuilder.primary,

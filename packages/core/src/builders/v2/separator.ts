@@ -11,12 +11,22 @@ export interface SeparatorOptions {
   spacing?: SeparatorSpacingValue;
 }
 
-/** Type 14 — vertical padding / optional divider between components. */
+/**
+ * Type 14 — vertical padding / optional divider between components.
+ */
 export class SeparatorBuilder {
   private dividerValue?: boolean;
   private spacingValue?: SeparatorSpacingValue;
   private idValue?: number;
 
+  /**
+   * Creates a new separator builder.
+   *
+   * @param options - Optional divider and spacing defaults
+   * @example
+   * new SeparatorBuilder({ divider: true, spacing: 2 })
+   *   .large()
+   */
   constructor(options: SeparatorOptions = {}) {
     if (options.divider !== undefined) this.dividerValue = options.divider;
     if (options.spacing !== undefined) this.spacingValue = options.spacing;
@@ -66,7 +76,15 @@ export class SeparatorBuilder {
   }
 }
 
-/** Short factory: `separator()` / `separator({ spacing: 2 })`. */
+/**
+ * Short factory for {@link SeparatorBuilder}.
+ *
+ * @param options - Optional divider and spacing defaults
+ * @example
+ * separator()
+ * @example
+ * separator({ spacing: 2, divider: true })
+ */
 export function separator(options?: SeparatorOptions): SeparatorBuilder {
   return new SeparatorBuilder(options);
 }

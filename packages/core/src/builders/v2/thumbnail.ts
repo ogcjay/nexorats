@@ -5,13 +5,23 @@ import {
   type UnfurledMediaItem,
 } from './types.js';
 
-/** Type 11 — small image accessory for sections. */
+/**
+ * Type 11 — small image accessory for sections.
+ */
 export class ThumbnailBuilder {
   private mediaValue: UnfurledMediaItem;
   private descriptionValue?: string | null;
   private spoilerValue?: boolean;
   private idValue?: number;
 
+  /**
+   * Creates a new thumbnail builder.
+   *
+   * @param url - Image URL (https or attachment://)
+   * @example
+   * new ThumbnailBuilder('https://cdn.example.com/avatar.png')
+   *   .setDescription('User avatar')
+   */
   constructor(url: string) {
     this.mediaValue = { url };
   }
@@ -53,7 +63,13 @@ export class ThumbnailBuilder {
   }
 }
 
-/** Short factory: `thumbnail("https://…")`. */
+/**
+ * Short factory for {@link ThumbnailBuilder}.
+ *
+ * @param url - Image URL (https or attachment://)
+ * @example
+ * thumbnail('https://cdn.example.com/icon.png')
+ */
 export function thumbnail(url: string): ThumbnailBuilder {
   return new ThumbnailBuilder(url);
 }

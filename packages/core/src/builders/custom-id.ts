@@ -14,6 +14,8 @@ export interface CustomIdOptions {
 /**
  * Build a typed customId, optionally namespaced as `nexora:<id>`.
  *
+ * @param id - Raw custom id string
+ * @param options - Optional prefix / namespace options
  * @example
  * customId('confirm')                    // 'confirm'
  * customId('confirm', { prefix: true })  // 'nexora:confirm'
@@ -33,7 +35,14 @@ export function customId(id: string, options?: CustomIdOptions): string {
   return `${ns}:${id}`;
 }
 
-/** Resolve customId from a builder method call */
+/**
+ * Resolve customId from a builder method call.
+ *
+ * @param id - Raw custom id string
+ * @param options - Optional prefix / namespace options
+ * @example
+ * resolveCustomId('confirm', { prefix: true }) // 'nexora:confirm'
+ */
 export function resolveCustomId(id: string, options?: CustomIdOptions): string {
   return customId(id, options);
 }

@@ -29,6 +29,16 @@ export class ComponentsV2Message {
   private readonly children: ComponentLike[] = [];
   private extraFlags = 0;
 
+  /**
+   * Creates a new Components V2 message builder.
+   *
+   * @example
+   * new ComponentsV2Message()
+   *   .add(text('# Hello'), container().add(text('Body')))
+   *   .flags(64) // ephemeral
+   */
+  constructor() {}
+
   add(...components: ComponentLike[]): this {
     for (const component of components) {
       this.children.push(component);
@@ -55,7 +65,13 @@ export class ComponentsV2Message {
   }
 }
 
-/** Short helper: `v2Message(text("hi"), container().add(…))`. */
+/**
+ * Short helper for {@link ComponentsV2Message}.
+ *
+ * @param components - Optional top-level V2 components to add immediately
+ * @example
+ * v2Message(text('hi'), container().add(text('More')))
+ */
 export function v2Message(...components: ComponentLike[]): ComponentsV2Message {
   const message = new ComponentsV2Message();
   if (components.length > 0) message.add(...components);
@@ -74,6 +90,7 @@ export const ComponentsV2 = {
   /**
    * Card layout: accent container with title + body, optional thumbnail section and button row.
    *
+   * @param options - Card title, body, and optional accent / thumbnail / buttons
    * @example
    * ```ts
    * await channel.send(ComponentsV2.card({

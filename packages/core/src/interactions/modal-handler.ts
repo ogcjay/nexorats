@@ -24,6 +24,9 @@ export abstract class ModalHandler {
 /**
  * Functional modal handler — same discovery as `extends ModalHandler`.
  *
+ * @param customId - Exact id, prefix (e.g. `report:`), or RegExp
+ * @param execute - Handler receiving {@link ModalContext}
+ * @returns A discoverable modal handler object
  * @example
  * export default modal('report', async (ctx) => {
  *   await ctx.reply(`Thanks — ${ctx.getField('details')}`);

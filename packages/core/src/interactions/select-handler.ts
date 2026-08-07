@@ -3,6 +3,14 @@ import type { ComponentContext } from './context.js';
 /**
  * Base select-menu handler (string / user / role / mentionable / channel).
  * Prefer {@link StringSelectHandler} for classic string selects.
+ *
+ * @example
+ * export default class RolePick extends SelectHandler {
+ *   customId = 'role-pick';
+ *   async execute(ctx) {
+ *     await ctx.update(`Chose: ${ctx.values.join(', ')}`);
+ *   }
+ * }
  */
 export abstract class SelectHandler {
   readonly kind = 'select' as const;
@@ -29,6 +37,9 @@ export abstract class StringSelectHandler extends SelectHandler {}
 /**
  * Functional select handler — same discovery as `extends SelectHandler`.
  *
+ * @param customId - Exact id, prefix (e.g. `role:`), or RegExp
+ * @param execute - Handler receiving {@link ComponentContext}
+ * @returns A discoverable select handler object
  * @example
  * export default select('role-pick', async (ctx) => {
  *   await ctx.update(`Chose: ${ctx.values.join(', ')}`);

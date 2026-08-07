@@ -39,6 +39,19 @@ export interface ConfirmDialogOptions {
  * });
  */
 export class ConfirmDialog {
+  /**
+   * Prompt the user with Confirm / Cancel buttons.
+   *
+   * @param ctx - Command or interaction context that can send a message
+   * @param options - Title, labels, timeout, ephemeral, optional user lock
+   * @returns `true` if confirmed, `false` if cancelled or timed out
+   * @example
+   * const ok = await ConfirmDialog.ask(ctx, {
+   *   title: 'Delete?',
+   *   description: 'Cannot undo',
+   * });
+   * if (ok) await doDelete();
+   */
   static async ask(
     ctx: PromptContext,
     options: ConfirmDialogOptions = {},

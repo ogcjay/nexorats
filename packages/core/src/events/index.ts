@@ -27,6 +27,10 @@ export interface EventDefinition<K extends keyof ClientEvents = keyof ClientEven
 /**
  * Type-safe event builder.
  *
+ * @param name - Discord.js client event name
+ * @param execute - Event handler (typed args for `name`)
+ * @param once - When `true`, register with `client.once` (default `false`)
+ * @returns An {@link EventDefinition} ready for discovery
  * @example
  * export default event('ready', (client) => {
  *   console.log(`Logged in as ${client.user.tag}`);
@@ -43,6 +47,9 @@ export function event<K extends keyof ClientEvents>(
 /**
  * Alias for {@link event} — same discovery, shorter name for beginners.
  *
+ * @param name - Discord.js client event name
+ * @param execute - Event handler
+ * @param once - When `true`, register with `client.once` (default `false`)
  * @example
  * export default on('messageCreate', async (message) => {
  *   if (message.content === 'ping') await message.reply('pong');
@@ -59,6 +66,8 @@ export function on<K extends keyof ClientEvents>(
 /**
  * Ready-event shortcut (`once: true` by default).
  *
+ * @param execute - Handler for the `ready` event
+ * @param once - When `true`, register once (default `true`)
  * @example
  * export default onReady((client) => {
  *   console.log(`Logged in as ${client.user.tag}`);
@@ -80,16 +89,34 @@ export interface RegisteredEvent<
   plugin?: string;
 }
 
-/** Event registry */
+/**
+ * Registry of Discord event handlers discovered or registered manually.
+ *
+ * @example
+ * const registry = new EventRegistry();
+ * registry.register({
+ *   name: 'ready',
+ *   once: true,
+ *   execute(client) {
+ *     console.log(client.user.tag);
+ *   },
+ * });
+ */
 export class EventRegistry {
   private readonly events = new Map<string, RegisteredEvent[]>();
 
+  /**
+   * Register an event definition (multiple handlers per event name allowed).
+   *
+   * @param eventDef - Event definition, optionally with `source` / `plugin` metadata
+   */
   register<K extends keyof ClientEvents>(eventDef: RegisteredEvent<K>): void {
     const existing = this.events.get(eventDef.name as string) ?? [];
     existing.push(eventDef as unknown as RegisteredEvent);
     this.events.set(eventDef.name as string, existing);
   }
 
+  /** All registered handlers (flat list) */
   getAll(): RegisteredEvent[] {
     const all: RegisteredEvent[] = [];
     for (const events of this.events.values()) {
@@ -98,11 +125,16 @@ export class EventRegistry {
     return all;
   }
 
-  /** Handlers grouped by Discord event name */
+  /**
+   * Handlers grouped by Discord event name.
+   *
+   * @param name - Discord.js event name (e.g. `'ready'`)
+   */
   getByName(name: string): RegisteredEvent[] {
     return this.events.get(name) ?? [];
   }
 
+  /** Total number of registered handlers */
   get size(): number {
     return this.getAll().length;
   }

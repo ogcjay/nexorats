@@ -331,6 +331,8 @@ export interface MessageCommandDefinition {
 /**
  * Type-safe command builder for slash commands.
  *
+ * @param definition - Slash command name, description, options, and execute handler
+ * @returns The same definition with `type: 'slash'`
  * @example
  * export default command({
  *   name: 'ping',
@@ -347,6 +349,11 @@ export function command(definition: CommandDefinition): CommandDefinition {
 /**
  * Shortest slash-command factory for beginners.
  *
+ * @param name - Slash command name
+ * @param description - Command description shown in Discord
+ * @param execute - Handler receiving {@link CommandContext}
+ * @param options - Optional flags (ephemeral, guildOnly, options, …)
+ * @returns A {@link CommandDefinition} ready for discovery
  * @example
  * export default slash('ping', 'Check latency', async (ctx) => {
  *   await ctx.reply('Pong!');
@@ -366,7 +373,19 @@ export function slash(
   return command({ name, description, execute, ...options });
 }
 
-/** Type-safe message command builder (content-match, no prefix) */
+/**
+ * Type-safe message command builder (content-match, no prefix).
+ *
+ * @param definition - Message command name, optional aliases, and execute handler
+ * @returns The same definition with `type: 'message'`
+ * @example
+ * export default messageCommand({
+ *   name: 'hello',
+ *   async execute(ctx) {
+ *     await ctx.reply('Hi!');
+ *   },
+ * });
+ */
 export function messageCommand(definition: MessageCommandDefinition): MessageCommandDefinition {
   return { ...definition, type: 'message' };
 }
@@ -484,7 +503,22 @@ function createServicesBag(
   };
 }
 
-/** Build a CommandContext from a chat-input interaction */
+/**
+ * Build a CommandContext from a chat-input interaction.
+ *
+ * @param interaction - Discord chat-input command interaction
+ * @param client - Discord.js client
+ * @param contextOptions - Optional ephemeral default, logger, cache, and DI container
+ * @returns A typed {@link CommandContext} with reply helpers
+ * @example
+ * const ctx = createCommandContext(interaction, client, {
+ *   ephemeral: true,
+ *   logger,
+ *   cache,
+ *   container,
+ * });
+ * await ctx.reply('Hello!');
+ */
 export function createCommandContext(
   interaction: ChatInputCommandInteraction,
   client: Client,

@@ -11,13 +11,6 @@ import {
 
 /**
  * Text input component for modals (type 4).
- *
- * @example
- * new TextInputBuilder()
- *   .customId('reason', { prefix: true })
- *   .label('Reason')
- *   .paragraph()
- *   .required()
  */
 export class TextInputBuilder implements JSONEncodable<APITextInputComponent> {
   private readonly data: Partial<APITextInputComponent> & {
@@ -27,6 +20,25 @@ export class TextInputBuilder implements JSONEncodable<APITextInputComponent> {
     style: TextInputStyle.Short,
   };
 
+  /**
+   * Creates a new text input builder.
+   *
+   * @example
+   * new TextInputBuilder()
+   *   .customId('reason', { prefix: true })
+   *   .label('Reason')
+   *   .paragraph()
+   *   .required()
+   */
+  constructor() {}
+
+  /**
+   * Clone from an existing text input builder or plain API object.
+   *
+   * @param data - API text input or another {@link TextInputBuilder}
+   * @example
+   * TextInputBuilder.from(existingInput).placeholder('Optional hint')
+   */
   static from(data: APITextInputComponent | TextInputBuilder): TextInputBuilder {
     const raw = data instanceof TextInputBuilder ? data.toJSON() : data;
     const builder = new TextInputBuilder();
@@ -109,20 +121,32 @@ export class TextInputBuilder implements JSONEncodable<APITextInputComponent> {
 
 /**
  * Modal builder — wraps text inputs in action rows automatically.
- *
- * @example
- * new ModalBuilder()
- *   .customId('report', { prefix: true })
- *   .title('Report user')
- *   .add(
- *     new TextInputBuilder().customId('details').label('Details').paragraph(),
- *   )
  */
 export class ModalBuilder implements JSONEncodable<APIModalComponent> {
   private customIdValue?: string;
   private titleValue?: string;
   private rows: ActionRowBuilder<APITextInputComponent>[] = [];
 
+  /**
+   * Creates a new modal builder.
+   *
+   * @example
+   * new ModalBuilder()
+   *   .customId('report', { prefix: true })
+   *   .title('Report user')
+   *   .add(
+   *     new TextInputBuilder().customId('details').label('Details').paragraph(),
+   *   )
+   */
+  constructor() {}
+
+  /**
+   * Clone from an existing modal builder or plain API modal object.
+   *
+   * @param data - API modal or another {@link ModalBuilder}
+   * @example
+   * ModalBuilder.from(existingModal).title('Updated title')
+   */
   static from(data: APIModalComponent | ModalBuilder): ModalBuilder {
     const raw = data instanceof ModalBuilder ? data.toJSON() : data;
     const builder = new ModalBuilder().customId(raw.custom_id).title(raw.title);

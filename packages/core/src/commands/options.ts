@@ -59,6 +59,9 @@ export interface AttachmentOptionConfig extends BaseOptionConfig {}
 /**
  * Build a string slash-command option.
  *
+ * @param name - Option name (lowercase, Discord rules)
+ * @param description - Option description shown in Discord
+ * @param config - Optional required, choices, autocomplete, length limits
  * @example
  * options = [
  *   stringOpt('reason', 'Reason', { required: true, maxLength: 200 }),
@@ -84,6 +87,9 @@ export function stringOpt(
 /**
  * Build an integer slash-command option.
  *
+ * @param name - Option name
+ * @param description - Option description shown in Discord
+ * @param config - Optional required, choices, autocomplete, min/max value
  * @example
  * integerOpt('days', 'Delete message days', { minValue: 0, maxValue: 7 })
  */
@@ -107,6 +113,9 @@ export function integerOpt(
 /**
  * Build a number (double) slash-command option.
  *
+ * @param name - Option name
+ * @param description - Option description shown in Discord
+ * @param config - Optional required, choices, autocomplete, min/max value
  * @example
  * numberOpt('amount', 'Amount', { minValue: 0.01, maxValue: 1000 })
  */
@@ -130,6 +139,9 @@ export function numberOpt(
 /**
  * Build a boolean slash-command option.
  *
+ * @param name - Option name
+ * @param description - Option description shown in Discord
+ * @param config - Optional `required` flag
  * @example
  * booleanOpt('silent', 'Suppress notifications')
  */
@@ -149,6 +161,9 @@ export function booleanOpt(
 /**
  * Build a user slash-command option.
  *
+ * @param name - Option name
+ * @param description - Option description shown in Discord
+ * @param config - Optional `required` flag
  * @example
  * userOpt('target', 'User to ban', { required: true })
  */
@@ -168,6 +183,9 @@ export function userOpt(
 /**
  * Build a channel slash-command option.
  *
+ * @param name - Option name
+ * @param description - Option description shown in Discord
+ * @param config - Optional required flag and channel type filter
  * @example
  * channelOpt('channel', 'Target channel', { channelTypes: [0, 5] })
  */
@@ -188,6 +206,9 @@ export function channelOpt(
 /**
  * Build a role slash-command option.
  *
+ * @param name - Option name
+ * @param description - Option description shown in Discord
+ * @param config - Optional `required` flag
  * @example
  * roleOpt('role', 'Role to assign', { required: true })
  */
@@ -207,6 +228,9 @@ export function roleOpt(
 /**
  * Build a mentionable (user or role) slash-command option.
  *
+ * @param name - Option name
+ * @param description - Option description shown in Discord
+ * @param config - Optional `required` flag
  * @example
  * mentionableOpt('who', 'User or role')
  */
@@ -226,6 +250,9 @@ export function mentionableOpt(
 /**
  * Build an attachment slash-command option.
  *
+ * @param name - Option name
+ * @param description - Option description shown in Discord
+ * @param config - Optional `required` flag
  * @example
  * attachmentOpt('file', 'File to upload', { required: true })
  */

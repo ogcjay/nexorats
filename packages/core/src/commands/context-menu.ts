@@ -200,7 +200,16 @@ async function deferThenHelper(
   }
 }
 
-/** Build a ContextMenuContext from a user/message context-menu interaction */
+/**
+ * Build a ContextMenuContext from a user/message context-menu interaction.
+ *
+ * @param interaction - User or message context-menu interaction
+ * @param client - Discord.js client
+ * @returns Typed context with target helpers and reply shortcuts
+ * @example
+ * const ctx = createContextMenuContext(interaction, client);
+ * await ctx.reply(`Target: ${ctx.targetUser?.tag}`);
+ */
 export function createContextMenuContext(
   interaction: UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction,
   client: Client,

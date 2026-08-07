@@ -99,13 +99,6 @@ abstract class BaseSelectBuilder<T extends { type: number; custom_id: string }> 
 
 /**
  * String select menu (type 3).
- *
- * @example
- * new StringSelectBuilder()
- *   .customId('role-pick', { prefix: true })
- *   .placeholder('Choose a role')
- *   .option('Admin', 'admin')
- *   .option({ label: 'Mod', value: 'mod', emoji: '🛡️' })
  */
 export class StringSelectBuilder
   extends BaseSelectBuilder<APIStringSelectComponent>
@@ -113,6 +106,25 @@ export class StringSelectBuilder
 {
   private optionsList: APISelectOption[] = [];
 
+  /**
+   * Creates a new string select menu builder.
+   *
+   * @example
+   * new StringSelectBuilder()
+   *   .customId('role-pick', { prefix: true })
+   *   .placeholder('Choose a role')
+   *   .option('Admin', 'admin')
+   *   .option({ label: 'Mod', value: 'mod', emoji: '🛡️' })
+   */
+  constructor() {}
+
+  /**
+   * Clone from an existing string select builder or plain API object.
+   *
+   * @param data - API string select or another {@link StringSelectBuilder}
+   * @example
+   * StringSelectBuilder.from(existingSelect).placeholder('Pick again')
+   */
   static from(data: APIStringSelectComponent | StringSelectBuilder): StringSelectBuilder {
     const raw = data instanceof StringSelectBuilder ? data.toJSON() : data;
     const builder = new StringSelectBuilder().customId(raw.custom_id);
@@ -198,11 +210,31 @@ abstract class EntitySelectBuilder<
   }
 }
 
-/** User select menu (type 5) */
+/**
+ * User select menu (type 5).
+ */
 export class UserSelectBuilder
   extends EntitySelectBuilder<APIUserSelectComponent>
   implements JSONEncodable<APIUserSelectComponent>
 {
+  /**
+   * Creates a new user select menu builder.
+   *
+   * @example
+   * new UserSelectBuilder()
+   *   .customId('pick-user', { prefix: true })
+   *   .placeholder('Select a user')
+   *   .values(1)
+   */
+  constructor() {}
+
+  /**
+   * Clone from an existing user select builder or plain API object.
+   *
+   * @param data - API user select or another {@link UserSelectBuilder}
+   * @example
+   * UserSelectBuilder.from(existingSelect).maxValues(3)
+   */
   static from(data: APIUserSelectComponent | UserSelectBuilder): UserSelectBuilder {
     const raw = data instanceof UserSelectBuilder ? data.toJSON() : data;
     const builder = new UserSelectBuilder().customId(raw.custom_id);
@@ -232,11 +264,32 @@ export class UserSelectBuilder
   }
 }
 
-/** Role select menu (type 6) */
+/**
+ * Role select menu (type 6).
+ */
 export class RoleSelectBuilder
   extends EntitySelectBuilder<APIRoleSelectComponent>
   implements JSONEncodable<APIRoleSelectComponent>
 {
+  /**
+   * Creates a new role select menu builder.
+   *
+   * @example
+   * new RoleSelectBuilder()
+   *   .customId('pick-role', { prefix: true })
+   *   .placeholder('Select a role')
+   *   .minValues(1)
+   *   .maxValues(3)
+   */
+  constructor() {}
+
+  /**
+   * Clone from an existing role select builder or plain API object.
+   *
+   * @param data - API role select or another {@link RoleSelectBuilder}
+   * @example
+   * RoleSelectBuilder.from(existingSelect).placeholder('Choose roles')
+   */
   static from(data: APIRoleSelectComponent | RoleSelectBuilder): RoleSelectBuilder {
     const raw = data instanceof RoleSelectBuilder ? data.toJSON() : data;
     const builder = new RoleSelectBuilder().customId(raw.custom_id);
@@ -266,11 +319,30 @@ export class RoleSelectBuilder
   }
 }
 
-/** Mentionable select menu (type 7) */
+/**
+ * Mentionable select menu (type 7).
+ */
 export class MentionableSelectBuilder
   extends EntitySelectBuilder<APIMentionableSelectComponent>
   implements JSONEncodable<APIMentionableSelectComponent>
 {
+  /**
+   * Creates a new mentionable select menu builder.
+   *
+   * @example
+   * new MentionableSelectBuilder()
+   *   .customId('mention', { prefix: true })
+   *   .placeholder('Select a user or role')
+   */
+  constructor() {}
+
+  /**
+   * Clone from an existing mentionable select builder or plain API object.
+   *
+   * @param data - API mentionable select or another {@link MentionableSelectBuilder}
+   * @example
+   * MentionableSelectBuilder.from(existingSelect).disabled()
+   */
   static from(
     data: APIMentionableSelectComponent | MentionableSelectBuilder,
   ): MentionableSelectBuilder {
@@ -295,13 +367,33 @@ export class MentionableSelectBuilder
   }
 }
 
-/** Channel select menu (type 8) */
+/**
+ * Channel select menu (type 8).
+ */
 export class ChannelSelectBuilder
   extends EntitySelectBuilder<APIChannelSelectComponent>
   implements JSONEncodable<APIChannelSelectComponent>
 {
   private channelTypesList?: ChannelTypeValue[];
 
+  /**
+   * Creates a new channel select menu builder.
+   *
+   * @example
+   * new ChannelSelectBuilder()
+   *   .customId('pick-channel', { prefix: true })
+   *   .placeholder('Select a channel')
+   *   .channelTypes(0, 5) // guild text + announcement
+   */
+  constructor() {}
+
+  /**
+   * Clone from an existing channel select builder or plain API object.
+   *
+   * @param data - API channel select or another {@link ChannelSelectBuilder}
+   * @example
+   * ChannelSelectBuilder.from(existingSelect).channelTypes(2) // voice
+   */
   static from(data: APIChannelSelectComponent | ChannelSelectBuilder): ChannelSelectBuilder {
     const raw = data instanceof ChannelSelectBuilder ? data.toJSON() : data;
     const builder = new ChannelSelectBuilder().customId(raw.custom_id);

@@ -14,33 +14,67 @@ export interface ServiceRegistration<T = unknown> {
 /**
  * Dependency injection container.
  * No global singletons — each Nexora instance owns its container.
+ *
+ * @example
+ * const container = new Container();
+ * container.registerSingleton(TOKENS.Cache, () => new Cache(new MemoryCacheAdapter()));
+ * const cache = container.resolve(TOKENS.Cache);
  */
 export class Container {
   private readonly factories = new Map<ServiceToken, ServiceFactory<unknown>>();
   private readonly singletons = new Map<ServiceToken, unknown>();
   private readonly singletonFlags = new Set<ServiceToken>();
 
-  /** Register a transient service (new instance each resolve) */
+  /**
+   * Register a transient service (new instance each resolve).
+   *
+   * @param token - Service token (symbol, string, or class)
+   * @param factory - Factory invoked on each {@link resolve}
+   * @example
+   * container.register('uuid', () => crypto.randomUUID());
+   */
   register<T>(token: ServiceToken<T>, factory: ServiceFactory<T>): void {
     this.factories.set(token, factory as ServiceFactory<unknown>);
     this.singletonFlags.delete(token);
     this.singletons.delete(token);
   }
 
-  /** Register a singleton service (single shared instance) */
+  /**
+   * Register a singleton service (single shared instance).
+   *
+   * @param token - Service token
+   * @param factory - Factory invoked once on first {@link resolve}
+   * @example
+   * container.registerSingleton(TOKENS.Cache, () => new Cache(new MemoryCacheAdapter()));
+   */
   registerSingleton<T>(token: ServiceToken<T>, factory: ServiceFactory<T>): void {
     this.factories.set(token, factory as ServiceFactory<unknown>);
     this.singletonFlags.add(token);
     this.singletons.delete(token);
   }
 
-  /** Register an existing instance as singleton */
+  /**
+   * Register an existing instance as singleton.
+   *
+   * @param token - Service token
+   * @param instance - Pre-built instance
+   * @example
+   * container.registerInstance(TOKENS.Logger, logger);
+   */
   registerInstance<T>(token: ServiceToken<T>, instance: T): void {
     this.singletons.set(token, instance);
     this.singletonFlags.add(token);
   }
 
-  /** Resolve a service by token */
+  /**
+   * Resolve a service by token.
+   *
+   * @param token - Service token
+   * @returns The registered service instance
+   * @throws If the token is not registered
+   * @example
+   * const logger = container.resolve(TOKENS.Logger);
+   */
   resolve<T>(token: ServiceToken<T>): T {
     if (this.singletonFlags.has(token) && this.singletons.has(token)) {
       return this.singletons.get(token) as T;
@@ -60,7 +94,11 @@ export class Container {
     return instance;
   }
 
-  /** Check if a service is registered */
+  /**
+   * Check if a service is registered.
+   *
+   * @param token - Service token
+   */
   has(token: ServiceToken): boolean {
     return this.factories.has(token) || this.singletons.has(token);
   }

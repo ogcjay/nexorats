@@ -39,6 +39,21 @@ export interface ChoicePromptOptions {
  * });
  */
 export class ChoicePrompt {
+  /**
+   * Prompt the user with a string select menu.
+   *
+   * @param ctx - Command or interaction context that can send a message
+   * @param options - Select options, placeholder, timeout, ephemeral, user lock
+   * @returns The selected option value, or `null` on timeout
+   * @example
+   * const value = await ChoicePrompt.ask(ctx, {
+   *   placeholder: 'Pick a role',
+   *   options: [
+   *     { label: 'Admin', value: 'admin' },
+   *     { label: 'Mod', value: 'mod' },
+   *   ],
+   * });
+   */
   static async ask(
     ctx: PromptContext,
     options: ChoicePromptOptions,

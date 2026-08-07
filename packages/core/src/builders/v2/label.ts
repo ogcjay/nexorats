@@ -15,6 +15,15 @@ export class LabelBuilder {
   private componentValue?: ComponentLike;
   private idValue?: number;
 
+  /**
+   * Creates a new label builder.
+   *
+   * @param label - Visible label text (max 45 characters)
+   * @example
+   * new LabelBuilder('Username')
+   *   .description('Your display name')
+   *   .component(new TextInputBuilder().customId('name').label('Name').short())
+   */
   constructor(label: string) {
     this.labelValue = label;
   }
@@ -78,7 +87,13 @@ export class LabelBuilder {
   }
 }
 
-/** Short factory: `label("Choose a user").component(…)`. */
+/**
+ * Short factory for {@link LabelBuilder}.
+ *
+ * @param text - Visible label text (max 45 characters)
+ * @example
+ * label('Choose a user').component(new UserSelectBuilder().customId('user'))
+ */
 export function label(text: string): LabelBuilder {
   return new LabelBuilder(text);
 }

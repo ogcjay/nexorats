@@ -40,40 +40,81 @@ export type EmbedData = APIEmbed;
 
 /**
  * Fluent embed builder — shorter chains and sensible presets vs discord.js.
- *
- * @example
- * EmbedBuilder.success('Done', 'User banned.')
- *   .field('Moderator', interaction.user.tag, true)
- *   .timestamp()
  */
 export class EmbedBuilder implements JSONEncodable<APIEmbed> {
   private readonly data: APIEmbed;
 
+  /**
+   * Creates a new embed builder.
+   *
+   * @param data - Optional partial API embed data to start from
+   * @example
+   * new EmbedBuilder({ title: 'Hello' })
+   *   .description('Welcome!')
+   *   .color(0x5865f2)
+   *   .timestamp()
+   */
   constructor(data: APIEmbed = {}) {
     this.data = { ...data, fields: data.fields ? [...data.fields] : undefined };
   }
 
-  /** Clone from an existing embed / plain API object */
+  /**
+   * Clone from an existing embed / plain API object.
+   *
+   * @param data - API embed or another {@link EmbedBuilder}
+   * @example
+   * EmbedBuilder.from(existingEmbed).title('Updated')
+   */
   static from(data: APIEmbed | EmbedBuilder): EmbedBuilder {
     return new EmbedBuilder(data instanceof EmbedBuilder ? data.toJSON() : { ...data });
   }
 
-  /** Green success embed */
+  /**
+   * Green success embed.
+   *
+   * @param title - Optional embed title
+   * @param description - Optional embed description
+   * @example
+   * EmbedBuilder.success('Done', 'User banned.')
+   *   .field('Moderator', interaction.user.tag, true)
+   *   .timestamp()
+   */
   static success(title?: string, description?: string): EmbedBuilder {
     return EmbedBuilder.preset(EmbedColor.Success, title, description);
   }
 
-  /** Red error embed */
+  /**
+   * Red error embed.
+   *
+   * @param title - Optional embed title
+   * @param description - Optional embed description
+   * @example
+   * EmbedBuilder.error('Failed', 'Missing permissions.')
+   */
   static error(title?: string, description?: string): EmbedBuilder {
     return EmbedBuilder.preset(EmbedColor.Error, title, description);
   }
 
-  /** Yellow warning embed */
+  /**
+   * Yellow warning embed.
+   *
+   * @param title - Optional embed title
+   * @param description - Optional embed description
+   * @example
+   * EmbedBuilder.warn('Careful', 'This action cannot be undone.')
+   */
   static warn(title?: string, description?: string): EmbedBuilder {
     return EmbedBuilder.preset(EmbedColor.Warn, title, description);
   }
 
-  /** Blurple info embed */
+  /**
+   * Blurple info embed.
+   *
+   * @param title - Optional embed title
+   * @param description - Optional embed description
+   * @example
+   * EmbedBuilder.info('Tip', 'Use /help for commands.')
+   */
   static info(title?: string, description?: string): EmbedBuilder {
     return EmbedBuilder.preset(EmbedColor.Info, title, description);
   }

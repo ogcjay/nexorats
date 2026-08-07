@@ -11,10 +11,22 @@ export interface MediaGalleryItemInput {
   spoiler?: boolean;
 }
 
-/** Type 12 — 1–10 media items in a gallery. */
+/**
+ * Type 12 — 1–10 media items in a gallery.
+ */
 export class MediaGalleryBuilder {
   private readonly galleryItems: APIMediaGalleryItem[] = [];
   private idValue?: number;
+
+  /**
+   * Creates a new media gallery builder.
+   *
+   * @example
+   * new MediaGalleryBuilder()
+   *   .add('https://cdn.example.com/a.png')
+   *   .item('https://cdn.example.com/b.png', { description: 'Shot B' })
+   */
+  constructor() {}
 
   add(...items: Array<MediaGalleryItemInput | string>): this {
     for (const item of items) {
@@ -59,7 +71,13 @@ export class MediaGalleryBuilder {
   }
 }
 
-/** Short factory: `gallery("https://a.png", { url: "https://b.png" })`. */
+/**
+ * Short factory for {@link MediaGalleryBuilder}.
+ *
+ * @param items - Optional media URLs or item objects to add immediately
+ * @example
+ * gallery('https://cdn.example.com/a.png', { url: 'https://cdn.example.com/b.png' })
+ */
 export function gallery(...items: Array<MediaGalleryItemInput | string>): MediaGalleryBuilder {
   const builder = new MediaGalleryBuilder();
   if (items.length > 0) builder.add(...items);

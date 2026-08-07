@@ -7,6 +7,8 @@ export type SlashCommandConstructor = new (...args: never[]) => SlashCommand;
 /**
  * Instantiates slash command classes for use in groups.
  *
+ * @param ctors - Zero-arg {@link SlashCommand} constructors
+ * @returns Instantiated command instances
  * @example
  * commands = subcommands(CreateCmd, CloseCmd);
  */
@@ -39,6 +41,17 @@ export class SlashCommandSubGroup {
   description!: string;
   commands!: SlashCommand[];
 
+  /**
+   * Creates a nested subcommand group.
+   *
+   * @param options - Group name, description, and subcommands (optional when subclassing)
+   * @example
+   * new SlashCommandSubGroup({
+   *   name: 'admin',
+   *   description: 'Admin tools',
+   *   commands: subcommands(BanCmd, KickCmd),
+   * });
+   */
   constructor(options?: {
     name: string;
     description: string;
@@ -144,6 +157,11 @@ class FunctionalSlashCommandGroup extends SlashCommandGroup {
 /**
  * Functional slash-command group — same discovery as `extends SlashCommandGroup`.
  *
+ * @param name - Top-level command name
+ * @param description - Command description shown in Discord
+ * @param commands - Subcommand classes or instances
+ * @param options - Optional group-level flags and nested groups
+ * @returns A discoverable {@link SlashCommandGroup}
  * @example
  * export default group('ticket', 'Ticket system', [CreateCmd, CloseCmd]);
  *

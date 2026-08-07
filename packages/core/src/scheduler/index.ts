@@ -43,6 +43,15 @@ function cronMatches(cron: string, date: Date): boolean {
 
 /**
  * Job scheduler supporting cron, interval, and delayed tasks.
+ *
+ * @example
+ * const scheduler = new Scheduler();
+ * scheduler.scheduleInterval('heartbeat', 'Heartbeat', 30_000, async () => {
+ *   console.log('tick');
+ * });
+ * scheduler.scheduleCron('daily', 'Daily reset', '0 0 * * *', async () => {
+ *   await reset();
+ * });
  */
 export class Scheduler {
   private readonly jobs = new Map<string, ScheduledJob>();
@@ -50,13 +59,33 @@ export class Scheduler {
   private cronInterval: ReturnType<typeof setInterval> | null = null;
   private lastCronMinute = -1;
 
-  /** Schedule a cron job (minute hour dom month dow) */
+  /**
+   * Schedule a cron job (minute hour dom month dow).
+   *
+   * @param id - Unique job id
+   * @param name - Human-readable label
+   * @param cron - Five-field cron expression
+   * @param execute - Job callback
+   * @example
+   * scheduler.scheduleCron('daily', 'Daily reset', '0 0 * * *', async () => {
+   *   await reset();
+   * });
+   */
   scheduleCron(id: string, name: string, cron: string, execute: () => Promise<void> | void): void {
     this.jobs.set(id, { id, name, cron, execute, running: false });
     this.ensureCronTicker();
   }
 
-  /** Schedule an interval job */
+  /**
+   * Schedule an interval job.
+   *
+   * @param id - Unique job id
+   * @param name - Human-readable label
+   * @param intervalMs - Interval in milliseconds
+   * @param execute - Job callback
+   * @example
+   * scheduler.scheduleInterval('heartbeat', 'Heartbeat', 30_000, () => console.log('tick'));
+   */
   scheduleInterval(
     id: string,
     name: string,
@@ -69,7 +98,16 @@ export class Scheduler {
     this.timers.set(id, timer);
   }
 
-  /** Schedule a one-time delayed task */
+  /**
+   * Schedule a one-time delayed task.
+   *
+   * @param id - Unique job id
+   * @param name - Human-readable label
+   * @param delayMs - Delay in milliseconds
+   * @param execute - Job callback
+   * @example
+   * scheduler.scheduleDelayed('remind', 'Remind', 5_000, () => console.log('done'));
+   */
   scheduleDelayed(
     id: string,
     name: string,
@@ -85,7 +123,12 @@ export class Scheduler {
     this.timers.set(id, timer);
   }
 
-  /** Cancel a scheduled job */
+  /**
+   * Cancel a scheduled job.
+   *
+   * @param id - Job id previously passed to schedule*
+   * @returns `true` if a job was removed
+   */
   cancel(id: string): boolean {
     const timer = this.timers.get(id);
     if (timer) {
@@ -111,10 +154,16 @@ export class Scheduler {
     }
   }
 
+  /**
+   * Look up a job by id.
+   *
+   * @param id - Job id
+   */
   getJob(id: string): ScheduledJob | undefined {
     return this.jobs.get(id);
   }
 
+  /** All registered jobs */
   getAllJobs(): ScheduledJob[] {
     return [...this.jobs.values()];
   }
