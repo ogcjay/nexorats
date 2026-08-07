@@ -11,7 +11,7 @@ import {
 import type { Logger } from '@nexora.ts/logger';
 import type { EventBus } from '../event-bus/index.js';
 import { FrameworkEvents } from '../event-bus/index.js';
-import type { CommandDefinition, MessageCommandDefinition } from './define.js';
+import type { CommandContext, CommandDefinition, MessageCommandDefinition } from './define.js';
 import {
   createCommandContext,
   createMessageCommandContext,
@@ -20,24 +20,41 @@ import { resolveCommandExport } from './command-class.js';
 import {
   resolveCommandGroupExport,
   type SlashCommandGroup,
+  type SlashCommandSubGroup,
 } from './command-group.js';
+import type { SlashCommand } from './command-class.js';
 import {
   createContextMenuContext,
   resolveContextMenuExport,
   type ContextMenuCommandDefinition,
   type ContextMenuType,
 } from './context-menu.js';
+import { runGuards } from './guards.js';
+import {
+  composeCommandMiddleware,
+  type CommandMiddleware,
+} from './middleware.js';
 
 /** Registered command with metadata */
 export interface RegisteredCommand extends CommandDefinition {
   source?: string;
 }
 
-/** Registered slash command group (top-level + subcommands) */
-export interface RegisteredCommandGroup {
+/** Registered nested subcommand group (Discord option type 2) */
+export interface RegisteredSubGroup {
   name: string;
   description: string;
   commands: CommandDefinition[];
+}
+
+/** Registered slash command group (top-level + flat and/or nested subcommands) */
+export interface RegisteredCommandGroup {
+  name: string;
+  description: string;
+  /** Flat type-1 subcommands under the parent */
+  commands: CommandDefinition[];
+  /** Nested type-2 subcommand groups */
+  groups?: RegisteredSubGroup[];
   source?: string;
 }
 
@@ -135,6 +152,11 @@ function contextMenuKey(type: ContextMenuType, name: string): string {
 /** Options for {@link attachCommandHandlers} */
 export interface AttachCommandHandlersOptions {
   eventBus?: EventBus;
+  /**
+   * Onion middleware (first-registered = outermost, Express-style).
+   * Prefer passing the live array from {@link import('../nexora.js').Nexora.useCommand}.
+   */
+  middlewares?: readonly CommandMiddleware[];
 }
 
 /** Auto-discover and register commands from glob patterns */
@@ -178,7 +200,8 @@ export async function discoverCommands(
           registry.registerGroup(toRegisteredGroup(groupDef, file));
           logger.debug(`Registered command group: ${groupDef.name}`, {
             file,
-            subcommands: groupDef.commands.map((c) => c.name),
+            subcommands: (groupDef.commands ?? []).map((c) => c.name),
+            groups: (groupDef.groups ?? []).map((g) => g.name),
           });
           continue;
         }
@@ -211,21 +234,72 @@ function toRegisteredGroup(
   return {
     name: group.name,
     description: group.description,
-    commands: group.commands.map((cmd) => ({
-      name: cmd.name,
-      description: cmd.description,
-      options: cmd.options,
-      guildOnly: cmd.guildOnly,
-      adminOnly: cmd.adminOnly,
-      permissions: cmd.permissions,
-      cooldown: cmd.cooldown,
-      type: 'slash' as const,
-      execute: (ctx) => cmd.execute(ctx),
-      autocomplete: cmd.autocomplete
-        ? (interaction) => cmd.autocomplete!(interaction)
-        : undefined,
-    })),
+    commands: (group.commands ?? []).map((cmd) => mapSubCommand(cmd, group)),
+    groups: (group.groups ?? []).map((subGroup) => mapSubGroup(subGroup, group)),
     source,
+  };
+}
+
+function mapSubGroup(
+  subGroup: SlashCommandSubGroup,
+  parent: SlashCommandGroup,
+): RegisteredSubGroup {
+  return {
+    name: subGroup.name,
+    description: subGroup.description,
+    commands: subGroup.commands.map((cmd) => mapSubCommand(cmd, parent)),
+  };
+}
+
+/** Map a SlashCommand onto a CommandDefinition, merging parent group defaults (sub wins). */
+function mapSubCommand(cmd: SlashCommand, group: SlashCommandGroup): CommandDefinition {
+  return {
+    name: cmd.name,
+    description: cmd.description,
+    options: cmd.options,
+    guildOnly: cmd.guildOnly ?? group.guildOnly,
+    adminOnly: cmd.adminOnly ?? group.adminOnly,
+    permissions: cmd.permissions ?? group.permissions,
+    cooldown: cmd.cooldown ?? group.cooldown,
+    type: 'slash' as const,
+    execute: (ctx) => cmd.execute(ctx),
+    autocomplete: cmd.autocomplete
+      ? (interaction) => cmd.autocomplete!(interaction)
+      : undefined,
+  };
+}
+
+/** Resolve a flat or nested subcommand from a registered group */
+function resolveGroupSubcommand(
+  group: RegisteredCommandGroup,
+  interaction: {
+    options: {
+      getSubcommandGroup(required?: boolean): string | null;
+      getSubcommand(required?: boolean): string | null;
+    };
+  },
+): { sub: CommandDefinition; label: string; cooldownKey: string } | undefined {
+  const subGroupName = interaction.options.getSubcommandGroup(false);
+  const subName = interaction.options.getSubcommand(false);
+  if (!subName) return undefined;
+
+  if (subGroupName) {
+    const nested = group.groups?.find((g) => g.name === subGroupName);
+    const sub = nested?.commands.find((c) => c.name === subName);
+    if (!sub) return undefined;
+    return {
+      sub,
+      label: `${group.name} ${subGroupName} ${sub.name}`,
+      cooldownKey: `${group.name}:${subGroupName}:${sub.name}`,
+    };
+  }
+
+  const sub = group.commands.find((c) => c.name === subName);
+  if (!sub) return undefined;
+  return {
+    sub,
+    label: `${group.name} ${sub.name}`,
+    cooldownKey: `${group.name}:${sub.name}`,
   };
 }
 
@@ -241,6 +315,8 @@ function resolveMessageExport(exported: unknown): MessageCommandDefinition | nul
 
 /** Discord Application Command option type: SUB_COMMAND */
 const OPTION_TYPE_SUB_COMMAND = 1;
+/** Discord Application Command option type: SUB_COMMAND_GROUP */
+const OPTION_TYPE_SUB_COMMAND_GROUP = 2;
 
 /** Register slash + context-menu commands with Discord API */
 export async function deployCommands(
@@ -258,12 +334,25 @@ export async function deployCommands(
     ...registry.getAllGroups().map((group) => ({
       name: group.name,
       description: group.description,
-      options: group.commands.map((sub) => ({
-        type: OPTION_TYPE_SUB_COMMAND,
-        name: sub.name,
-        description: sub.description,
-        options: sub.options?.map(mapCommandOption),
-      })),
+      options: [
+        ...group.commands.map((sub) => ({
+          type: OPTION_TYPE_SUB_COMMAND,
+          name: sub.name,
+          description: sub.description,
+          options: sub.options?.map(mapCommandOption),
+        })),
+        ...(group.groups ?? []).map((subGroup) => ({
+          type: OPTION_TYPE_SUB_COMMAND_GROUP,
+          name: subGroup.name,
+          description: subGroup.description,
+          options: subGroup.commands.map((sub) => ({
+            type: OPTION_TYPE_SUB_COMMAND,
+            name: sub.name,
+            description: sub.description,
+            options: sub.options?.map(mapCommandOption),
+          })),
+        })),
+      ],
     })),
     ...registry.getAllContextMenus().map((cmd) =>
       cmd.type === 'user'
@@ -292,6 +381,11 @@ function mapCommandOption(opt: NonNullable<CommandDefinition['options']>[number]
     required: opt.required ?? false,
     choices: opt.choices,
     autocomplete: opt.autocomplete,
+    min_value: opt.minValue,
+    max_value: opt.maxValue,
+    min_length: opt.minLength,
+    max_length: opt.maxLength,
+    channel_types: opt.channelTypes,
   };
 }
 
@@ -305,6 +399,7 @@ function mapOptionType(type: string): number {
     role: 8,
     mentionable: 9,
     number: 10,
+    attachment: 11,
   };
   return types[type] ?? 3;
 }
@@ -317,6 +412,7 @@ export function attachCommandHandlers(
   options?: AttachCommandHandlersOptions,
 ): void {
   const eventBus = options?.eventBus;
+  const middlewares = options?.middlewares ?? [];
   /** key: `${commandName}:${userId}` → cooldown expiry timestamp (ms) */
   const cooldowns = new Map<string, number>();
 
@@ -324,12 +420,9 @@ export function attachCommandHandlers(
     if (interaction.isAutocomplete()) {
       const group = registry.getGroup(interaction.commandName);
       if (group) {
-        const subName = interaction.options.getSubcommand(false);
-        const sub = subName
-          ? group.commands.find((c) => c.name === subName)
-          : undefined;
-        if (sub?.autocomplete) {
-          await sub.autocomplete(interaction);
+        const resolved = resolveGroupSubcommand(group, interaction);
+        if (resolved?.sub.autocomplete) {
+          await resolved.sub.autocomplete(interaction);
         }
         return;
       }
@@ -367,19 +460,19 @@ export function attachCommandHandlers(
 
     const group = registry.getGroup(interaction.commandName);
     if (group) {
-      const subName = interaction.options.getSubcommand(true);
-      const sub = group.commands.find((c) => c.name === subName);
-      if (!sub) return;
+      const resolved = resolveGroupSubcommand(group, interaction);
+      if (!resolved) return;
 
-      const blocked = await enforceGuards(interaction, sub, cooldowns, `${group.name}:${sub.name}`);
+      const { sub, label: commandLabel, cooldownKey } = resolved;
+      const ctx = createCommandContext(interaction, client);
+      const blocked = await enforceGuards(interaction, sub, cooldowns, ctx, cooldownKey);
       if (blocked) return;
 
-      const ctx = createCommandContext(interaction, client);
-      const commandLabel = `${group.name} ${sub.name}`;
       const started = Date.now();
+      const run = composeCommandMiddleware(middlewares, (c) => sub.execute(c));
 
       try {
-        await sub.execute(ctx);
+        await run(ctx);
         const duration = Date.now() - started;
 
         logger.command(`/${commandLabel}`, {
@@ -417,14 +510,15 @@ export function attachCommandHandlers(
     const cmd = registry.get(interaction.commandName);
     if (!cmd) return;
 
-    const blocked = await enforceGuards(interaction, cmd, cooldowns);
+    const ctx = createCommandContext(interaction, client);
+    const blocked = await enforceGuards(interaction, cmd, cooldowns, ctx);
     if (blocked) return;
 
-    const ctx = createCommandContext(interaction, client);
     const started = Date.now();
+    const run = composeCommandMiddleware(middlewares, (c) => cmd.execute(c));
 
     try {
-      await cmd.execute(ctx);
+      await run(ctx);
       const duration = Date.now() - started;
 
       logger.command(`/${cmd.name}`, {
@@ -519,6 +613,18 @@ async function runContextMenu(
   if (!cmd) return;
 
   const ctx = createContextMenuContext(interaction, client);
+
+  if (cmd.guards?.length) {
+    // Built-in Guards only need user / guildId / interaction.memberPermissions
+    const result = await runGuards(ctx as unknown as CommandContext, cmd.guards);
+    if (result !== true) {
+      const message =
+        typeof result === 'string' ? result : 'You cannot use this command.';
+      await replyEphemeral(interaction, message);
+      return;
+    }
+  }
+
   const started = Date.now();
   const label = `ctx:${cmd.type}:${cmd.name}`;
 
@@ -581,6 +687,7 @@ async function enforceGuards(
   interaction: ChatInputCommandInteraction,
   cmd: CommandDefinition,
   cooldowns: Map<string, number>,
+  ctx: CommandContext,
   cooldownKeyPrefix?: string,
 ): Promise<boolean> {
   if (cmd.guildOnly && !interaction.guildId) {
@@ -621,11 +728,24 @@ async function enforceGuards(
     cooldowns.set(key, now + cmd.cooldown);
   }
 
+  if (cmd.guards?.length) {
+    const result = await runGuards(ctx, cmd.guards);
+    if (result !== true) {
+      const message =
+        typeof result === 'string' ? result : 'You cannot use this command.';
+      await replyEphemeral(interaction, message);
+      return true;
+    }
+  }
+
   return false;
 }
 
 async function replyEphemeral(
-  interaction: ChatInputCommandInteraction,
+  interaction:
+    | ChatInputCommandInteraction
+    | UserContextMenuCommandInteraction
+    | MessageContextMenuCommandInteraction,
   content: string,
 ): Promise<void> {
   const options = { content, flags: MessageFlags.Ephemeral as const };

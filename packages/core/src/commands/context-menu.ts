@@ -1,23 +1,26 @@
-import type {
-  APIInteractionGuildMember,
-  Client,
-  Guild,
-  GuildMember,
-  InteractionDeferReplyOptions,
-  InteractionEditReplyOptions,
-  InteractionReplyOptions,
-  InteractionResponse,
-  Message,
-  MessageContextMenuCommandInteraction,
-  TextBasedChannel,
-  User,
-  UserContextMenuCommandInteraction,
+import {
+  MessageFlags,
+  MessagePayload,
+  type APIInteractionGuildMember,
+  type Client,
+  type Guild,
+  type GuildMember,
+  type InteractionDeferReplyOptions,
+  type InteractionEditReplyOptions,
+  type InteractionReplyOptions,
+  type InteractionResponse,
+  type Message,
+  type MessageContextMenuCommandInteraction,
+  type TextBasedChannel,
+  type User,
+  type UserContextMenuCommandInteraction,
 } from 'discord.js';
 import type { ComponentLike, EmbedLike } from '../builders/index.js';
 import {
   resolveReplyOptions,
   type CommandReplyOptions,
 } from './define.js';
+import type { Guard } from './guards.js';
 
 /** Context-menu target kind (Discord ApplicationCommand type) */
 export type ContextMenuType = 'user' | 'message';
@@ -42,12 +45,12 @@ export interface ContextMenuContext {
     ...components: ComponentLike[]
   ): Promise<InteractionResponse<boolean>>;
   defer(options?: InteractionDeferReplyOptions): Promise<InteractionResponse<boolean>>;
-  editReply(
-    options: InteractionEditReplyOptions | string,
-  ): Promise<Message<boolean>>;
-  followUp(
-    options: InteractionReplyOptions | string,
-  ): Promise<Message<boolean>>;
+  deferThen(
+    work: () => Promise<CommandReplyOptions | string | void>,
+    options?: InteractionDeferReplyOptions,
+  ): Promise<Message<boolean> | undefined>;
+  editReply(options: CommandReplyOptions): Promise<Message<boolean>>;
+  followUp(options: CommandReplyOptions): Promise<Message<boolean>>;
 }
 
 /**
@@ -67,6 +70,8 @@ export abstract class ContextMenuCommand {
   abstract type: ContextMenuType;
   /** Discriminator vs content-match {@link messageCommand} */
   readonly kind = 'context-menu' as const;
+  /** Composable guards (same helpers as slash commands) */
+  guards?: Guard[];
 
   abstract execute(ctx: ContextMenuContext): Promise<void> | void;
 }
@@ -76,6 +81,7 @@ export interface ContextMenuCommandDefinition {
   name: string;
   type: ContextMenuType;
   kind?: 'context-menu';
+  guards?: Guard[];
   execute: (ctx: ContextMenuContext) => Promise<void> | void;
 }
 
@@ -118,6 +124,7 @@ function toContextMenuDefinition(
     name: cmd.name,
     type: cmd.type,
     kind: 'context-menu',
+    guards: cmd.guards,
     execute: (ctx) => cmd.execute(ctx),
   };
 }
@@ -134,6 +141,55 @@ function isContextMenuDefinition(value: unknown): value is ContextMenuCommandDef
   }
   // Class instances always set kind; plain objects need the discriminator
   return false;
+}
+
+function resolveEditReply(
+  options: CommandReplyOptions,
+): string | MessagePayload | InteractionEditReplyOptions {
+  return resolveReplyOptions(options) as string | MessagePayload | InteractionEditReplyOptions;
+}
+
+function resolveFollowUp(
+  options: CommandReplyOptions,
+): string | MessagePayload | InteractionReplyOptions {
+  return resolveReplyOptions(options);
+}
+
+async function deferThenHelper(
+  interaction: UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction,
+  work: () => Promise<CommandReplyOptions | string | void>,
+  options?: InteractionDeferReplyOptions,
+): Promise<Message<boolean> | undefined> {
+  if (!interaction.deferred && !interaction.replied) {
+    await interaction.deferReply(options);
+  }
+
+  try {
+    const result = await work();
+    if (result === undefined) return undefined;
+    return await interaction.editReply(resolveEditReply(result));
+  } catch (error) {
+    try {
+      if (interaction.deferred || interaction.replied) {
+        await interaction.editReply({ content: 'Something went wrong.' });
+      } else {
+        await interaction.reply({
+          content: 'Something went wrong.',
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+    } catch {
+      try {
+        await interaction.followUp({
+          content: 'Something went wrong.',
+          flags: MessageFlags.Ephemeral,
+        });
+      } catch {
+        // swallow secondary reply failures
+      }
+    }
+    throw error;
+  }
 }
 
 /** Build a ContextMenuContext from a user/message context-menu interaction */
@@ -164,7 +220,8 @@ export function createContextMenuContext(
     componentsV2: (...components) =>
       interaction.reply(resolveReplyOptions({ v2: components })),
     defer: (options) => interaction.deferReply(options),
-    editReply: (options) => interaction.editReply(options),
-    followUp: (options) => interaction.followUp(options),
+    deferThen: (work, options) => deferThenHelper(interaction, work, options),
+    editReply: (options) => interaction.editReply(resolveEditReply(options)),
+    followUp: (options) => interaction.followUp(resolveFollowUp(options)),
   };
 }

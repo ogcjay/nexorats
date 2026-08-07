@@ -1,6 +1,6 @@
 {
   "name": "@nexora.ts/core",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Discord client, commands, events, and lifecycle management",
   "license": "MIT",
   "type": "module",

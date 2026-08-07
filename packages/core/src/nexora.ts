@@ -8,6 +8,7 @@ import {
   deployCommands,
   attachCommandHandlers,
 } from './commands/index.js';
+import type { CommandMiddleware } from './commands/middleware.js';
 import { EventRegistry, discoverEvents, attachEventHandlers } from './events/index.js';
 import {
   InteractionRegistry,
@@ -51,6 +52,7 @@ export class Nexora {
   private readonly commandsPath: string[];
   private readonly eventsPath: string[];
   private readonly interactionsPath: string[];
+  private readonly commandMiddlewares: CommandMiddleware[] = [];
   private phase: LifecyclePhase = 'idle';
 
   constructor(options: NexoraOptions) {
@@ -90,6 +92,15 @@ export class Nexora {
     return this.phase;
   }
 
+  /**
+   * Register onion-style command middleware (Express order: first = outermost).
+   * Call before {@link start}. The same array reference is passed to handlers.
+   */
+  useCommand(mw: CommandMiddleware): this {
+    this.commandMiddlewares.push(mw);
+    return this;
+  }
+
   private registerServices(): void {
     this.container.registerInstance(TOKENS.Logger, this.logger);
     this.container.registerInstance(TOKENS.Config, this.config);
@@ -123,6 +134,7 @@ export class Nexora {
 
     attachCommandHandlers(this.client, this.commandRegistry, this.logger, {
       eventBus: this.eventBus,
+      middlewares: this.commandMiddlewares,
     });
     attachEventHandlers(this.client, this.eventRegistry);
     attachInteractionHandlers(this.client, this.interactionRegistry, this.logger);

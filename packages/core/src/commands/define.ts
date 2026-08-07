@@ -19,6 +19,7 @@ import type {
 } from 'discord.js';
 import { MessageFlags, MessageFlagsBitField, MessagePayload } from 'discord.js';
 import type { ComponentLike, EmbedLike } from '../builders/index.js';
+import type { Guard } from './guards.js';
 
 /** Builder-first reply options (resolved before discord.js) */
 export interface BuilderReplyOptions {
@@ -190,24 +191,47 @@ export interface CommandContext {
   ): Promise<InteractionResponse<boolean>>;
   /** Shortcut for `interaction.deferReply()` */
   defer(options?: InteractionDeferReplyOptions): Promise<InteractionResponse<boolean>>;
-  /** Shortcut for `interaction.editReply()` */
-  editReply(
-    options: InteractionEditReplyOptions | MessagePayload | string,
-  ): Promise<Message<boolean>>;
-  /** Shortcut for `interaction.followUp()` */
-  followUp(
-    options: InteractionReplyOptions | MessagePayload | string,
-  ): Promise<Message<boolean>>;
+  /**
+   * Defer (if needed), run async work, then `editReply` when work returns a payload.
+   * On throw: tries ephemeral `editReply` / `followUp` with a generic error, then rethrows.
+   */
+  deferThen(
+    work: () => Promise<CommandReplyOptions | string | void>,
+    options?: InteractionDeferReplyOptions,
+  ): Promise<Message<boolean> | undefined>;
+  /** Shortcut for `interaction.editReply()` — accepts the same inputs as {@link reply} */
+  editReply(options: CommandReplyOptions): Promise<Message<boolean>>;
+  /** Shortcut for `interaction.followUp()` — accepts the same inputs as {@link reply} */
+  followUp(options: CommandReplyOptions): Promise<Message<boolean>>;
 }
 
 /** Slash command option definition */
 export interface CommandOption {
   name: string;
   description: string;
-  type: 'string' | 'integer' | 'boolean' | 'user' | 'channel' | 'role' | 'mentionable' | 'number';
+  type:
+    | 'string'
+    | 'integer'
+    | 'boolean'
+    | 'user'
+    | 'channel'
+    | 'role'
+    | 'mentionable'
+    | 'number'
+    | 'attachment';
   required?: boolean;
   choices?: { name: string; value: string | number }[];
   autocomplete?: boolean;
+  /** Minimum value (integer / number options) — maps to Discord `min_value` */
+  minValue?: number;
+  /** Maximum value (integer / number options) — maps to Discord `max_value` */
+  maxValue?: number;
+  /** Minimum string length — maps to Discord `min_length` */
+  minLength?: number;
+  /** Maximum string length — maps to Discord `max_length` */
+  maxLength?: number;
+  /** Allowed channel types (channel options) — maps to Discord `channel_types` */
+  channelTypes?: number[];
 }
 
 /** Discriminator for discovered command modules */
@@ -226,6 +250,11 @@ export interface CommandDefinition {
   permissions?: PermissionResolvable[];
   /** Per-user cooldown in milliseconds */
   cooldown?: number;
+  /**
+   * Composable guards — run after built-in `guildOnly` / `adminOnly` /
+   * `permissions` / `cooldown` flags.
+   */
+  guards?: Guard[];
   /** Internal module kind — set by `command()` / SlashCommand */
   type?: CommandModuleType;
   execute: (ctx: CommandContext) => Promise<void> | void;
@@ -276,6 +305,58 @@ export function messageCommand(definition: MessageCommandDefinition): MessageCom
   return { ...definition, type: 'message' };
 }
 
+/** Resolve builder/string options for `editReply` */
+function resolveEditReply(
+  options: CommandReplyOptions,
+): string | MessagePayload | InteractionEditReplyOptions {
+  return resolveReplyOptions(options) as string | MessagePayload | InteractionEditReplyOptions;
+}
+
+/** Resolve builder/string options for `followUp` */
+function resolveFollowUp(
+  options: CommandReplyOptions,
+): string | MessagePayload | InteractionReplyOptions {
+  return resolveReplyOptions(options);
+}
+
+async function deferThenHelper(
+  interaction: ChatInputCommandInteraction,
+  work: () => Promise<CommandReplyOptions | string | void>,
+  options?: InteractionDeferReplyOptions,
+): Promise<Message<boolean> | undefined> {
+  if (!interaction.deferred && !interaction.replied) {
+    await interaction.deferReply(options);
+  }
+
+  try {
+    const result = await work();
+    if (result === undefined) return undefined;
+    return await interaction.editReply(resolveEditReply(result));
+  } catch (error) {
+    try {
+      if (interaction.deferred || interaction.replied) {
+        // editReply does not accept Ephemeral — use plain content
+        await interaction.editReply({ content: 'Something went wrong.' });
+      } else {
+        await interaction.reply({
+          content: 'Something went wrong.',
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+    } catch {
+      try {
+        await interaction.followUp({
+          content: 'Something went wrong.',
+          flags: MessageFlags.Ephemeral,
+        });
+      } catch {
+        // swallow secondary reply failures — original error is rethrown
+      }
+    }
+    throw error;
+  }
+}
+
 /** Build a CommandContext from a chat-input interaction */
 export function createCommandContext(
   interaction: ChatInputCommandInteraction,
@@ -294,8 +375,9 @@ export function createCommandContext(
     componentsV2: (...components) =>
       interaction.reply(resolveReplyOptions({ v2: components })),
     defer: (options) => interaction.deferReply(options),
-    editReply: (options) => interaction.editReply(options),
-    followUp: (options) => interaction.followUp(options),
+    deferThen: (work, options) => deferThenHelper(interaction, work, options),
+    editReply: (options) => interaction.editReply(resolveEditReply(options)),
+    followUp: (options) => interaction.followUp(resolveFollowUp(options)),
   };
 }
 

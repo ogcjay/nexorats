@@ -13,6 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Community docs inviting plugins and ecosystem contributions
 - Package READMEs for all framework packages
 
+## [0.1.6] - 2026-08-07
+
+### Added (`@nexora.ts/core`)
+
+- Typed slash option helpers (`stringOpt`, `integerOpt`, …)
+- Nested command groups / subgroups
+- Command guards and middleware composition
+- Autocomplete helpers and handler support
+
 ## [0.1.0] - 2026-08-06
 
 ### Added

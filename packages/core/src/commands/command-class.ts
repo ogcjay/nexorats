@@ -8,6 +8,7 @@ import type {
   CommandModuleType,
   CommandOption,
 } from './define.js';
+import type { Guard } from './guards.js';
 
 /**
  * Abstract slash command class — additive alternative to `command({})`.
@@ -31,6 +32,8 @@ export abstract class SlashCommand implements CommandDefinition {
   permissions?: PermissionResolvable[];
   /** Per-user cooldown in milliseconds */
   cooldown?: number;
+  /** Composable guards — after built-in flags */
+  guards?: Guard[];
   readonly type: CommandModuleType = 'slash';
 
   abstract execute(ctx: CommandContext): Promise<void> | void;
