@@ -9,4 +9,4 @@ const loader = new PluginLoader(bot, bot.logger);
 await loader.loadAll({ pluginsPath: './plugins' });
 ```
 
-See [Plugins](/guide/plugins).
+See [Plugins](../guide/plugins.md).

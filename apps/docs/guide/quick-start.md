@@ -63,7 +63,7 @@ Commands and events are **auto-discovered** — no manual registration.
 
 ## Next steps
 
-- [Configuration](/guide/configuration)
-- [Commands](/guide/commands)
-- [Plugins](/guide/plugins)
-- [Dashboard](/guide/dashboard)
+- [Configuration](configuration.md)
+- [Commands](commands.md)
+- [Plugins](plugins.md)
+- [Dashboard](dashboard.md)

@@ -9,4 +9,4 @@ const hub = new WebSocketHub(logger);
 hub.start(4001);
 ```
 
-See [WebSocket](/guide/websocket).
+See [WebSocket](../guide/websocket.md).

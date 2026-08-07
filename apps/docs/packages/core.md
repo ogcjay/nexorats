@@ -20,4 +20,4 @@ await bot.start();
 | `Cache` / `MemoryCacheAdapter` | Caching |
 | `Scheduler` | Cron / interval / delayed jobs |
 
-See also: [Commands](/guide/commands), [Events](/guide/events), [DI](/guide/dependency-injection).
+See also: [Commands](../guide/commands.md), [Events](../guide/events.md), [DI](../guide/dependency-injection.md).

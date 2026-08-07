@@ -1,0 +1,8 @@
+# GitBook config for Project directory = apps/docs
+# In GitBook: Git Sync → Project directory → apps/docs
+
+root: ./
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md

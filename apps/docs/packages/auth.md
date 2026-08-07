@@ -9,4 +9,4 @@ const auth = createAuthService(config.auth!, repos);
 const url = auth.oauth.getAuthorizationUrl(state);
 ```
 
-See [Auth](/guide/auth).
+See [Auth](../guide/auth.md).

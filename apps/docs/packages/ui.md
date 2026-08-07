@@ -8,4 +8,4 @@ Includes: `SettingsCard`, `StatCard`, `Switch`, `ServerSelector`, `GuildSidebar`
 import { SettingsCard, Switch } from '@nexorajs/ui';
 ```
 
-See [Dashboard](/guide/dashboard).
+See [Dashboard](../guide/dashboard.md).

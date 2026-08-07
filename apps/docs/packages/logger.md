@@ -11,4 +11,4 @@ subscribeLiveLogs((entry) => {
 });
 ```
 
-See [Logging](/guide/logging).
+See [Logging](../guide/logging.md).

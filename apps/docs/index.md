@@ -11,7 +11,7 @@ hero:
       link: /guide/quick-start
     - theme: alt
       text: View on GitHub
-      link: https://github.com/nexorajs/nexora
+      link: https://github.com/ogcjay/nexorajs
 
 features:
   - title: Complete foundation

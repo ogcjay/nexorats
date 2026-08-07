@@ -1,6 +1,6 @@
 # Changelog
 
-See the repository [CHANGELOG.md](https://github.com/nexorajs/nexora/blob/main/CHANGELOG.md).
+See the repository [CHANGELOG.md](https://github.com/ogcjay/nexorajs/blob/main/CHANGELOG.md).
 
 ## 0.1.0 — Preview
 

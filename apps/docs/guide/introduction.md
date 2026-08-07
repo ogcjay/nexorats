@@ -29,7 +29,7 @@ Nexora is **MIT licensed** and hosted on GitHub so developers can:
 3. **Improve** core, docs, and DX
 4. **Share** plugins and grow a common ecosystem
 
-This documentation site is published via **GitHub Pages** for everyone — you do not need to run a docs server to read it.
+This documentation is published for everyone via **GitBook** (and optionally GitHub Pages) — you do not need to run a docs server to read it.
 
 ## Status
 

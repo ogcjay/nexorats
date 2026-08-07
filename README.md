@@ -4,15 +4,15 @@
 
 Nexora is a complete foundation — CLI, command system, plugin system, dashboard, authentication, and more — so you can focus on your bot’s features instead of wiring libraries together.
 
-[![CI](https://github.com/nexorajs/nexora/actions/workflows/ci.yml/badge.svg)](https://github.com/nexorajs/nexora/actions/workflows/ci.yml)
-[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://nexorajs.github.io/nexora/)
+[![CI](https://github.com/ogcjay/nexorajs/actions/workflows/ci.yml/badge.svg)](https://github.com/ogcjay/nexorajs/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://ogcjay.github.io/nexorajs/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
 [![pnpm](https://img.shields.io/badge/pnpm-9.x-orange)](https://pnpm.io)
 
 > **Status:** early preview (`0.1.0`). APIs may change before `1.0.0`.
 >
-> **Documentation (public):** [https://nexorajs.github.io/nexora/](https://nexorajs.github.io/nexora/) — hosted on GitHub Pages for everyone  
+> **Documentation (public):** see [GITBOOK.md](./GITBOOK.md) for GitBook sync · GitHub Pages: [https://ogcjay.github.io/nexorajs/](https://ogcjay.github.io/nexorajs/)  
 > **Nexora Studio (local):** `http://localhost:3002` — Developer Center for *your* running project (commands, plugins, logs, status)
 
 ---
@@ -103,7 +103,7 @@ pnpm --filter @nexorajs/playground dev   # bot + Studio API
 pnpm studio:dev                        # Studio UI
 ```
 
-See the docs guide: [Nexora Studio](https://nexorajs.github.io/nexora/guide/studio).
+See the docs guide: [Nexora Studio](https://ogcjay.github.io/nexorajs/guide/studio).
 
 ## Build plugins, grow the ecosystem
 
@@ -145,7 +145,7 @@ templates/
 **Requirements:** Node.js ≥ 20, pnpm 9.15+
 
 ```bash
-git clone https://github.com/nexorajs/nexora.git
+git clone https://github.com/ogcjay/nexorajs.git
 cd nexora
 pnpm install
 pnpm build

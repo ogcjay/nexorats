@@ -28,13 +28,13 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.2"
   },
-  "homepage": "https://github.com/nexorajs/nexora#readme",
+  "homepage": "https://github.com/ogcjay/nexorajs#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nexorajs/nexora.git"
+    "url": "git+https://github.com/ogcjay/nexorajs.git"
   },
   "bugs": {
-    "url": "https://github.com/nexorajs/nexora/issues"
+    "url": "https://github.com/ogcjay/nexorajs/issues"
   },
   "license": "MIT"
 }

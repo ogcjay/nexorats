@@ -21,4 +21,4 @@ export default event('ready', (client) => {
 
 ## Framework event bus
 
-Besides Discord events, Nexora has an internal `EventBus` with hooks, middleware, and priorities — used by plugins and platform features. See [@nexorajs/core](/packages/core).
+Besides Discord events, Nexora has an internal `EventBus` with hooks, middleware, and priorities — used by plugins and platform features. See [@nexorajs/core](../packages/core.md).

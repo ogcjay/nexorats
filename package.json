@@ -4,13 +4,13 @@
   "private": true,
   "description": "Open-source TypeScript framework for Discord bots — CLI, commands, plugins, dashboard, and auth",
   "license": "MIT",
-  "homepage": "https://github.com/nexorajs/nexora#readme",
+  "homepage": "https://github.com/ogcjay/nexorajs#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nexorajs/nexora.git"
+    "url": "git+https://github.com/ogcjay/nexorajs.git"
   },
   "bugs": {
-    "url": "https://github.com/nexorajs/nexora/issues"
+    "url": "https://github.com/ogcjay/nexorajs/issues"
   },
   "keywords": [
     "discord",

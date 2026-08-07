@@ -9,7 +9,7 @@ Nexora grows when the community uses it, extends it, and improves it.
 3. Fix DX pain points in core packages
 4. Publish plugins others can install
 
-Full guide: [CONTRIBUTING.md](https://github.com/nexorajs/nexora/blob/main/CONTRIBUTING.md) on GitHub.
+Full guide: [CONTRIBUTING.md](https://github.com/ogcjay/nexorajs/blob/main/CONTRIBUTING.md) on GitHub.
 
 ## Docs contributions
 

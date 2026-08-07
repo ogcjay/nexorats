@@ -31,7 +31,7 @@ Ideas and questions: open a [Feature request](../../issues/new/choose) or start 
 ## Development Setup
 
 ```bash
-git clone https://github.com/nexorajs/nexora.git
+git clone https://github.com/ogcjay/nexorajs.git
 cd nexora
 pnpm install
 pnpm build

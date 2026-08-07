@@ -1,33 +1,60 @@
-# Documentation
+# Nexora
 
-Public docs are a **VitePress** site in `apps/docs`, deployed automatically to **GitHub Pages**.
+**Modern open-source TypeScript framework for Discord bots.**
 
-Readers use the hosted site — they do **not** need to run a docs server.
+Nexora is a complete foundation — CLI, command system, plugin system, dashboard, authentication, and more — so you can focus on your bot’s features instead of wiring libraries together.
 
 | | |
 | --- | --- |
-| **Live URL** | https://nexorajs.github.io/nexora/ |
-| **Source** | `apps/docs/**/*.md` |
-| **Workflow** | `.github/workflows/docs.yml` |
+| **GitHub** | [ogcjay/nexorajs](https://github.com/ogcjay/nexorajs) |
+| **npm** | [`@nexorajs/core`](https://www.npmjs.com/package/@nexorajs/core) |
+| **Status** | Early preview (`0.1.x`) |
 
-## Enable GitHub Pages (once)
-
-After the first push to GitHub:
-
-1. Repo → **Settings** → **Pages**
-2. **Source:** GitHub Actions
-3. Merge/push to `main` (or run the “Deploy Docs” workflow manually)
-
-If your GitHub user/org is not `nexorajs`, update:
-
-- `DOCS_BASE` in `.github/workflows/docs.yml` (usually `/<repo-name>/`)
-- `base` / links in `apps/docs/.vitepress/config.ts`
-- Badge + URL in the root `README.md`
-
-## Local preview (contributors only)
+## Quick start
 
 ```bash
-pnpm docs:dev
+npx create-nexorajs my-bot
+cd my-bot
+pnpm install
+cp .env.example .env   # add your Discord token
+pnpm dev
 ```
 
-Opens a local VitePress preview. Production still comes from GitHub Pages.
+Continue with **[Quick start](guide/quick-start.md)** or **[Introduction](guide/introduction.md)**.
+
+## What you get
+
+| Building block | What you get |
+| --- | --- |
+| **CLI** | `create-nexorajs` scaffolds a full project |
+| **Commands & events** | `command()` / `event()` with auto-discovery |
+| **Plugin system** | Commands, events, dashboard, API, migrations |
+| **Dashboard** | Next.js UI for guild settings, modules, logs |
+| **Auth** | Discord OAuth, sessions, permissions |
+| **Database** | Drizzle + repository layer (PostgreSQL / SQLite) |
+| **API + WebSocket** | Internal REST API and live dashboard events |
+| **Config & logging** | Type-safe `defineConfig()`, structured logs |
+
+## Open source
+
+MIT licensed. Use it, extend it with plugins, improve core and docs — community-driven.
+
+```ts
+import { command } from '@nexorajs/core';
+import { defineConfig } from '@nexorajs/config';
+
+export default defineConfig({
+  bot: {
+    token: process.env.DISCORD_TOKEN!,
+    clientId: process.env.DISCORD_CLIENT_ID!,
+  },
+});
+
+export const ping = command({
+  name: 'ping',
+  description: 'Check bot latency',
+  async execute(ctx) {
+    await ctx.interaction.reply('Pong!');
+  },
+});
+```

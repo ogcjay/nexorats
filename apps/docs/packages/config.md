@@ -11,4 +11,4 @@ export default defineConfig({
 });
 ```
 
-See [Configuration](/guide/configuration).
+See [Configuration](../guide/configuration.md).

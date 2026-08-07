@@ -10,4 +10,4 @@ Prompts for bot name, database, dashboard, Docker, linting, GitHub Actions, and 
 
 Also exposes `nexora` for plugin management (WIP: `add`, `remove`, `list`, `dev`).
 
-See [Quick start](/guide/quick-start).
+See [Quick start](../guide/quick-start.md).

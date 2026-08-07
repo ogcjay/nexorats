@@ -9,4 +9,4 @@ const db = await createDatabase(config.database);
 const repos = new RepositoryFactory(db);
 ```
 
-See [Database](/guide/database).
+See [Database](../guide/database.md).

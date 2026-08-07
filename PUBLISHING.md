@@ -25,7 +25,7 @@ gh auth login
 
 ## 2. Choose your GitHub identity
 
-Default URLs in this repo use the placeholder org **`nexorajs/nexora`**.
+Default URLs in this repo use **`ogcjay/nexorajs`**.
 
 If your user/org is different, update:
 

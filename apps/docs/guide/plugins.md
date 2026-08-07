@@ -68,4 +68,4 @@ nexora add moderation
 
 ## Community plugins
 
-Building and publishing plugins is how the ecosystem grows. See [Plugin ecosystem](/guide/ecosystem) and [Contributing](/guide/contributing).
+Building and publishing plugins is how the ecosystem grows. See [Plugin ecosystem](ecosystem.md) and [Contributing](contributing.md).

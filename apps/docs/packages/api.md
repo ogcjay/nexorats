@@ -9,4 +9,4 @@ const server = createApiServer(auth, repos, logger, 4000);
 await server.start();
 ```
 
-See [API](/guide/api).
+See [API](../guide/api.md).

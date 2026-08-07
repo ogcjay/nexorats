@@ -3,10 +3,10 @@ import { defineConfig } from 'vitepress';
 /**
  * Docs are built statically and deployed to GitHub Pages.
  * Change `base` if your repo name is not `nexora`:
- *   user.github.io/nexora  →  base: '/nexora/'
+ *   user.github.io/nexorajs  →  base: '/nexorajs/'
  *   custom domain / org root →  base: '/'
  */
-const base = process.env.DOCS_BASE ?? '/nexora/';
+const base = process.env.DOCS_BASE ?? '/nexorajs/';
 
 export default defineConfig({
   title: 'Nexora',
@@ -16,7 +16,7 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: false,
   ignoreDeadLinks: true,
-  srcExclude: ['**/README.md'],
+  srcExclude: ['**/README.md', '**/HOSTING.md', '**/SUMMARY.md'],
 
   head: [['link', { rel: 'icon', href: `${base}favicon.svg` }]],
 
@@ -33,7 +33,7 @@ export default defineConfig({
       },
       {
         text: 'GitHub',
-        link: 'https://github.com/nexorajs/nexora',
+        link: 'https://github.com/ogcjay/nexorajs',
       },
     ],
 
@@ -97,14 +97,14 @@ export default defineConfig({
       ],
     },
 
-    socialLinks: [{ icon: 'github', link: 'https://github.com/nexorajs/nexora' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/ogcjay/nexorajs' }],
 
     search: {
       provider: 'local',
     },
 
     editLink: {
-      pattern: 'https://github.com/nexorajs/nexora/edit/main/apps/docs/:path',
+      pattern: 'https://github.com/ogcjay/nexorajs/edit/main/apps/docs/:path',
       text: 'Edit this page on GitHub',
     },
 
