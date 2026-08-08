@@ -1,6 +1,6 @@
 # Builders
 
-Nexora ships fluent builders for embeds, buttons, selects, modals, and action rows — designed for shorter chains than discord.js while still emitting plain Discord API payloads (`toJSON()`).
+Nexora ships fluent builders for embeds, buttons, selects, modals, and action rows — shorter chains for common UI, still emitting plain Discord API payloads (`toJSON()`).
 
 They work with [`ctx.reply`](commands.md), `ctx.embed`, and raw `interaction.reply({ embeds, components })`.
 
@@ -14,9 +14,9 @@ For Discord’s newer layout system (Containers, Text Display, …), see [Compon
 | **Shorter API** | `title()`, `field()`, `.success()` instead of long `set*` chains |
 | **Unified replies** | `ctx.reply({ embed })`, `ctx.embed(…)`, `components` accept builders |
 | **customId helpers** | Optional `nexora:` (or custom) namespace via `{ prefix: true }` |
-| **No lock-in** | `toJSON()` is API-compatible — mix with discord.js anytime |
+| **No lock-in** | `toJSON()` is Discord API-compatible — mix with other payload builders anytime |
 
-## vs discord.js
+## Compared to verbose builders
 
 ```ts
 // discord.js

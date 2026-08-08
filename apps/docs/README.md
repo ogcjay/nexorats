@@ -1,8 +1,8 @@
 # Nexora
 
-**Modern open-source TypeScript application framework for Discord bots — built on Discord.js.**
+**The platform that revolutionizes how Discord bots are built** — open-source TypeScript, production-ready from minute one.
 
-Nexora isn’t just a framework — **it ships with its own local Developer Center**. CLI, Studio, plugins, auto-discovery, auth, and more so you can focus on features instead of scaffolding.
+Nexora isn’t another bot template — **it’s the platform Discord developers have been missing.** CLI, Studio, plugins, auto-discovery, auth, and more so you can focus on features instead of scaffolding.
 
 | | |
 | --- | --- |
@@ -24,16 +24,16 @@ pnpm dev
 
 Open **http://localhost:3002** for Nexora Studio. Continue with **[Quick start](guide/quick-start.md)**, **[Nexora Studio](guide/studio.md)**, **[Classes](classes/index.md)**, or **[Introduction](guide/introduction.md)**.
 
-## Nexora vs Discord.js
+## Nexora vs a typical DIY bot stack
 
-| Feature | Discord.js | Nexora |
+| Feature | From-scratch Discord project | Nexora |
 | --- | :---: | :---: |
-| Discord API client | ✅ | ✅ (via Discord.js) |
-| Project CLI / scaffold | ❌ | ✅ |
+| Discord API compatibility | ✅ (you wire it) | ✅ |
+| Project CLI / scaffold | ❌ / copy-paste | ✅ |
 | Local Developer Center (Studio) | ❌ | ✅ |
-| Plugin system | ❌ | ✅ |
-| Auto-discovery | ❌ | ✅ |
-| Typed config + structured logging | ❌ | ✅ |
+| Plugin system | DIY | ✅ |
+| Auto-discovery | DIY | ✅ |
+| Typed config + structured logging | DIY | ✅ |
 
 ## What you get
 

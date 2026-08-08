@@ -1,8 +1,8 @@
 # @nexora.ts/core
 
-Heart of the Nexora framework: Discord client, slash commands, events, DI container, cache, and scheduler.
+Heart of the Nexora platform: Discord client, slash commands, events, DI container, cache, and scheduler.
 
-Not a thin Discord.js wrapper — the foundation bots and plugins build on.
+The runtime foundation bots and plugins build on — commands, events, DI, and lifecycle in one place.
 
 ## Usage
 

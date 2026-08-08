@@ -52,7 +52,7 @@ import { LayoutContainerBuilder, container } from '@nexora.ts/core';
 
 Interactive children (buttons, selects) still use the classic [Builders](builders.md) and sit inside action rows (or as a Section accessory).
 
-## vs discord.js
+## Compared to verbose builders
 
 ```ts
 // discord.js
