@@ -17,7 +17,12 @@ export {
   type BuilderReplyOptions,
   type CreateCommandContextOptions,
   type StatusReplyOptions,
+  type CommandOptionsGetters,
 } from './define.js';
+
+export {
+  createCommandOptionsGetters,
+} from './options-getters.js';
 
 export { buildStatusReply } from './reply-presets.js';
 

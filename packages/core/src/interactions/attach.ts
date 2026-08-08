@@ -1,6 +1,11 @@
 import { MessageFlags, type Client, type Interaction } from 'discord.js';
 import type { Logger } from '@nexora.ts/logger';
 import {
+  reportError,
+  resolveErrorMessage,
+  type ErrorBoundaryConfig,
+} from '../errors/handler.js';
+import {
   createComponentContext,
   createModalContext,
   type ComponentInteraction,
@@ -10,13 +15,21 @@ import type { ButtonHandler } from './button-handler.js';
 import type { SelectHandler } from './select-handler.js';
 import type { ModalHandler } from './modal-handler.js';
 
+/** Options for {@link attachInteractionHandlers} */
+export interface AttachInteractionHandlersOptions {
+  errorBoundary?: ErrorBoundaryConfig;
+}
+
 /** Attach button / select / modal handlers to `interactionCreate` */
 export function attachInteractionHandlers(
   client: Client,
   registry: InteractionRegistry,
   logger: Logger,
+  options?: AttachInteractionHandlersOptions,
 ): void {
   if (registry.size === 0) return;
+
+  const errorBoundary = options?.errorBoundary;
 
   client.on('interactionCreate', async (interaction) => {
     try {
@@ -55,7 +68,22 @@ export function attachInteractionHandlers(
         error instanceof Error ? error : { error: String(error) },
       );
 
-      await safeErrorReply(interaction);
+      await reportError(
+        errorBoundary,
+        {
+          error,
+          source: 'interaction',
+          userId: interaction.user?.id,
+          guildId: interaction.guildId,
+          interaction,
+        },
+        logger,
+      );
+
+      await safeErrorReply(
+        interaction,
+        resolveErrorMessage(errorBoundary, 'interaction'),
+      );
     }
   });
 }
@@ -93,11 +121,14 @@ function formatCustomId(entry: RegisteredInteraction): string {
     : entry.customId;
 }
 
-async function safeErrorReply(interaction: Interaction): Promise<void> {
+async function safeErrorReply(
+  interaction: Interaction,
+  content: string,
+): Promise<void> {
   if (!interaction.isRepliable()) return;
 
   const reply = {
-    content: 'An error occurred while handling this interaction.',
+    content,
     flags: MessageFlags.Ephemeral as const,
   };
   try {

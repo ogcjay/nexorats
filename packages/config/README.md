@@ -1,6 +1,7 @@
 # @nexora.ts/config
 
 Type-safe configuration with `defineConfig()` and Zod validation.
+`defineConfig()` validates at runtime and throws a clear error with config paths on failure.
 
 ```ts
 import { defineConfig } from '@nexora.ts/config';

@@ -1,5 +1,8 @@
 import { Client, GatewayIntentBits, Partials, type ClientOptions } from 'discord.js';
-import type { NexoraConfig } from '@nexora.ts/config';
+import {
+  validateConfig,
+  type NexoraConfig,
+} from '@nexora.ts/config';
 import { createLiveLogger, printStartupBanner, type Logger } from '@nexora.ts/logger';
 import { Container, TOKENS } from './container/index.js';
 import {
@@ -19,6 +22,10 @@ import { EventBus, FrameworkEvents } from './event-bus/index.js';
 import { Cache, MemoryCacheAdapter } from './cache/index.js';
 import { Scheduler } from './scheduler/index.js';
 import { checkForCoreUpdate, getInstalledCoreVersion } from './update-check.js';
+import type {
+  ErrorBoundaryConfig,
+  NexoraErrorHandler,
+} from './errors/handler.js';
 
 /**
  * Bootstrap options for {@link Nexora}.
@@ -29,6 +36,10 @@ import { checkForCoreUpdate, getInstalledCoreVersion } from './update-check.js';
  *   commandsPath: './commands',
  *   eventsPath: './events',
  *   interactionsPath: './interactions',
+ *   onError: ({ error, source, command }) => {
+ *     console.error(source, command, error);
+ *   },
+ *   errorMessage: 'Etwas ist schiefgelaufen.',
  * };
  */
 export interface NexoraOptions {
@@ -42,6 +53,20 @@ export interface NexoraOptions {
   interactionsPath?: string | string[];
   /** Extra discord.js {@link ClientOptions} merged into the client */
   clientOptions?: Partial<ClientOptions>;
+  /**
+   * Global error hook for command / autocomplete / interaction / event failures.
+   * @see Nexora.onError
+   */
+  onError?: NexoraErrorHandler;
+  /**
+   * User-facing ephemeral message when a command or interaction fails.
+   * @default 'An error occurred while executing this command.'
+   */
+  errorMessage?: string;
+  /** Override for button / select / modal failure replies */
+  interactionErrorMessage?: string;
+  /** Override for `ctx.deferThen` failure replies */
+  deferErrorMessage?: string;
 }
 
 /** Bot lifecycle phases */
@@ -68,6 +93,7 @@ export class Nexora {
   private readonly eventsPath: string[];
   private readonly interactionsPath: string[];
   private readonly commandMiddlewares: CommandMiddleware[] = [];
+  private errorBoundary: ErrorBoundaryConfig;
   private phase: LifecyclePhase = 'idle';
 
   /**
@@ -83,23 +109,29 @@ export class Nexora {
    * await bot.start();
    */
   constructor(options: NexoraOptions) {
-    this.config = options.config;
+    this.config = validateConfig(options.config);
     this.commandsPath = normalizePaths(options.commandsPath ?? './commands/**/*.ts');
     this.eventsPath = normalizePaths(options.eventsPath ?? './events/**/*.ts');
     this.interactionsPath = normalizePaths(
       options.interactionsPath ?? './interactions/**/*.ts',
     );
+    this.errorBoundary = {
+      onError: options.onError,
+      errorMessage: options.errorMessage,
+      interactionErrorMessage: options.interactionErrorMessage,
+      deferErrorMessage: options.deferErrorMessage,
+    };
 
     this.container = new Container();
     this.logger = createLiveLogger({
-      level: options.config.logger?.level ?? 'info',
+      level: this.config.logger?.level ?? 'info',
       context: 'nexora',
-      console: options.config.logger?.console,
-      file: options.config.logger?.file,
+      console: this.config.logger?.console,
+      file: this.config.logger?.file,
     });
 
     this.client = new Client({
-      intents: resolveIntents(options.config.bot.intents),
+      intents: resolveIntents(this.config.bot.intents),
       partials: [Partials.Channel, Partials.Message],
       ...options.clientOptions,
     });
@@ -108,7 +140,7 @@ export class Nexora {
     this.eventRegistry = new EventRegistry();
     this.interactionRegistry = new InteractionRegistry();
     this.eventBus = new EventBus();
-    this.cache = new Cache(new MemoryCacheAdapter(), options.config.cache?.defaultTtl);
+    this.cache = new Cache(new MemoryCacheAdapter(), this.config.cache?.defaultTtl);
     this.scheduler = new Scheduler();
 
     this.registerServices();
@@ -117,6 +149,33 @@ export class Nexora {
   /** Current lifecycle phase */
   get lifecycle(): LifecyclePhase {
     return this.phase;
+  }
+
+  /**
+   * Register a global error handler (commands, autocomplete, interactions, events).
+   * Call before {@link start}. Overwrites any handler from {@link NexoraOptions.onError}.
+   *
+   * @param handler - Async-capable error hook
+   * @returns This bot instance for chaining
+   * @example
+   * bot.onError(async ({ error, source, command }) => {
+   *   bot.logger.error('Unhandled', { source, command, error: String(error) });
+   * });
+   */
+  onError(handler: NexoraErrorHandler): this {
+    this.errorBoundary = { ...this.errorBoundary, onError: handler };
+    return this;
+  }
+
+  /**
+   * Set the user-facing ephemeral error message for failed commands / interactions.
+   *
+   * @param message - Message shown to Discord users
+   * @returns This bot instance for chaining
+   */
+  setErrorMessage(message: string): this {
+    this.errorBoundary = { ...this.errorBoundary, errorMessage: message };
+    return this;
   }
 
   /**
@@ -178,9 +237,14 @@ export class Nexora {
       container: this.container,
       logger: this.logger,
       cache: this.cache,
+      errorBoundary: this.errorBoundary,
     });
-    attachEventHandlers(this.client, this.eventRegistry);
-    attachInteractionHandlers(this.client, this.interactionRegistry, this.logger);
+    attachEventHandlers(this.client, this.eventRegistry, this.logger, {
+      errorBoundary: this.errorBoundary,
+    });
+    attachInteractionHandlers(this.client, this.interactionRegistry, this.logger, {
+      errorBoundary: this.errorBoundary,
+    });
 
     this.client.once('ready', (readyClient) => {
       this.phase = 'ready';

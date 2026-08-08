@@ -1,6 +1,12 @@
 /** Default Nexora customId namespace */
 export const CUSTOM_ID_NAMESPACE = 'nexora' as const;
 
+/** Default delimiter for {@link packCustomId} / {@link parseCustomId} */
+export const CUSTOM_ID_DELIMITER = ':' as const;
+
+/** Discord custom_id hard limit */
+export const CUSTOM_ID_MAX_LENGTH = 100 as const;
+
 export interface CustomIdOptions {
   /**
    * Prefix the id with a namespace.
@@ -45,4 +51,45 @@ export function customId(id: string, options?: CustomIdOptions): string {
  */
 export function resolveCustomId(id: string, options?: CustomIdOptions): string {
   return customId(id, options);
+}
+
+/**
+ * Join parts into a Discord custom id (max {@link CUSTOM_ID_MAX_LENGTH} chars).
+ * Uses {@link CUSTOM_ID_DELIMITER} (`:`) between segments.
+ *
+ * @param parts - Segments to join (stringified)
+ * @returns Packed custom id
+ * @throws If the result exceeds {@link CUSTOM_ID_MAX_LENGTH}
+ * @example
+ * packCustomId('ban', userId, 'confirm') // 'ban:123:confirm'
+ */
+export function packCustomId(
+  ...parts: Array<string | number | boolean>
+): string {
+  const id = parts.map(String).join(CUSTOM_ID_DELIMITER);
+
+  if (id.length > CUSTOM_ID_MAX_LENGTH) {
+    throw new Error(
+      `customId exceeds Discord limit of ${CUSTOM_ID_MAX_LENGTH} characters (got ${id.length})`,
+    );
+  }
+
+  return id;
+}
+
+/**
+ * Split a custom id into segments.
+ *
+ * @param id - Raw custom id
+ * @param delimiter - Segment delimiter — default {@link CUSTOM_ID_DELIMITER}
+ * @returns Segments (empty string → `[]`)
+ * @example
+ * parseCustomId('ban:123:confirm') // ['ban', '123', 'confirm']
+ */
+export function parseCustomId(
+  id: string,
+  delimiter: string = CUSTOM_ID_DELIMITER,
+): string[] {
+  if (!id) return [];
+  return id.split(delimiter);
 }

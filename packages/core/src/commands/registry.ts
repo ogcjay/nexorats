@@ -2,10 +2,12 @@ import {
   ApplicationCommandType,
   MessageFlags,
   PermissionFlagsBits,
+  PermissionsBitField,
   type ApplicationCommandDataResolvable,
   type Client,
   type ChatInputCommandInteraction,
   type MessageContextMenuCommandInteraction,
+  type PermissionResolvable,
   type UserContextMenuCommandInteraction,
 } from 'discord.js';
 import type { Logger } from '@nexora.ts/logger';
@@ -13,6 +15,12 @@ import type { Cache } from '../cache/index.js';
 import type { Container } from '../container/index.js';
 import type { EventBus } from '../event-bus/index.js';
 import { FrameworkEvents } from '../event-bus/index.js';
+import {
+  formatErrorMessage,
+  reportError,
+  resolveErrorMessage,
+  type ErrorBoundaryConfig,
+} from '../errors/handler.js';
 import {
   PipelineTraceBuilder,
   studioTelemetry,
@@ -61,6 +69,8 @@ export interface RegisteredCommandGroup {
   commands: CommandDefinition[];
   /** Nested type-2 subcommand groups */
   groups?: RegisteredSubGroup[];
+  defaultMemberPermissions?: PermissionResolvable | bigint | null;
+  dmPermission?: boolean;
   source?: string;
 }
 
@@ -169,6 +179,8 @@ export interface AttachCommandHandlersOptions {
   logger?: Logger;
   /** Optional cache — exposed as `ctx.cache` */
   cache?: Cache;
+  /** Error boundary (`onError`, user-facing messages) */
+  errorBoundary?: ErrorBoundaryConfig;
 }
 
 /** Auto-discover and register commands from glob patterns */
@@ -248,6 +260,8 @@ function toRegisteredGroup(
     description: group.description,
     commands: (group.commands ?? []).map((cmd) => mapSubCommand(cmd, group)),
     groups: (group.groups ?? []).map((subGroup) => mapSubGroup(subGroup, group)),
+    defaultMemberPermissions: group.defaultMemberPermissions,
+    dmPermission: group.dmPermission,
     source,
   };
 }
@@ -274,6 +288,9 @@ function mapSubCommand(cmd: SlashCommand, group: SlashCommandGroup): CommandDefi
     permissions: cmd.permissions ?? group.permissions,
     cooldown: cmd.cooldown ?? group.cooldown,
     ephemeral: cmd.ephemeral,
+    defaultMemberPermissions:
+      cmd.defaultMemberPermissions ?? group.defaultMemberPermissions,
+    dmPermission: cmd.dmPermission ?? group.dmPermission,
     type: 'slash' as const,
     execute: (ctx) => cmd.execute(ctx),
     autocomplete: cmd.autocomplete
@@ -343,10 +360,12 @@ export async function deployCommands(
       name: cmd.name,
       description: cmd.description,
       options: cmd.options?.map(mapCommandOption),
+      ...mapDeployPermissions(cmd),
     })),
     ...registry.getAllGroups().map((group) => ({
       name: group.name,
       description: group.description,
+      ...mapDeployPermissions(group),
       options: [
         ...group.commands.map((sub) => ({
           type: OPTION_TYPE_SUB_COMMAND,
@@ -369,8 +388,16 @@ export async function deployCommands(
     })),
     ...registry.getAllContextMenus().map((cmd) =>
       cmd.type === 'user'
-        ? { name: cmd.name, type: ApplicationCommandType.User as const }
-        : { name: cmd.name, type: ApplicationCommandType.Message as const },
+        ? {
+            name: cmd.name,
+            type: ApplicationCommandType.User as const,
+            ...mapDeployPermissions(cmd),
+          }
+        : {
+            name: cmd.name,
+            type: ApplicationCommandType.Message as const,
+            ...mapDeployPermissions(cmd),
+          },
     ),
   ] as ApplicationCommandDataResolvable[];
 
@@ -384,6 +411,32 @@ export async function deployCommands(
     await client.application?.commands.set(payload);
     logger?.info(`Deployed ${payload.length} global command(s)`);
   }
+}
+
+function mapDeployPermissions(cmd: {
+  defaultMemberPermissions?: PermissionResolvable | bigint | null;
+  dmPermission?: boolean;
+}): {
+  defaultMemberPermissions?: string | null;
+  dmPermission?: boolean;
+} {
+  const out: {
+    defaultMemberPermissions?: string | null;
+    dmPermission?: boolean;
+  } = {};
+
+  if (cmd.defaultMemberPermissions !== undefined) {
+    out.defaultMemberPermissions =
+      cmd.defaultMemberPermissions === null
+        ? null
+        : PermissionsBitField.resolve(cmd.defaultMemberPermissions).toString();
+  }
+
+  if (cmd.dmPermission !== undefined) {
+    out.dmPermission = cmd.dmPermission;
+  }
+
+  return out;
 }
 
 function mapCommandOption(opt: NonNullable<CommandDefinition['options']>[number]) {
@@ -428,6 +481,7 @@ export function attachCommandHandlers(
   const middlewares = options?.middlewares ?? [];
   const container = options?.container;
   const cache = options?.cache;
+  const errorBoundary = options?.errorBoundary;
   /** key: `${commandName}:${userId}` → cooldown expiry timestamp (ms) */
   const cooldowns = new Map<string, number>();
 
@@ -435,22 +489,42 @@ export function attachCommandHandlers(
     logger: options?.logger ?? logger,
     cache,
     container,
+    deferErrorMessage: resolveErrorMessage(errorBoundary, 'deferThen'),
   };
 
   client.on('interactionCreate', async (interaction) => {
     if (interaction.isAutocomplete()) {
-      const group = registry.getGroup(interaction.commandName);
-      if (group) {
-        const resolved = resolveGroupSubcommand(group, interaction);
-        if (resolved?.sub.autocomplete) {
-          await resolved.sub.autocomplete(interaction);
+      try {
+        const group = registry.getGroup(interaction.commandName);
+        if (group) {
+          const resolved = resolveGroupSubcommand(group, interaction);
+          if (resolved?.sub.autocomplete) {
+            await resolved.sub.autocomplete(interaction);
+          }
+          return;
         }
-        return;
-      }
 
-      const cmd = registry.get(interaction.commandName);
-      if (cmd?.autocomplete) {
-        await cmd.autocomplete(interaction);
+        const cmd = registry.get(interaction.commandName);
+        if (cmd?.autocomplete) {
+          await cmd.autocomplete(interaction);
+        }
+      } catch (error) {
+        const errMsg = formatErrorMessage(error);
+        logger.error(`Autocomplete error: /${interaction.commandName}`, {
+          error: errMsg,
+        });
+        await reportError(
+          errorBoundary,
+          {
+            error,
+            source: 'autocomplete',
+            command: interaction.commandName,
+            userId: interaction.user.id,
+            guildId: interaction.guildId,
+            interaction,
+          },
+          logger,
+        );
       }
       return;
     }
@@ -462,6 +536,7 @@ export function attachCommandHandlers(
         client,
         logger,
         eventBus,
+        errorBoundary,
       );
       return;
     }
@@ -473,6 +548,7 @@ export function attachCommandHandlers(
         client,
         logger,
         eventBus,
+        errorBoundary,
       );
       return;
     }
@@ -496,6 +572,7 @@ export function attachCommandHandlers(
         logger,
         eventBus,
         ctxExtras,
+        errorBoundary,
       });
       return;
     }
@@ -514,6 +591,7 @@ export function attachCommandHandlers(
       logger,
       eventBus,
       ctxExtras,
+      errorBoundary,
     });
   });
 
@@ -572,7 +650,7 @@ export function attachCommandHandlers(
       });
     } catch (error) {
       const duration = Date.now() - started;
-      const errMsg = error instanceof Error ? error.message : String(error);
+      const errMsg = formatErrorMessage(error);
 
       logger.error(`Message command error: ${cmd.name}`, {
         error: errMsg,
@@ -594,6 +672,18 @@ export function attachCommandHandlers(
         message,
         kind: 'message' as const,
       });
+
+      await reportError(
+        errorBoundary,
+        {
+          error,
+          source: 'message',
+          command: cmd.name,
+          userId: message.author.id,
+          guildId: message.guildId,
+        },
+        logger,
+      );
     }
   });
 }
@@ -612,7 +702,9 @@ interface RunSlashCommandArgs {
     logger: Logger;
     cache?: Cache;
     container?: Container;
+    deferErrorMessage?: string;
   };
+  errorBoundary?: ErrorBoundaryConfig;
 }
 
 async function runSlashCommand(args: RunSlashCommandArgs): Promise<void> {
@@ -627,6 +719,7 @@ async function runSlashCommand(args: RunSlashCommandArgs): Promise<void> {
     logger,
     eventBus,
     ctxExtras,
+    errorBoundary,
   } = args;
 
   const pipe = new PipelineTraceBuilder(
@@ -699,7 +792,7 @@ async function runSlashCommand(args: RunSlashCommandArgs): Promise<void> {
     });
   } catch (error) {
     const duration = Date.now() - started;
-    const errMsg = error instanceof Error ? error.message : String(error);
+    const errMsg = formatErrorMessage(error);
 
     logger.error(`Command error: /${commandLabel}`, {
       error: errMsg,
@@ -721,7 +814,23 @@ async function runSlashCommand(args: RunSlashCommandArgs): Promise<void> {
       interaction,
     });
 
-    await replyCommandError(interaction);
+    await reportError(
+      errorBoundary,
+      {
+        error,
+        source: 'command',
+        command: commandLabel,
+        userId: interaction.user.id,
+        guildId: interaction.guildId,
+        interaction,
+      },
+      logger,
+    );
+
+    await replyCommandError(
+      interaction,
+      resolveErrorMessage(errorBoundary, 'command'),
+    );
   }
 }
 
@@ -731,6 +840,7 @@ async function runContextMenu(
   client: Client,
   logger: Logger,
   eventBus?: EventBus,
+  errorBoundary?: ErrorBoundaryConfig,
 ): Promise<void> {
   if (!cmd) return;
 
@@ -811,7 +921,7 @@ async function runContextMenu(
     });
   } catch (error) {
     const duration = Date.now() - started;
-    const errMsg = error instanceof Error ? error.message : String(error);
+    const errMsg = formatErrorMessage(error);
 
     logger.error(`Context menu error: ${cmd.name}`, {
       error: errMsg,
@@ -834,7 +944,23 @@ async function runContextMenu(
       kind: 'context-menu' as const,
     });
 
-    await replyCommandError(interaction);
+    await reportError(
+      errorBoundary,
+      {
+        error,
+        source: 'context-menu',
+        command: cmd.name,
+        userId: interaction.user.id,
+        guildId: interaction.guildId,
+        interaction,
+      },
+      logger,
+    );
+
+    await replyCommandError(
+      interaction,
+      resolveErrorMessage(errorBoundary, 'context-menu'),
+    );
   }
 }
 
@@ -843,15 +969,20 @@ async function replyCommandError(
     | ChatInputCommandInteraction
     | UserContextMenuCommandInteraction
     | MessageContextMenuCommandInteraction,
+  content: string,
 ): Promise<void> {
   const reply = {
-    content: 'An error occurred while executing this command.',
+    content,
     flags: MessageFlags.Ephemeral as const,
   };
-  if (interaction.replied || interaction.deferred) {
-    await interaction.followUp(reply);
-  } else {
-    await interaction.reply(reply);
+  try {
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp(reply);
+    } else {
+      await interaction.reply(reply);
+    }
+  } catch {
+    // Interaction may already be acknowledged or expired
   }
 }
 

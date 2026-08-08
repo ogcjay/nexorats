@@ -13,7 +13,7 @@ Please **do not** open a public GitHub issue for security vulnerabilities.
 Instead, report them privately via one of:
 
 - GitHub Security Advisories (preferred): **Security → Report a vulnerability** on this repository
-- Email: security@nexora.dev (update this address after creating the org)
+- Discord: join the [Nexora Discord server](https://discord.gg/fHbCrdHnms) and DM the maintainer **ogcjay**, or open a private ticket if available
 
 Include:
 

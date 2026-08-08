@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Open-source readiness: LICENSE, SECURITY, CoC, CI, issue/PR templates
 - Community docs inviting plugins and ecosystem contributions
 - Package READMEs for all framework packages
+- `nexora doctor` — project health checks (Node, `.env`, config, `@nexora.ts/core`, optional Studio API)
+
+### Changed
+
+- `@nexora.ts/config@0.1.4` — `defineConfig()` validates via Zod with path-prefixed errors; `ConfigValidationError`
+- `@nexora.ts/core@0.1.10` — validates config on `Nexora` construct
+- `@nexora.ts/create@0.1.10` — scaffold: ESLint/Prettier files when linting is selected; no empty `templates` ship claim; no `db:migrate` without drizzle-kit
 
 ### Dashboard (unreleased)
 

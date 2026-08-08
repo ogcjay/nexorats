@@ -45,7 +45,9 @@ an individual is officially representing the community in public spaces.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement.
+reported to the community leaders responsible for enforcement via the
+[Nexora Discord server](https://discord.gg/fHbCrdHnms) or by DMing the
+maintainer **ogcjay**.
 
 All complaints will be reviewed and investigated promptly and fairly.
 

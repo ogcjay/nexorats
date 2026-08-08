@@ -155,7 +155,10 @@ export default defineConfig({
 
     sidebar,
 
-    socialLinks: [{ icon: 'github', link: 'https://github.com/ogcjay/nexorats' }],
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/ogcjay/nexorats' },
+      { icon: 'discord', link: 'https://discord.gg/fHbCrdHnms' },
+    ],
 
     search: {
       provider: 'local',

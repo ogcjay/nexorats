@@ -1,4 +1,10 @@
 import type { Client, ClientEvents } from 'discord.js';
+import type { Logger } from '@nexora.ts/logger';
+import {
+  formatErrorMessage,
+  reportError,
+  type ErrorBoundaryConfig,
+} from '../errors/handler.js';
 import {
   nextTelemetryId,
   studioTelemetry,
@@ -176,8 +182,18 @@ export async function discoverEvents(
  * Attach all registered events to the Discord client.
  * Handlers for the same event (+ once flag) share one listener so Studio
  * receives a single {@link import('../studio-telemetry/index.js').StudioEventTrace}.
+ *
+ * @param client - Discord.js client
+ * @param registry - Event registry
+ * @param logger - Optional logger for handler failures
+ * @param options - Optional error boundary
  */
-export function attachEventHandlers(client: Client, registry: EventRegistry): void {
+export function attachEventHandlers(
+  client: Client,
+  registry: EventRegistry,
+  logger?: Logger,
+  options?: { errorBoundary?: ErrorBoundaryConfig },
+): void {
   /** key: `once|on:eventName` → handlers */
   const groups = new Map<string, RegisteredEvent[]>();
 
@@ -196,7 +212,13 @@ export function attachEventHandlers(client: Client, registry: EventRegistry): vo
     const eventName = handlers[0]!.name;
 
     const listener = (...args: unknown[]) => {
-      void runEventHandlers(String(eventName), handlers, args);
+      void runEventHandlers(
+        String(eventName),
+        handlers,
+        args,
+        logger,
+        options?.errorBoundary,
+      );
     };
 
     if (once) {
@@ -211,6 +233,8 @@ async function runEventHandlers(
   eventName: string,
   handlers: readonly RegisteredEvent[],
   args: unknown[],
+  logger?: Logger,
+  errorBoundary?: ErrorBoundaryConfig,
 ): Promise<void> {
   const started = Date.now();
   const spans: StudioEventHandlerSpan[] = [];
@@ -233,7 +257,7 @@ async function runEventHandlers(
         durationMs: performance.now() - t0,
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = formatErrorMessage(error);
       spans[spans.length] = {
         id: spanId,
         plugin: eventDef.plugin,
@@ -244,6 +268,21 @@ async function runEventHandlers(
       // Keep first handler error on the trace; continue so one bad handler
       // does not skip siblings (matches prior per-listener isolation).
       if (!traceError) traceError = message;
+
+      logger?.error(`Event handler error: ${eventName}`, {
+        error: message,
+        source,
+      });
+
+      await reportError(
+        errorBoundary,
+        {
+          error,
+          source: 'event',
+          event: eventName,
+        },
+        logger,
+      );
     }
   }
 

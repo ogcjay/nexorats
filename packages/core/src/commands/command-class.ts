@@ -37,6 +37,16 @@ export abstract class SlashCommand implements CommandDefinition {
    * @see CommandDefinition.ephemeral
    */
   ephemeral?: boolean;
+  /**
+   * Default member permissions for Discord registration.
+   * @see CommandDefinition.defaultMemberPermissions
+   */
+  defaultMemberPermissions?: PermissionResolvable | bigint | null;
+  /**
+   * Whether usable in DMs (global deploy).
+   * @see CommandDefinition.dmPermission
+   */
+  dmPermission?: boolean;
   /** Composable guards — after built-in flags */
   guards?: Guard[];
   readonly type: CommandModuleType = 'slash';

@@ -34,7 +34,7 @@ If your user/org is different, update:
 | `package.json`                      | `homepage`, `repository.url`, `bugs.url` |
 | `README.md`                         | CI badge URLs                            |
 | `.github/ISSUE_TEMPLATE/config.yml` | Security / Discussions links             |
-| `SECURITY.md`                       | Contact email                            |
+| `SECURITY.md`                       | Discord / reporting contacts             |
 
 ## 3. Create the GitHub repository
 

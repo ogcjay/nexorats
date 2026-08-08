@@ -52,7 +52,20 @@ new Nexora({
   clientOptions: {
     // optional discord.js ClientOptions overrides
   },
+  // Optional error boundary
+  onError: ({ error, source, command }) => {
+    console.error(`[${source}]`, command, error);
+  },
+  errorMessage: 'Etwas ist schiefgelaufen. Bitte später erneut versuchen.',
 });
+```
+
+Or chain after construction:
+
+```ts
+bot
+  .onError(async (ctx) => { /* Sentry / webhook */ })
+  .setErrorMessage('Something went wrong.');
 ```
 
 On ready, Nexora prints a **startup banner** (commands/events count, Studio URL when live).

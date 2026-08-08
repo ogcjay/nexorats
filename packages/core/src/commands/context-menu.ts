@@ -11,6 +11,7 @@ import {
   type InteractionResponse,
   type Message,
   type MessageContextMenuCommandInteraction,
+  type PermissionResolvable,
   type TextBasedChannel,
   type User,
   type UserContextMenuCommandInteraction,
@@ -25,6 +26,7 @@ import {
   buildStatusReply,
   type StatusReplyOptions,
 } from './reply-presets.js';
+import { DEFAULT_DEFER_ERROR_MESSAGE } from '../errors/handler.js';
 
 /** Context-menu target kind (Discord ApplicationCommand type) */
 export type ContextMenuType = 'user' | 'message';
@@ -80,6 +82,10 @@ export abstract class ContextMenuCommand {
   readonly kind = 'context-menu' as const;
   /** Composable guards (same helpers as slash commands) */
   guards?: Guard[];
+  /** Default member permissions for Discord registration */
+  defaultMemberPermissions?: PermissionResolvable | bigint | null;
+  /** Whether usable in DMs (global deploy) */
+  dmPermission?: boolean;
 
   abstract execute(ctx: ContextMenuContext): Promise<void> | void;
 }
@@ -90,6 +96,8 @@ export interface ContextMenuCommandDefinition {
   type: ContextMenuType;
   kind?: 'context-menu';
   guards?: Guard[];
+  defaultMemberPermissions?: PermissionResolvable | bigint | null;
+  dmPermission?: boolean;
   execute: (ctx: ContextMenuContext) => Promise<void> | void;
 }
 
@@ -176,20 +184,20 @@ async function deferThenHelper(
     const result = await work();
     if (result === undefined) return undefined;
     return await interaction.editReply(resolveEditReply(result));
-  } catch (error) {
+  }   catch (error) {
     try {
       if (interaction.deferred || interaction.replied) {
-        await interaction.editReply({ content: 'Something went wrong.' });
+        await interaction.editReply({ content: DEFAULT_DEFER_ERROR_MESSAGE });
       } else {
         await interaction.reply({
-          content: 'Something went wrong.',
+          content: DEFAULT_DEFER_ERROR_MESSAGE,
           flags: MessageFlags.Ephemeral,
         });
       }
     } catch {
       try {
         await interaction.followUp({
-          content: 'Something went wrong.',
+          content: DEFAULT_DEFER_ERROR_MESSAGE,
           flags: MessageFlags.Ephemeral,
         });
       } catch {
