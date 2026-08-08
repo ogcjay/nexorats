@@ -1,6 +1,6 @@
 {
   "name": "@nexora.ts/dev-server",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Local introspection API for Nexora Studio (Developer Center)",
   "license": "MIT",
   "type": "module",
@@ -23,11 +23,14 @@
   },
   "dependencies": {
     "@nexora.ts/config": "workspace:*",
-    "@nexora.ts/core": "workspace:*",
     "@nexora.ts/logger": "workspace:*",
     "@nexora.ts/websocket": "workspace:*"
   },
+  "peerDependencies": {
+    "@nexora.ts/core": "^0.1.10"
+  },
   "devDependencies": {
+    "@nexora.ts/core": "workspace:*",
     "@types/node": "^22.10.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.7.2"

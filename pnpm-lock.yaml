@@ -257,9 +257,6 @@ importers:
       '@nexora.ts/config':
         specifier: workspace:*
         version: link:../config
-      '@nexora.ts/core':
-        specifier: workspace:*
-        version: link:../core
       '@nexora.ts/logger':
         specifier: workspace:*
         version: link:../logger
@@ -267,6 +264,9 @@ importers:
         specifier: workspace:*
         version: link:../websocket
     devDependencies:
+      '@nexora.ts/core':
+        specifier: workspace:*
+        version: link:../core
       '@types/node':
         specifier: ^22.10.0
         version: 22.20.1
@@ -292,9 +292,6 @@ importers:
 
   packages/plugin-system:
     dependencies:
-      '@nexora.ts/core':
-        specifier: workspace:*
-        version: link:../core
       '@nexora.ts/logger':
         specifier: workspace:*
         version: link:../logger
@@ -302,6 +299,9 @@ importers:
         specifier: ^11.0.0
         version: 11.1.0
     devDependencies:
+      '@nexora.ts/core':
+        specifier: workspace:*
+        version: link:../core
       rimraf:
         specifier: ^6.0.1
         version: 6.1.3

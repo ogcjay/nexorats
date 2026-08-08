@@ -53,8 +53,11 @@ export interface PluginContext {
   config: Record<string, unknown>;
   /** Register a slash command at runtime */
   registerCommand: (command: CommandDefinition) => void;
-  /** Register a Discord event handler at runtime */
-  registerEvent: (event: EventDefinition) => void;
+  /**
+   * Register a Discord event handler at runtime.
+   * Accepts any specific `EventDefinition<K>` (uses `any` key to avoid contravariance issues).
+   */
+  registerEvent: (event: EventDefinition<any>) => void;
 }
 
 /** Full plugin manifest */
@@ -108,7 +111,7 @@ export interface LoadedPlugin {
   enabled: boolean;
   path: string;
   commands: CommandDefinition[];
-  events: EventDefinition[];
+  events: EventDefinition<any>[];
   /** Class-based plugin instance, if loaded via NexoraPlugin */
   instance?: NexoraPlugin;
   /** Lifecycle context (present after successful load) */
