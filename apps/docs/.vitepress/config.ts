@@ -2,11 +2,11 @@ import { defineConfig } from 'vitepress';
 
 /**
  * Docs are built statically and deployed to GitHub Pages.
- * Change `base` if your repo name is not `nexora`:
- *   user.github.io/nexorajs  →  base: '/nexora.ts/'
- *   custom domain / org root →  base: '/'
+ * `base` must match the repo name for project Pages:
+ *   ogcjay.github.io/nexorats  →  base: '/nexorats/'
+ *   custom domain / org root   →  base: '/'
  */
-const base = process.env.DOCS_BASE ?? '/nexora.ts/';
+const base = process.env.DOCS_BASE ?? '/nexorats/';
 
 /** Shared sidebar — discord.js-style: top categories + nested collapsible groups */
 const sidebar = [
@@ -149,20 +149,20 @@ export default defineConfig({
       },
       {
         text: 'GitHub',
-        link: 'https://github.com/ogcjay/nexorajs',
+        link: 'https://github.com/ogcjay/nexorats',
       },
     ],
 
     sidebar,
 
-    socialLinks: [{ icon: 'github', link: 'https://github.com/ogcjay/nexorajs' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/ogcjay/nexorats' }],
 
     search: {
       provider: 'local',
     },
 
     editLink: {
-      pattern: 'https://github.com/ogcjay/nexorajs/edit/main/apps/docs/:path',
+      pattern: 'https://github.com/ogcjay/nexorats/edit/main/apps/docs/:path',
       text: 'Edit this page on GitHub',
     },
 

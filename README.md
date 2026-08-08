@@ -4,7 +4,7 @@
 
 Nexora isn’t another bot template — **it’s the platform Discord developers have been missing.** CLI, Studio (Developer OS), plugins, and auto-discovery in one coherent stack so you never scaffold a Discord bot from scratch again.
 
-[![CI](https://github.com/ogcjay/nexorajs/actions/workflows/ci.yml/badge.svg)](https://github.com/ogcjay/nexorajs/actions/workflows/ci.yml)
+[![CI](https://github.com/ogcjay/nexorats/actions/workflows/ci.yml/badge.svg)](https://github.com/ogcjay/nexorats/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-GitBook-blue)](https://cjays-organization.gitbook.io/nexora.ts)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
@@ -166,8 +166,8 @@ templates/
 **Requirements:** Node.js ≥ 20, pnpm 9.15+
 
 ```bash
-git clone https://github.com/ogcjay/nexorajs.git
-cd nexora
+git clone https://github.com/ogcjay/nexorats.git
+cd nexorats
 pnpm install
 pnpm build
 pnpm dev

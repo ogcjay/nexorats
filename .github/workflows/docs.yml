@@ -42,8 +42,10 @@ jobs:
       - name: Build docs
         working-directory: apps/docs
         env:
-          # Change to "/" if you use a custom domain or org root site
-          DOCS_BASE: /nexora.ts/
+          # Must match the GitHub repo name for project Pages:
+          #   https://ogcjay.github.io/nexorats/  →  /nexorats/
+          # Use "/" only for a custom domain or org/user root site.
+          DOCS_BASE: /nexorats/
         run: pnpm build
 
       - name: Upload artifact

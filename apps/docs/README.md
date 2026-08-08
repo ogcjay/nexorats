@@ -6,7 +6,7 @@ Nexora isn’t another bot template — **it’s the platform Discord developers
 
 | | |
 | --- | --- |
-| **GitHub** | [ogcjay/nexorajs](https://github.com/ogcjay/nexorajs) |
+| **GitHub** | [ogcjay/nexorats](https://github.com/ogcjay/nexorats) |
 | **npm** | [`@nexora.ts/core`](https://www.npmjs.com/package/@nexora.ts/core) |
 | **Status** | Early preview (`0.1.x`) |
 
