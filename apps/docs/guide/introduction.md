@@ -1,32 +1,32 @@
 # Introduction
 
-**Nexora** is a modern open-source TypeScript **application framework** for Discord bots — built on [Discord.js](https://discord.js.org).
+**Nexora** is the open-source TypeScript **platform** that revolutionizes how Discord bots are built — CLI, Studio, plugins, and auto-discovery in one coherent stack.
 
-Nexora isn’t just a framework — **it ships with its own local Developer Operating System**. After `pnpm dev`, open **Nexora Studio** at `http://localhost:3002` and inspect *your* commands, plugins, logs, and config. Handlers work through a shared `ctx` (reply helpers today; logger/services rolling out) so you spend less time wiring services by hand.
+Nexora isn’t another bot template — **it’s the platform Discord developers have been missing.** After `pnpm dev`, open **Nexora Studio** at `http://localhost:3002` and inspect *your* commands, plugins, logs, and config. Handlers work through a shared `ctx` (reply helpers today; logger/services rolling out) so you spend less time wiring services by hand.
 
-Think of the relationship like **Next.js → React**: Discord.js is the library; Nexora is the opinionated platform on top so you never wire the same stack from scratch again.
+Production-ready from minute one — so you never wire the same Discord bot stack from scratch again.
 
 ![Nexora Studio — Overview](../images/studio-overview.png)
 
 ## Why Nexora exists
 
-Most Discord projects stitch together Discord.js, an ORM, an OAuth flow, and custom glue. That works — until every bot reinvents the same stack.
+Most Discord projects stitch together an API client, an ORM, an OAuth flow, and custom glue. That works — until every bot reinvents the same stack.
 
-Nexora aims to be the shared platform: scaffold once, ship features.
+Nexora is the shared platform the Discord bot scene has been missing: scaffold once, ship features, grow together.
 
-## Nexora vs Discord.js
+## Nexora vs a typical DIY bot stack
 
-Discord.js is the foundation. Nexora does **not** replace it — it packages the application layer developers rebuild on every project.
+From-scratch Discord projects spend weeks on scaffolding. Nexora ships the application platform developers rebuild on every project.
 
-| Feature | Discord.js | Nexora |
+| Feature | From-scratch Discord project | Nexora |
 | --- | :---: | :---: |
-| Discord API client | ✅ | ✅ (via Discord.js) |
-| Project CLI / scaffold | ❌ | ✅ |
+| Discord API compatibility | ✅ (you wire it) | ✅ |
+| Project CLI / scaffold | ❌ / copy-paste | ✅ |
 | Local Developer OS (Studio) | ❌ | ✅ |
-| Plugin system | ❌ | ✅ |
-| Auto-discovery (commands / events) | ❌ | ✅ |
-| Typed `defineConfig()` | ❌ | ✅ |
-| Structured logging + startup banner | ❌ | ✅ |
+| Plugin system | DIY | ✅ |
+| Auto-discovery (commands / events) | DIY | ✅ |
+| Typed `defineConfig()` | DIY | ✅ |
+| Structured logging + startup banner | DIY | ✅ |
 | Auth / database / internal API | DIY | ✅ (optional packages) |
 
 The memorable outcome after install:

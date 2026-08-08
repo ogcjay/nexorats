@@ -1,8 +1,8 @@
 # <img src="apps/docs/public/icon-180.png" alt="Nexora" width="40" height="40" align="absmiddle" /> Nexora
 
-**Modern open-source TypeScript application framework for Discord bots — built on Discord.js.**
+**The platform that revolutionizes how Discord bots are built** — open-source TypeScript, production-ready from minute one.
 
-Nexora isn’t just a framework — **it ships with its own local Developer Center.** CLI, Studio, plugins, and auto-discovery so you never scaffold a Discord bot from scratch again.
+Nexora isn’t another bot template — **it’s the platform Discord developers have been missing.** CLI, Studio (Developer OS), plugins, and auto-discovery in one coherent stack so you never scaffold a Discord bot from scratch again.
 
 [![CI](https://github.com/ogcjay/nexorajs/actions/workflows/ci.yml/badge.svg)](https://github.com/ogcjay/nexorajs/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-GitBook-blue)](https://cjays-organization.gitbook.io/nexora.ts)
@@ -23,7 +23,7 @@ Nexora isn’t just a framework — **it ships with its own local Developer Cent
 
 ## Vision
 
-Discord.js is the foundation. Nexora is the **application layer** on top — similar to how Next.js builds on React.
+Nexora exists to **revolutionize Discord bot development** — not as another starter kit, but as the shared platform the scene has been missing.
 
 You get a production-ready bot stack in minutes: scaffold, auto-discovery, plugins, Studio, logging, and optional auth/database/API. The community grows it into a platform.
 
@@ -32,17 +32,17 @@ You get a production-ready bot stack in minutes: scaffold, auto-discovery, plugi
 - **Free to improve** — PRs and issues welcome
 - **Community-driven** — a growing plugin ecosystem around one shared foundation
 
-## Nexora vs Discord.js
+## Nexora vs a typical DIY bot stack
 
-| Feature | Discord.js | Nexora |
+| Feature | From-scratch Discord project | Nexora |
 | --- | :---: | :---: |
-| Discord API client | ✅ | ✅ (via Discord.js) |
-| Project CLI / scaffold | ❌ | ✅ |
+| Discord API compatibility | ✅ (you wire it) | ✅ |
+| Project CLI / scaffold | ❌ / copy-paste | ✅ |
 | Local Developer Center (Studio) | ❌ | ✅ |
-| Plugin system | ❌ | ✅ |
-| Auto-discovery (commands / events) | ❌ | ✅ |
-| Typed `defineConfig()` | ❌ | ✅ |
-| Structured logging + startup banner | ❌ | ✅ |
+| Plugin system | DIY | ✅ |
+| Auto-discovery (commands / events) | DIY | ✅ |
+| Typed `defineConfig()` | DIY | ✅ |
+| Structured logging + startup banner | DIY | ✅ |
 
 ## Why Nexora?
 
