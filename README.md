@@ -1,4 +1,4 @@
-# Nexora
+# <img src="apps/docs/public/icon-180.png" alt="Nexora" width="40" height="40" align="absmiddle" /> Nexora
 
 **Modern open-source TypeScript application framework for Discord bots — built on Discord.js.**
 
