@@ -11,16 +11,17 @@ Public docs live in `apps/docs/**/*.md` and can be published two ways from the *
 
 Primary public docs: https://cjays-organization.gitbook.io/nexora.ts
 
-Optional Pages URL (if enabled): `https://<user-or-org>.github.io/<repo>/`
+Optional Pages URL (if enabled): `https://ogcjay.github.io/nexorats/`
 
 1. Repo → **Settings** → **Pages**
-2. **Source:** GitHub Actions
+2. **Source:** GitHub Actions  
+   (required — without this, `actions/deploy-pages` fails with HTTP 404)
 3. Push to `main` (or run “Deploy Docs” manually)
 
 If the repo name changes, update:
 
-- `DOCS_BASE` in `.github/workflows/docs.yml`
-- `base` in `apps/docs/.vitepress/config.ts`
+- `DOCS_BASE` in `.github/workflows/docs.yml` (must be `/<repo>/`)
+- default `base` in `apps/docs/.vitepress/config.ts`
 - Badge + URL in the root `README.md`
 
 ## Local VitePress preview
