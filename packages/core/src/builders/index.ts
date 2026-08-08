@@ -52,7 +52,7 @@ export {
 export type { SelectOptionInput } from './select.js';
 
 export { ModalBuilder, TextInputBuilder } from './modal.js';
-export { customId, resolveCustomId, CUSTOM_ID_NAMESPACE } from './custom-id.js';
+export { customId, resolveCustomId, packCustomId, parseCustomId, CUSTOM_ID_NAMESPACE, CUSTOM_ID_DELIMITER, CUSTOM_ID_MAX_LENGTH } from './custom-id.js';
 export type { CustomIdOptions } from './custom-id.js';
 
 export {

@@ -21,7 +21,7 @@ Private admin reply in one line:
 import { slash } from '@nexora.ts/core';
 
 export default slash('ban', 'Ban a member', async (ctx) => {
-  const user = ctx.interaction.options.getUser('user', true);
+  const user = ctx.options.user('user', true);
   await ctx.success(`${user.tag} was banned.`);
 }, {
   guildOnly: true,
@@ -32,6 +32,27 @@ export default slash('ban', 'Ban a member', async (ctx) => {
   ],
 });
 ```
+
+### Typed option getters
+
+Prefer `ctx.options.*` over `ctx.interaction.options.get*`:
+
+```ts
+import { slash } from '@nexora.ts/core';
+
+export default slash('echo', 'Echo text', async (ctx) => {
+  const text = ctx.options.string('text', true);
+  const times = ctx.options.integer('times') ?? 1;
+  await ctx.reply(text.repeat(times));
+}, {
+  options: [
+    { name: 'text', description: 'Text', type: 'string', required: true },
+    { name: 'times', description: 'Repeat count', type: 'integer' },
+  ],
+});
+```
+
+Available: `string`, `integer`, `number`, `boolean`, `user`, `channel`, `role`, `mentionable`, `attachment`. Pass `true` as second arg when the option is required (narrows away `null`).
 
 ## Class style
 
@@ -66,8 +87,8 @@ export default class BanCommand extends SlashCommand {
   ];
 
   async execute(ctx: CommandContext) {
-    const user = ctx.interaction.options.getUser('user', true);
-    const reason = ctx.interaction.options.getString('reason') ?? 'No reason';
+    const user = ctx.options.user('user', true);
+    const reason = ctx.options.string('reason') ?? 'No reason';
 
     await ctx.reply(
       EmbedBuilder.success('Banned', `${user.tag} — ${reason}`).field(
@@ -92,11 +113,12 @@ Inside `execute(ctx)`:
 | `ctx.embed(builder)` | reply with one embed |
 | `ctx.componentsV2(…)` | Components V2 + `IsComponentsV2` flag |
 | `ctx.user` / `ctx.guild` / `ctx.member` / `ctx.channel` | shortcuts |
+| `ctx.options.string/user/…` | typed option getters |
 | `ctx.interaction` | raw discord.js interaction |
 
 ## Fields you can set
 
-`name`, `description`, `options`, `guildOnly`, `adminOnly`, `permissions`, `cooldown`, `ephemeral`, `guards`, `autocomplete?`, `execute`
+`name`, `description`, `options`, `guildOnly`, `adminOnly`, `permissions`, `cooldown`, `ephemeral`, `defaultMemberPermissions`, `dmPermission`, `guards`, `autocomplete?`, `execute`
 
 ## vs `command()` / `slash()`
 

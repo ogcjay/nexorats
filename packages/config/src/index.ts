@@ -172,19 +172,52 @@ export type DeepPartial<T> = {
 };
 
 /**
+ * Formats a Zod error into path-prefixed lines for CLI / constructor messages.
+ *
+ * @example
+ * // "  • bot.token: String must contain at least 1 character(s)"
+ */
+export function formatConfigErrors(error: z.ZodError): string {
+  return error.issues
+    .map((issue) => {
+      const path = issue.path.length > 0 ? issue.path.join('.') : '(root)';
+      return `  • ${path}: ${issue.message}`;
+    })
+    .join('\n');
+}
+
+/** Thrown when {@link defineConfig} / {@link validateConfig} reject a config. */
+export class ConfigValidationError extends Error {
+  readonly zodError: z.ZodError;
+
+  constructor(zodError: z.ZodError) {
+    super(`Invalid Nexora config:\n${formatConfigErrors(zodError)}`);
+    this.name = 'ConfigValidationError';
+    this.zodError = zodError;
+  }
+}
+
+/**
  * Type-safe configuration builder.
- * Returns the config unchanged — enables IDE autocomplete and type checking.
+ * Validates with Zod at runtime and returns the same object (IDE autocomplete + safety).
+ *
+ * @throws {ConfigValidationError} when validation fails (paths + messages)
  */
 export function defineConfig<T extends NexoraConfig>(config: T): T {
+  validateConfig(config);
   return config;
 }
 
 /**
  * Validates configuration at runtime using Zod.
- * @throws {z.ZodError} when validation fails
+ * @throws {ConfigValidationError} when validation fails
  */
 export function validateConfig(config: unknown): NexoraConfig {
-  return nexoraConfigSchema.parse(config);
+  const result = nexoraConfigSchema.safeParse(config);
+  if (!result.success) {
+    throw new ConfigValidationError(result.error);
+  }
+  return result.data;
 }
 
 /**

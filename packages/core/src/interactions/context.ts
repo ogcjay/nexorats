@@ -23,6 +23,7 @@ import type {
 } from 'discord.js';
 import { MessagePayload } from 'discord.js';
 import type { ComponentLike, EmbedLike } from '../builders/index.js';
+import { parseCustomId } from '../builders/custom-id.js';
 import {
   resolveReplyOptions,
   type BuilderReplyOptions,
@@ -72,6 +73,12 @@ export interface BaseInteractionContext {
   guildId: string | null;
   /** Raw customId from the interaction */
   customId: string;
+  /**
+   * {@link parseCustomId} segments of {@link customId} (delimiter `:`).
+   * @example
+   * // customId = 'ban:123:confirm' → params = ['ban', '123', 'confirm']
+   */
+  params: string[];
 }
 
 /**
@@ -165,6 +172,7 @@ export function createComponentContext(
     channel: interaction.channel,
     guildId: interaction.guildId,
     customId: interaction.customId,
+    params: parseCustomId(interaction.customId),
     values: readSelectValues(interaction),
     reply,
     update: (options) => interaction.update(resolveUpdateOptions(options)),
@@ -203,6 +211,7 @@ export function createModalContext(
     channel: interaction.channel,
     guildId: interaction.guildId,
     customId: interaction.customId,
+    params: parseCustomId(interaction.customId),
     fields: interaction.fields,
     getField: (fieldCustomId) => interaction.fields.getTextInputValue(fieldCustomId),
     reply,

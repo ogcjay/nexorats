@@ -18,7 +18,7 @@ By participating, you agree to follow our [Code of Conduct](./CODE_OF_CONDUCT.md
 | **Docs & examples** | Guides, recipes, playground demos             |
 | **CLI / tooling**   | Scaffolding, `nexora add`, templates          |
 
-Ideas and questions: open a [Feature request](../../issues/new/choose) or start a Discussion after the repo is public.
+Ideas and questions: join the [Discord server](https://discord.gg/fHbCrdHnms), open a [Feature request](../../issues/new/choose), or start a Discussion. Maintainer Discord: **ogcjay**.
 
 ## Prerequisites
 

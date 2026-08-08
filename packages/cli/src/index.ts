@@ -133,13 +133,18 @@ OAUTH_REDIRECT_URI=http://localhost:3000/api/auth/callback
           dev: 'tsx watch --env-file=.env src/index.ts',
           start: 'node --env-file=.env dist/index.js',
           build: 'tsc',
-          'db:migrate': 'drizzle-kit migrate',
+          ...(options.linting
+            ? {
+                lint: 'eslint .',
+                format: 'prettier --write .',
+              }
+            : {}),
         },
         dependencies: {
-          '@nexora.ts/config': '^0.1.2',
-          '@nexora.ts/core': '^0.1.7',
+          '@nexora.ts/config': '^0.1.4',
+          '@nexora.ts/core': '^0.1.10',
           '@nexora.ts/logger': '^0.1.2',
-          '@nexora.ts/dev-server': '^0.1.3',
+          '@nexora.ts/dev-server': '^0.1.6',
           ...(options.dashboard
             ? {
                 '@nexora.ts/database': '^0.1.1',
@@ -155,8 +160,10 @@ OAUTH_REDIRECT_URI=http://localhost:3000/api/auth/callback
           typescript: '^5.7.2',
           ...(options.linting
             ? {
+                '@eslint/js': '^9.17.0',
                 eslint: '^9.17.0',
                 prettier: '^3.4.2',
+                'typescript-eslint': '^8.18.0',
               }
             : {}),
         },
@@ -311,6 +318,40 @@ volumes:
 `
         : `# SQLite — no external database service needed
 `,
+    );
+  }
+
+  if (options.linting) {
+    writeFile(
+      join(projectPath, 'eslint.config.js'),
+      `import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
+
+export default tseslint.config(
+  { ignores: ['dist/**', 'node_modules/**'] },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+);
+`,
+    );
+
+    writeFile(
+      join(projectPath, '.prettierrc'),
+      JSON.stringify(
+        {
+          singleQuote: true,
+          trailingComma: 'all',
+          printWidth: 100,
+          semi: true,
+        },
+        null,
+        2,
+      ) + '\n',
+    );
+
+    writeFile(
+      join(projectPath, '.prettierignore'),
+      'dist\nnode_modules\n.env\nlogs\ndata\n',
     );
   }
 

@@ -13,11 +13,15 @@
  * - `nexora add <package>`    → pnpm add / npm install
  * - `nexora remove <package>`  → pnpm remove / npm uninstall
  * - `nexora list`              → ./plugins + matching dependencies
+ *
+ * Diagnostics:
+ * - `nexora doctor`           → environment / project health checks
  */
 
 import { spawn, type ChildProcess } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
+import { runDoctor } from './doctor.js';
 
 const DOCS_PLUGINS = 'https://cjays-organization.gitbook.io/nexora.ts/guide/plugins';
 const DOCS_STUDIO = 'https://cjays-organization.gitbook.io/nexora.ts/guide/studio';
@@ -52,6 +56,12 @@ switch (command) {
   case 'list':
     handleList();
     break;
+
+  case 'doctor': {
+    const code = await runDoctor(cwd);
+    process.exit(code);
+    break;
+  }
 
   case 'dev':
     await runDev();
@@ -271,6 +281,7 @@ function printHelp(): void {
   Nexora CLI
 
   Usage:
+    nexora doctor           Check Node, .env, config, and @nexora.ts/core
     nexora dev              Start bot + Nexora Studio (Developer Center)
     nexora studio           Start only Nexora Studio UI (expects API on :3920)
     nexora add <package>    Install a plugin package from npm

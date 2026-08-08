@@ -3,6 +3,9 @@ contact_links:
   - name: Security vulnerability
     url: https://github.com/ogcjay/nexorajs/security/advisories/new
     about: Please report security issues privately (do not open a public issue).
+  - name: Discord community
+    url: https://discord.gg/fHbCrdHnms
+    about: FAQs, support, and community chat (maintainer: ogcjay).
   - name: Discussions
     url: https://github.com/ogcjay/nexorajs/discussions
     about: Ask questions and share ideas with the community.

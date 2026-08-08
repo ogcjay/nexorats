@@ -1,6 +1,21 @@
 export { Nexora } from './nexora.js';
 export type { NexoraOptions, LifecyclePhase } from './nexora.js';
 
+export {
+  DEFAULT_COMMAND_ERROR_MESSAGE,
+  DEFAULT_INTERACTION_ERROR_MESSAGE,
+  DEFAULT_DEFER_ERROR_MESSAGE,
+  resolveErrorMessage,
+  reportError,
+  formatErrorMessage,
+} from './errors/index.js';
+export type {
+  NexoraErrorSource,
+  NexoraErrorContext,
+  NexoraErrorHandler,
+  ErrorBoundaryConfig,
+} from './errors/index.js';
+
 export { Container, TOKENS } from './container/index.js';
 export type { ServiceToken, ServiceFactory } from './container/index.js';
 
@@ -12,6 +27,7 @@ export {
   createMessageCommandContext,
   resolveReplyOptions,
   withDefaultEphemeral,
+  createCommandOptionsGetters,
   SlashCommand,
   BaseCommand,
   isCommandClass,
@@ -67,6 +83,7 @@ export type {
   BuilderReplyOptions,
   CreateCommandContextOptions,
   StatusReplyOptions,
+  CommandOptionsGetters,
   ContextMenuType,
   ContextMenuContext,
   ContextMenuCommandDefinition,
@@ -148,6 +165,7 @@ export type {
   AnyInteractionHandler,
   RegisteredInteraction,
   InteractionRegistryGetOptions,
+  AttachInteractionHandlersOptions,
 } from './interactions/index.js';
 
 export { EventBus, FrameworkEvents } from './event-bus/index.js';
@@ -196,7 +214,11 @@ export {
   TextInputBuilder,
   customId,
   resolveCustomId,
+  packCustomId,
+  parseCustomId,
   CUSTOM_ID_NAMESPACE,
+  CUSTOM_ID_DELIMITER,
+  CUSTOM_ID_MAX_LENGTH,
   ComponentType,
   ButtonStyle,
   TextInputStyle,

@@ -114,6 +114,10 @@ export abstract class SlashCommandGroup {
   permissions?: PermissionResolvable[];
   /** Default per-user cooldown (ms) merged onto each sub unless overridden */
   cooldown?: number;
+  /** Top-level default member permissions for Discord registration */
+  defaultMemberPermissions?: PermissionResolvable | bigint | null;
+  /** Whether the group command is usable in DMs (global deploy) */
+  dmPermission?: boolean;
 }
 
 /** Optional flags for {@link group} */
@@ -123,6 +127,8 @@ export interface GroupOptions {
   permissions?: PermissionResolvable[];
   cooldown?: number;
   groups?: SlashCommandSubGroup[];
+  defaultMemberPermissions?: PermissionResolvable | bigint | null;
+  dmPermission?: boolean;
 }
 
 type GroupCommandInput = SlashCommand | SlashCommandConstructor;
@@ -151,6 +157,10 @@ class FunctionalSlashCommandGroup extends SlashCommandGroup {
     if (options?.permissions !== undefined) this.permissions = options.permissions;
     if (options?.cooldown !== undefined) this.cooldown = options.cooldown;
     if (options?.groups !== undefined) this.groups = options.groups;
+    if (options?.defaultMemberPermissions !== undefined) {
+      this.defaultMemberPermissions = options.defaultMemberPermissions;
+    }
+    if (options?.dmPermission !== undefined) this.dmPermission = options.dmPermission;
   }
 }
 

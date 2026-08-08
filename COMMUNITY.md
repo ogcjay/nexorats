@@ -4,10 +4,13 @@ Nexora is open source so developers can **use**, **extend**, **improve**, and **
 
 ## Get involved
 
-1. Star / watch the repo once it is on GitHub
-2. Open issues for bugs and ideas
-3. Contribute PRs — core, docs, Studio, or plugins
-4. Share plugins and bot recipes with others
+1. Join the [Discord server](https://discord.gg/fHbCrdHnms) for FAQs, support, and community chat
+2. Star / watch the repo on GitHub
+3. Open issues for bugs and ideas
+4. Contribute PRs — core, docs, Studio, or plugins
+5. Share plugins and bot recipes with others
+
+Maintainer Discord: **ogcjay**
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup and standards.
 

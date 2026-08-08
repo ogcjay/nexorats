@@ -1,6 +1,7 @@
 # CLI project templates
 
-Templates used by `@nexora.ts/create` will live here.
+Scaffolding for `@nexora.ts/create` lives **inline** in `packages/cli/src/index.ts`
+(not as separate files under this folder yet).
 
-Current scaffold logic is embedded in `packages/cli`.
-Externalized templates (default, with-dashboard, minimal) are planned.
+Planned external templates (default / with-dashboard / minimal) may land here later.
+Until then, do not expect a `templates/` directory inside the published npm package.

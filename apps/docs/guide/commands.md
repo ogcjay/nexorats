@@ -17,7 +17,7 @@ export default command({
     },
   ],
   async execute(ctx) {
-    const echo = ctx.interaction.options.getString('echo');
+    const echo = ctx.options.string('echo');
     await ctx.reply(echo ?? 'Pong!');
   },
 });
@@ -36,6 +36,7 @@ export default command({
 | `member` | Guild member or `null` |
 | `channel` | Channel where the command ran |
 | `guildId` | Guild id or `null` |
+| `options.string/user/…` | Typed getters for slash options |
 | `reply(…)` | Reply to the interaction (strings, discord.js options, or builders) |
 | `embed(…)` | Reply with a single embed builder / `APIEmbed` |
 | `componentsV2(…)` | Reply with Components V2 (sets `IS_COMPONENTS_V2` automatically) |
@@ -45,13 +46,20 @@ export default command({
 
 ```ts
 async execute(ctx) {
+  const target = ctx.options.user('user', true);
+  await ctx.reply(`Hello ${target.username}`);
+}
+```
+
+You can still use `ctx.interaction.reply(…)` when you need the full Discord.js API.
+
+```ts
+async execute(ctx) {
   await ctx.defer();
   // … work …
   await ctx.editReply(`Done for ${ctx.user.username}`);
 }
 ```
-
-You can still use `ctx.interaction.reply(…)` when you need the full Discord.js API.
 
 ### Embeds & Components V2
 

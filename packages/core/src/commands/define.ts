@@ -24,11 +24,19 @@ import type { Cache } from '../cache/index.js';
 import type { Container, ServiceToken } from '../container/index.js';
 import type { Guard } from './guards.js';
 import {
+  createCommandOptionsGetters,
+  type CommandOptionsGetters,
+} from './options-getters.js';
+import {
   buildStatusReply,
   type StatusReplyOptions,
 } from './reply-presets.js';
+import {
+  DEFAULT_DEFER_ERROR_MESSAGE,
+} from '../errors/handler.js';
 
 export type { StatusReplyOptions } from './reply-presets.js';
+export type { CommandOptionsGetters } from './options-getters.js';
 
 /** Optional DI accessors on {@link CommandContext} */
 export interface CommandContextServices {
@@ -205,6 +213,14 @@ export interface CommandContext {
   services?: CommandContextServices;
 
   /**
+   * Typed option getters — shorthand for `interaction.options.get*`.
+   * @example
+   * const user = ctx.options.user('target', true);
+   * const reason = ctx.options.string('reason') ?? 'n/a';
+   */
+  options: CommandOptionsGetters;
+
+  /**
    * Shortcut for `interaction.reply()`.
    * Accepts strings, discord.js options, or builder-friendly payloads
    * (`embed` / `embeds` / `components` / `v2`).
@@ -294,6 +310,16 @@ export interface CommandDefinition {
    * Does not affect `ctx.success` / `ctx.error` (already ephemeral by default).
    */
   ephemeral?: boolean;
+  /**
+   * Default member permissions bitfield for Discord command registration
+   * (`default_member_permissions`).
+   */
+  defaultMemberPermissions?: PermissionResolvable | bigint | null;
+  /**
+   * Whether the command is usable in DMs (`dm_permission`).
+   * Only applies to global command deployment.
+   */
+  dmPermission?: boolean;
   /**
    * Composable guards — run after built-in `guildOnly` / `adminOnly` /
    * `permissions` / `cooldown` flags.
@@ -408,6 +434,7 @@ async function deferThenHelper(
   interaction: ChatInputCommandInteraction,
   work: () => Promise<CommandReplyOptions | string | void>,
   options?: InteractionDeferReplyOptions,
+  errorMessage: string = DEFAULT_DEFER_ERROR_MESSAGE,
 ): Promise<Message<boolean> | undefined> {
   if (!interaction.deferred && !interaction.replied) {
     await interaction.deferReply(options);
@@ -421,17 +448,17 @@ async function deferThenHelper(
     try {
       if (interaction.deferred || interaction.replied) {
         // editReply does not accept Ephemeral — use plain content
-        await interaction.editReply({ content: 'Something went wrong.' });
+        await interaction.editReply({ content: errorMessage });
       } else {
         await interaction.reply({
-          content: 'Something went wrong.',
+          content: errorMessage,
           flags: MessageFlags.Ephemeral,
         });
       }
     } catch {
       try {
         await interaction.followUp({
-          content: 'Something went wrong.',
+          content: errorMessage,
           flags: MessageFlags.Ephemeral,
         });
       } catch {
@@ -452,6 +479,8 @@ export interface CreateCommandContextOptions {
   cache?: Cache;
   /** Optional DI container — enables `ctx.container` and `ctx.services` */
   container?: Container;
+  /** User-facing message when {@link CommandContext.deferThen} work throws */
+  deferErrorMessage?: string;
 }
 
 /** Apply command-level default ephemeral unless the payload already sets it */
@@ -528,6 +557,8 @@ export function createCommandContext(
   const container = contextOptions?.container;
   const logger = contextOptions?.logger;
   const cache = contextOptions?.cache;
+  const deferErrorMessage =
+    contextOptions?.deferErrorMessage ?? DEFAULT_DEFER_ERROR_MESSAGE;
 
   const reply = (options: CommandReplyOptions) =>
     interaction.reply(resolveReplyOptions(withDefaultEphemeral(options, defaultEphemeral)));
@@ -544,6 +575,7 @@ export function createCommandContext(
     cache,
     container,
     services: createServicesBag(container),
+    options: createCommandOptionsGetters(interaction),
     reply,
     embed: (embed) =>
       interaction.reply(
@@ -566,6 +598,7 @@ export function createCommandContext(
         defaultEphemeral && options?.ephemeral === undefined
           ? { ...options, ephemeral: true }
           : options,
+        deferErrorMessage,
       ),
     editReply: (options) => interaction.editReply(resolveEditReply(options)),
     followUp: (options) =>

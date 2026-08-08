@@ -41,6 +41,7 @@ Always run from the **bot project root** (directory with `package.json`).
 
 | Command | Description |
 | --- | --- |
+| `nexora doctor` | Non-destructive checks: Node ≥20, `.env` / token, `nexora.config.*`, `@nexora.ts/core`, optional Studio API ping on `:3920` |
 | `nexora dev` | Runs `pnpm run dev` / `npm run dev` (bot + Studio API). Starts Vite Studio UI when `@nexora.ts/studio` is available; otherwise relies on the embedded UI from `@nexora.ts/dev-server` on `:3002`. |
 | `nexora studio` | Studio UI only (API expected on `:3920`) |
 | `nexora add <package>` | Validates the npm name, then `pnpm add` (if `pnpm-lock.yaml`) or `npm install`. Prints how to register via `@nexora.ts/plugin-system`. |

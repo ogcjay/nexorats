@@ -21,4 +21,4 @@ Until a registry exists:
 2. Document the Nexora version range
 3. Open a discussion / PR to list it in community showcases
 
-Ideas and RFCs: use GitHub Discussions once the repo is public.
+Ideas and RFCs: join the [Discord server](https://discord.gg/fHbCrdHnms) or use GitHub Discussions.

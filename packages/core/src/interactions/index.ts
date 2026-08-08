@@ -42,4 +42,5 @@ export {
 } from './registry.js';
 
 export { attachInteractionHandlers } from './attach.js';
+export type { AttachInteractionHandlersOptions } from './attach.js';
 export { discoverInteractions } from './discover.js';

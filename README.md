@@ -204,6 +204,7 @@ Nexora thrives when developers:
 3. **Improve** core, docs, and DX
 4. **Share** patterns with the community
 
+- Discord (FAQs, support, community): [https://discord.gg/fHbCrdHnms](https://discord.gg/fHbCrdHnms) — maintainer: **ogcjay**
 - Contribute: [CONTRIBUTING.md](./CONTRIBUTING.md)
 - Community: [COMMUNITY.md](./COMMUNITY.md)
 - Code of Conduct: [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)

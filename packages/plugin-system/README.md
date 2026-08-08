@@ -23,7 +23,7 @@ await loader.loadAll({ pluginsPath: './plugins' });
 - Ship migrations and config
 - Register DI services
 
-Community plugins are encouraged — see the root [CONTRIBUTING.md](../../CONTRIBUTING.md).
+Community plugins are encouraged — see the root [CONTRIBUTING.md](../../CONTRIBUTING.md). Chat and support: [Discord](https://discord.gg/fHbCrdHnms).
 
 ## License
 

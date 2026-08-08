@@ -9,6 +9,8 @@ Nexora grows when the community uses it, extends it, and improves it.
 3. Fix DX pain points in core packages
 4. Publish plugins others can install
 
+Questions and support: join the [Discord server](https://discord.gg/fHbCrdHnms) (maintainer: **ogcjay**).
+
 Full guide: [CONTRIBUTING.md](https://github.com/ogcjay/nexorajs/blob/main/CONTRIBUTING.md) on GitHub.
 
 ## Docs contributions
